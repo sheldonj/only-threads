@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/prevent-abbreviations */
 import { schema } from '@/zenstack/schema';
 import { ZenStackClient } from '@zenstackhq/orm';
 import { PolicyPlugin } from '@zenstackhq/plugin-policy';

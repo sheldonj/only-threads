@@ -40,6 +40,7 @@ const ToggleGroup = ({
       style={{ '--gap': spacing } as React.CSSProperties}
       {...props}
     >
+      {/* eslint-disable-next-line react/jsx-no-constructed-context-values */}
       <ToggleGroupContext.Provider value={{ size, spacing, variant }}>
         {children}
       </ToggleGroupContext.Provider>

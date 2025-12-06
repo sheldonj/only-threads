@@ -32,38 +32,43 @@ export const auth = betterAuth({
   emailVerification: {
     sendOnSignUp: true,
     async sendVerificationEmail({ url, user }) {
+      // eslint-disable-next-line no-console
       console.log('Sending verification email to', user.email);
-      const res = await resend.emails.send({
+      const response = await resend.emails.send({
         from,
         html: `<a href="${url}">Verify your email address</a>`,
         subject: 'Verify your email address',
         to: to || user.email,
       });
-      console.log(res, user.email);
+      // eslint-disable-next-line no-console
+      console.log(response, user.email);
     },
   },
   plugins: [
     organization({
       async sendInvitationEmail(data) {
-        const res = await resend.emails.send({
+        const baseUrl =
+          process.env.NODE_ENV === 'development'
+            ? 'http://localhost:3000'
+            : process.env.BETTER_AUTH_URL;
+
+        const acceptInvitationUrl = `${baseUrl}/accept-invitation/${data.id}`;
+
+        const response = await resend.emails.send({
           from,
           react: reactInvitationEmail({
             invitedByEmail: data.inviter.user.email,
             invitedByUsername: data.inviter.user.name,
-            inviteLink:
-              process.env.NODE_ENV === 'development'
-                ? `http://localhost:3000/accept-invitation/${data.id}`
-                : `${
-                    process.env.BETTER_AUTH_URL ||
-                    'https://demo.better-auth.com'
-                  }/accept-invitation/${data.id}`,
+            inviteLink: acceptInvitationUrl,
             teamName: data.organization.name,
             username: data.email,
           }),
           subject: "You've been invited to join an organization",
           to: data.email,
         });
-        console.log(res, data.email);
+
+        // eslint-disable-next-line no-console
+        console.log(response, data.email);
       },
     }),
     bearer(),

@@ -102,8 +102,10 @@ export default function AdminDashboard() {
       queryClient.invalidateQueries({
         queryKey: ['users'],
       });
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to create user');
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to create user';
+      toast.error(errorMessage);
     } finally {
       setIsLoading(undefined);
     }
@@ -117,8 +119,10 @@ export default function AdminDashboard() {
       queryClient.invalidateQueries({
         queryKey: ['users'],
       });
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to delete user');
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to delete user';
+      toast.error(errorMessage);
     } finally {
       setIsLoading(undefined);
     }
@@ -129,8 +133,10 @@ export default function AdminDashboard() {
     try {
       await client.admin.revokeUserSessions({ userId: id });
       toast.success('Sessions revoked for user');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to revoke sessions');
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to revoke sessions';
+      toast.error(errorMessage);
     } finally {
       setIsLoading(undefined);
     }
@@ -142,15 +148,17 @@ export default function AdminDashboard() {
       await client.admin.impersonateUser({ userId: id });
       toast.success('Impersonated user');
       router.push('/dashboard');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to impersonate user');
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to impersonate user';
+      toast.error(errorMessage);
     } finally {
       setIsLoading(undefined);
     }
   };
 
-  const handleBanUser = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleBanUser = async (event: React.FormEvent) => {
+    event.preventDefault();
     setIsLoading(`ban-${banForm.userId}`);
     try {
       if (!banForm.expirationDate) {
@@ -167,8 +175,10 @@ export default function AdminDashboard() {
       queryClient.invalidateQueries({
         queryKey: ['users'],
       });
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to ban user');
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to ban user';
+      toast.error(errorMessage);
     } finally {
       setIsLoading(undefined);
     }
@@ -201,10 +211,10 @@ export default function AdminDashboard() {
                   <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"
-                    onChange={(e) =>
+                    onChange={(event) =>
                       setNewUser({
                         ...newUser,
-                        email: e.target.value,
+                        email: event.target.value,
                       })
                     }
                     required
@@ -216,10 +226,10 @@ export default function AdminDashboard() {
                   <Label htmlFor="password">Password</Label>
                   <Input
                     id="password"
-                    onChange={(e) =>
+                    onChange={(event) =>
                       setNewUser({
                         ...newUser,
-                        password: e.target.value,
+                        password: event.target.value,
                       })
                     }
                     required
@@ -231,10 +241,10 @@ export default function AdminDashboard() {
                   <Label htmlFor="name">Name</Label>
                   <Input
                     id="name"
-                    onChange={(e) =>
+                    onChange={(event) =>
                       setNewUser({
                         ...newUser,
-                        name: e.target.value,
+                        name: event.target.value,
                       })
                     }
                     required
@@ -294,10 +304,10 @@ export default function AdminDashboard() {
                   <Label htmlFor="reason">Reason</Label>
                   <Input
                     id="reason"
-                    onChange={(e) =>
+                    onChange={(event) =>
                       setBanForm({
                         ...banForm,
-                        reason: e.target.value,
+                        reason: event.target.value,
                       })
                     }
                     required

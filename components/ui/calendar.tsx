@@ -14,6 +14,112 @@ import {
   getDefaultClassNames,
 } from 'react-day-picker';
 
+const CalendarDayButton = ({
+  className,
+  day,
+  modifiers,
+  ...props
+}: React.ComponentProps<typeof DayButton>) => {
+  const defaultClassNames = getDefaultClassNames();
+
+  const ref = React.useRef<HTMLButtonElement>(null);
+  React.useEffect(() => {
+    if (modifiers.focused) ref.current?.focus();
+  }, [modifiers.focused]);
+
+  return (
+    <Button
+      className={cn(
+        'data-[selected-single=true]:bg-primary data-[selected-single=true]:text-primary-foreground data-[range-middle=true]:bg-accent data-[range-middle=true]:text-accent-foreground data-[range-start=true]:bg-primary data-[range-start=true]:text-primary-foreground data-[range-end=true]:bg-primary data-[range-end=true]:text-primary-foreground group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-ring/50 dark:hover:text-accent-foreground flex aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:ring-[3px] data-[range-end=true]:rounded-md data-[range-end=true]:rounded-r-md data-[range-middle=true]:rounded-none data-[range-start=true]:rounded-md data-[range-start=true]:rounded-l-md [&>span]:text-xs [&>span]:opacity-70',
+        defaultClassNames.day,
+        className,
+      )}
+      data-day={day.date.toLocaleDateString()}
+      data-range-end={modifiers.range_end}
+      data-range-middle={modifiers.range_middle}
+      data-range-start={modifiers.range_start}
+      data-selected-single={
+        modifiers.selected &&
+        !modifiers.range_start &&
+        !modifiers.range_end &&
+        !modifiers.range_middle
+      }
+      ref={ref}
+      size="icon"
+      variant="ghost"
+      {...props}
+    />
+  );
+};
+
+const ChevronComponent = ({
+  className,
+  orientation,
+  ...props
+}: {
+  readonly className?: string;
+  readonly orientation?: 'down' | 'left' | 'right' | 'up';
+}) => {
+  if (orientation === 'left') {
+    return (
+      <ChevronLeftIcon
+        className={cn('size-4', className)}
+        {...props}
+      />
+    );
+  }
+
+  if (orientation === 'right') {
+    return (
+      <ChevronRightIcon
+        className={cn('size-4', className)}
+        {...props}
+      />
+    );
+  }
+
+  return (
+    <ChevronDownIcon
+      className={cn('size-4', className)}
+      {...props}
+    />
+  );
+};
+
+const RootComponent = ({
+  className,
+  rootRef,
+  ...props
+}: {
+  readonly children?: React.ReactNode;
+  readonly className?: string;
+  readonly rootRef?: React.Ref<HTMLDivElement>;
+}) => {
+  return (
+    <div
+      className={cn(className)}
+      data-slot="calendar"
+      ref={rootRef}
+      {...props}
+    />
+  );
+};
+
+const WeekNumberComponent = ({
+  children,
+  ...props
+}: {
+  readonly children?: React.ReactNode;
+}) => {
+  return (
+    <td {...props}>
+      <div className="flex size-(--cell-size) items-center justify-center text-center">
+        {children}
+      </div>
+    </td>
+  );
+};
+
 const Calendar = ({
   buttonVariant = 'ghost',
   captionLayout = 'label',
@@ -125,52 +231,10 @@ const Calendar = ({
         ...classNames,
       }}
       components={{
-        Chevron: ({ className, orientation, ...props }) => {
-          if (orientation === 'left') {
-            return (
-              <ChevronLeftIcon
-                className={cn('size-4', className)}
-                {...props}
-              />
-            );
-          }
-
-          if (orientation === 'right') {
-            return (
-              <ChevronRightIcon
-                className={cn('size-4', className)}
-                {...props}
-              />
-            );
-          }
-
-          return (
-            <ChevronDownIcon
-              className={cn('size-4', className)}
-              {...props}
-            />
-          );
-        },
+        Chevron: ChevronComponent,
         DayButton: CalendarDayButton,
-        Root: ({ className, rootRef, ...props }) => {
-          return (
-            <div
-              className={cn(className)}
-              data-slot="calendar"
-              ref={rootRef}
-              {...props}
-            />
-          );
-        },
-        WeekNumber: ({ children, ...props }) => {
-          return (
-            <td {...props}>
-              <div className="flex size-(--cell-size) items-center justify-center text-center">
-                {children}
-              </div>
-            </td>
-          );
-        },
+        Root: RootComponent,
+        WeekNumber: WeekNumberComponent,
         ...components,
       }}
       formatters={{
@@ -179,44 +243,6 @@ const Calendar = ({
         ...formatters,
       }}
       showOutsideDays={showOutsideDays}
-      {...props}
-    />
-  );
-};
-
-const CalendarDayButton = ({
-  className,
-  day,
-  modifiers,
-  ...props
-}: React.ComponentProps<typeof DayButton>) => {
-  const defaultClassNames = getDefaultClassNames();
-
-  const ref = React.useRef<HTMLButtonElement>(null);
-  React.useEffect(() => {
-    if (modifiers.focused) ref.current?.focus();
-  }, [modifiers.focused]);
-
-  return (
-    <Button
-      className={cn(
-        'data-[selected-single=true]:bg-primary data-[selected-single=true]:text-primary-foreground data-[range-middle=true]:bg-accent data-[range-middle=true]:text-accent-foreground data-[range-start=true]:bg-primary data-[range-start=true]:text-primary-foreground data-[range-end=true]:bg-primary data-[range-end=true]:text-primary-foreground group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-ring/50 dark:hover:text-accent-foreground flex aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:ring-[3px] data-[range-end=true]:rounded-md data-[range-end=true]:rounded-r-md data-[range-middle=true]:rounded-none data-[range-start=true]:rounded-md data-[range-start=true]:rounded-l-md [&>span]:text-xs [&>span]:opacity-70',
-        defaultClassNames.day,
-        className,
-      )}
-      data-day={day.date.toLocaleDateString()}
-      data-range-end={modifiers.range_end}
-      data-range-middle={modifiers.range_middle}
-      data-range-start={modifiers.range_start}
-      data-selected-single={
-        modifiers.selected &&
-        !modifiers.range_start &&
-        !modifiers.range_end &&
-        !modifiers.range_middle
-      }
-      ref={ref}
-      size="icon"
-      variant="ghost"
       {...props}
     />
   );

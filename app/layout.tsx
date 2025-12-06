@@ -1,10 +1,11 @@
+/* eslint-disable import/no-unassigned-import */
+import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 import { Wrapper, WrapperWithQuery } from '@/components/wrapper';
 import { createMetadata } from '@/lib/metadata';
 import { GeistMono } from 'geist/font/mono';
 import { GeistSans } from 'geist/font/sans';
-import './globals.css';
 
 export const metadata = createMetadata({
   description: 'The most comprehensive authentication library for typescript',

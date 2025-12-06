@@ -25,18 +25,24 @@ async function getClient() {
     organizationId = session.activeOrganizationId;
     const org = await auth.api.getFullOrganization({ headers: requestHeaders });
     if (org?.members) {
-      const myMember = org.members.find((m) => m.userId === session.userId);
+      const myMember = org.members.find(
+        (member) => member.userId === session.userId,
+      );
       organizationRole = myMember?.role;
     }
   }
 
   // create enhanced client with user context
-  const userContext = {
+  const userContext: {
+    organizationId?: string;
+    organizationRole?: string;
+    userId: string;
+  } = {
     organizationId,
     organizationRole,
     userId: session.userId,
   };
-  return authDb.$setAuth(userContext as any);
+  return authDb.$setAuth(userContext);
 }
 
 const handler = NextRequestHandler({

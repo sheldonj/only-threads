@@ -50,10 +50,10 @@ const Carousel = ({
   const [canScrollPrevious, setCanScrollPrevious] = React.useState(false);
   const [canScrollNext, setCanScrollNext] = React.useState(false);
 
-  const onSelect = React.useCallback((api: CarouselApi) => {
-    if (!api) return;
-    setCanScrollPrevious(api.canScrollPrev());
-    setCanScrollNext(api.canScrollNext());
+  const onSelect = React.useCallback((carouselApi: CarouselApi) => {
+    if (!carouselApi) return;
+    setCanScrollPrevious(carouselApi.canScrollPrev());
+    setCanScrollNext(carouselApi.canScrollNext());
   }, []);
 
   const scrollPrevious = React.useCallback(() => {
@@ -83,30 +83,43 @@ const Carousel = ({
   }, [api, setApi]);
 
   React.useEffect(() => {
-    if (!api) return;
+    if (!api) return undefined;
     onSelect(api);
     api.on('reInit', onSelect);
     api.on('select', onSelect);
 
     return () => {
-      api?.off('select', onSelect);
+      api.off('select', onSelect);
+      api.off('reInit', onSelect);
     };
   }, [api, onSelect]);
 
+  const contextValue = React.useMemo(
+    () => ({
+      api,
+      canScrollNext,
+      canScrollPrev: canScrollPrevious,
+      carouselRef,
+      opts,
+      orientation:
+        orientation || (opts?.axis === 'y' ? 'vertical' : 'horizontal'),
+      scrollNext,
+      scrollPrev: scrollPrevious,
+    }),
+    [
+      api,
+      canScrollNext,
+      canScrollPrevious,
+      carouselRef,
+      opts,
+      orientation,
+      scrollNext,
+      scrollPrevious,
+    ],
+  );
+
   return (
-    <CarouselContext.Provider
-      value={{
-        api,
-        canScrollNext,
-        canScrollPrev: canScrollPrevious,
-        carouselRef,
-        opts,
-        orientation:
-          orientation || (opts?.axis === 'y' ? 'vertical' : 'horizontal'),
-        scrollNext,
-        scrollPrev: scrollPrevious,
-      }}
-    >
+    <CarouselContext.Provider value={contextValue}>
       <div
         aria-roledescription="carousel"
         className={cn('relative', className)}

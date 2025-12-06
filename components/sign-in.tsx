@@ -14,10 +14,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PasswordInput } from '@/components/ui/password-input';
 import { signIn } from '@/lib/auth-client';
-import { DiscordLogoIcon, GitHubLogoIcon } from '@radix-ui/react-icons';
-import { Key, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -25,7 +23,6 @@ export default function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
   return (
     <Card className="z-50 rounded-md rounded-t-none max-w-md">
@@ -41,8 +38,8 @@ export default function SignIn() {
             <Label htmlFor="email">Email</Label>
             <Input
               id="email"
-              onChange={(e) => {
-                setEmail(e.target.value);
+              onChange={(event) => {
+                setEmail(event.target.value);
               }}
               placeholder="m@example.com"
               required
@@ -63,7 +60,7 @@ export default function SignIn() {
             <PasswordInput
               autoComplete="password"
               id="password"
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(event) => setPassword(event.target.value)}
               placeholder="Password"
               value={password}
             />

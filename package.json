@@ -106,6 +106,7 @@
     "dev:secure": "next dev --experimental-https",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "prebuild": "pnpm lint",
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "up": "npm i -D @zenstackhq/cli@next && npm i @zenstackhq/orm@next @zenstackhq/better-auth@next @zenstackhq/server@next @zenstackhq/plugin-policy@next @zenstackhq/tanstack-query@next"

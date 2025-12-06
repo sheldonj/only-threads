@@ -12,6 +12,7 @@ declare module '@react-three/fiber' {
     >;
     primitive: Object3DNode<THREE.Object3D, typeof THREE.Object3D> & {
       attach?: string;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       object: any;
     };
     shaderMaterial: Object3DNode<

@@ -1,6 +1,4 @@
-import { type SVGProps } from 'react';
-
-export const Logo = (props: SVGProps<any>) => {
+export const Logo = () => {
   return (
     <svg
       className="w-5 h-5"

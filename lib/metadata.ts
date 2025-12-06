@@ -13,7 +13,7 @@ export function createMetadata(override: Metadata): Metadata {
     },
     twitter: {
       card: 'summary_large_image',
-      creator: '@beakcru',
+      creator: '@baku',
       description: override.description ?? undefined,
       images: 'https://demo.better-auth.com/og.png',
       title: override.title ?? undefined,
@@ -25,4 +25,4 @@ export function createMetadata(override: Metadata): Metadata {
 export const baseUrl =
   process.env.NODE_ENV === 'development'
     ? new URL('http://localhost:3000')
-    : new URL(`https://${process.env.VERCEL_URL!}`);
+    : new URL(`https://${process.env.VERCEL_URL}`);

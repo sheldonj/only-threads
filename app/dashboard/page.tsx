@@ -1,34 +1,51 @@
+'use client';
+
 import { OrganizationCard } from './organization-card';
 import TodoListsCard from './todo-lists-card';
 import UserCard from './user-card';
-import { auth } from '@/lib/auth';
-import { headers } from 'next/headers';
-import { redirect } from 'next/navigation';
+import { useSession, useActiveOrganization, client } from '@/lib/auth-client';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
-export default async function DashboardPage() {
-  const [session, activeSessions, organization] = await Promise.all([
-    auth.api.getSession({
-      headers: await headers(),
-    }),
-    auth.api.listSessions({
-      headers: await headers(),
-    }),
-    auth.api.getFullOrganization({
-      headers: await headers(),
-    }),
-  ]).catch(() => {
-    throw redirect('/sign-in');
+export default function DashboardPage() {
+  const { data: session, isPending: isSessionPending } = useSession();
+  const { data: organization, isPending: isOrgPending } = useActiveOrganization();
+  const router = useRouter();
+
+  const { data: activeSessions, isPending: isSessionsPending } = useQuery({
+    enabled: Boolean(session),
+    queryFn: async () => {
+      const result = await client.listSessions();
+      return result.data || [];
+    },
+    queryKey: ['sessions'],
   });
+
+  useEffect(() => {
+    if (!isSessionPending && !session) {
+      router.push('/sign-in');
+    }
+  }, [session, isSessionPending, router]);
+
+  if (isSessionPending || isSessionsPending || isOrgPending) {
+    return null;
+  }
+
+  if (!session) {
+    return null;
+  }
+
   return (
     <div className="w-full">
       <div className="flex gap-4 flex-col">
         <UserCard
-          activeSessions={JSON.parse(JSON.stringify(activeSessions))}
-          session={JSON.parse(JSON.stringify(session))}
+          activeSessions={activeSessions || []}
+          session={session}
         />
         <OrganizationCard
-          activeOrganization={JSON.parse(JSON.stringify(organization))}
-          session={JSON.parse(JSON.stringify(session))}
+          activeOrganization={organization || null}
+          session={session}
         />
         <TodoListsCard />
       </div>

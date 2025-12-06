@@ -20,82 +20,14 @@ import { schema } from '@/zenstack/schema-lite';
 import { PlusIcon, TrashIcon } from '@radix-ui/react-icons';
 import { useClientQueries } from '@zenstackhq/tanstack-query/react';
 import { Loader2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
-
-export default function TodoListsCard() {
-  const { data: activeOrg } = useActiveOrganization();
-  const client = useClientQueries(schema);
-
-  const { data: todoLists, refetch } = client.todoList.useFindMany({
-    orderBy: { createdAt: 'desc' },
-  });
-
-  const { isPending: isDeleting, mutateAsync: del } =
-    client.todoList.useDelete();
-  // current editing TodoList
-  const [currentOpenList, setCurrentOpenList] = useState<TodoList>();
-
-  // refetch todo lists when active org changes
-  useEffect(() => void refetch(), [activeOrg]);
-
-  async function onDelete(id: string) {
-    await del({ where: { id } });
-  }
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Todo List</CardTitle>
-        <div className="w-full flex justify-end">
-          <CreateTodoListDialog />
-        </div>
-      </CardHeader>
-      <CardContent className="grid gap-8 grid-cols-1">
-        <div className="flex flex-col gap-2">
-          {todoLists?.map((list) => (
-            <div
-              className="flex justify-between items-center"
-              key={list.id}
-            >
-              <div className="flex items-center gap-2">
-                <div>
-                  <p
-                    className="text-sm cursor-pointer"
-                    onClick={() => setCurrentOpenList(list)}
-                  >
-                    {list.name}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {list.createdAt.toLocaleString()}
-                  </p>
-                </div>
-              </div>
-              <Button
-                disabled={isDeleting}
-                onClick={() => onDelete(list.id)}
-                size="sm"
-                variant="destructive"
-              >
-                Delete
-              </Button>
-            </div>
-          ))}
-        </div>
-        <TodoListDialog
-          list={currentOpenList}
-          onClose={() => setCurrentOpenList(undefined)}
-        />
-      </CardContent>
-    </Card>
-  );
-}
 
 const CreateTodoListDialog = () => {
   const [name, setName] = useState('');
   const [open, setOpen] = useState(false);
   const client = useClientQueries(schema);
-  const { isPending, mutateAsync: create } = client.todoList.useCreate();
+  const { isPending, mutateAsync: create } = client.todoList.useCreate({ optimisticUpdate: true });
 
   useEffect(() => {
     if (open) {
@@ -103,11 +35,11 @@ const CreateTodoListDialog = () => {
     }
   }, [open]);
 
-  async function onCreate() {
+  const onCreate = useCallback(async () => {
     await create({ data: { name } });
     toast.success('Todo list created successfully');
     setOpen(false);
-  }
+  }, [create, name]);
 
   return (
     <Dialog
@@ -132,7 +64,7 @@ const CreateTodoListDialog = () => {
           <div className="flex flex-col gap-2">
             <Label>List Name</Label>
             <Input
-              onChange={(e) => setName(e.target.value)}
+              onChange={(event) => setName(event.target.value)}
               placeholder="Name"
               value={name}
             />
@@ -158,6 +90,44 @@ const CreateTodoListDialog = () => {
   );
 };
 
+const TodoItem = ({ todo }: { readonly todo: Todo }) => {
+  const client = useClientQueries(schema);
+  const { isPending: isUpdating, mutateAsync: update } =
+    client.todo.useUpdate({ optimisticUpdate: true });
+  const { isPending: isDeleting, mutateAsync: del } = client.todo.useDelete({ optimisticUpdate: true });
+  const [isDone, setIsDone] = useState(todo.done);
+
+  const onToggleDone = useCallback(async () => {
+    await update({ data: { done: !todo.done }, where: { id: todo.id } });
+    setIsDone(!todo.done);
+  }, [todo.done, todo.id, update]);
+
+  const onDelete = useCallback(async () => {
+    await del({ where: { id: todo.id } });
+  }, [del, todo.id]);
+
+  return (
+    <div className="flex justify-between">
+      <p className={todo.done ? 'line-through' : ''}>{todo.title}</p>
+      <div className="flex gap-1 items-center">
+        <Checkbox
+          checked={isDone}
+          disabled={isUpdating || isDeleting}
+          onCheckedChange={onToggleDone}
+        />
+        <Button
+          disabled={isUpdating || isDeleting}
+          onClick={onDelete}
+          size="icon"
+          variant="ghost"
+        >
+          <TrashIcon className="cursor-pointer" />
+        </Button>
+      </div>
+    </div>
+  );
+};
+
 const TodoListDialog = ({
   list,
   onClose,
@@ -176,24 +146,43 @@ const TodoListDialog = ({
     { enabled: Boolean(list) },
   );
 
-  const { isPending, mutateAsync: create } = client.todo.useCreate();
+  const { isPending, mutateAsync: create } = client.todo.useCreate({ optimisticUpdate: true });
 
-  function onOpenChange(open: boolean) {
-    if (!open) {
-      onClose();
-    }
-  }
+  const onOpenChange = useCallback(
+    (open: boolean) => {
+      if (!open) {
+        onClose();
+      }
+    },
+    [onClose],
+  );
 
-  async function onCreate() {
-    if (!title.trim()) {
+  const onCreate = useCallback(async () => {
+    if (!title.trim() || !list) {
       return;
     }
 
     await create({
-      data: { listId: list!.id, title },
+      data: { listId: list.id, title },
     });
     setTitle('');
-  }
+  }, [create, list, title]);
+
+  const handleKeyUp = useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === 'Enter') {
+        onCreate();
+      }
+    },
+    [onCreate],
+  );
+
+  const handleTitleChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setTitle(event.target.value);
+    },
+    [],
+  );
 
   return (
     <Dialog
@@ -206,12 +195,8 @@ const TodoListDialog = ({
           <div className="pt-4">
             <Input
               disabled={isPending}
-              onChange={(e) => setTitle(e.target.value)}
-              onKeyUp={(e) => {
-                if (e.key === 'Enter') {
-                  onCreate();
-                }
-              }}
+              onChange={handleTitleChange}
+              onKeyUp={handleKeyUp}
               placeholder="Enter title and press enter to create"
               value={title}
             />
@@ -231,42 +216,90 @@ const TodoListDialog = ({
   );
 };
 
-const TodoItem = ({ todo }: { readonly todo: Todo }) => {
+export default function TodoListsCard() {
+  const { data: activeOrg } = useActiveOrganization();
   const client = useClientQueries(schema);
-  const { isPending: isUpdating, mutateAsync: update } =
-    client.todo.useUpdate();
-  const { isPending: isDeleting, mutateAsync: del } = client.todo.useDelete();
-  const [isDone, setIsDone] = useState(todo.done);
 
-  async function onToggleDone() {
-    await update({ data: { done: !todo.done }, where: { id: todo.id } });
-    setIsDone(!todo.done);
-  }
+  const { data: todoLists, refetch } = client.todoList.useFindMany({
+    orderBy: { createdAt: 'desc' },
+  });
 
-  async function onDelete() {
-    await del({ where: { id: todo.id } });
-  }
+  const { isPending: isDeleting, mutateAsync: del } =
+    client.todoList.useDelete({ optimisticUpdate: true });
+  // current editing TodoList
+  const [currentOpenList, setCurrentOpenList] = useState<TodoList>();
+
+  // refetch todo lists when active org changes
+  useEffect(() => {
+    refetch();
+  }, [activeOrg, refetch]);
+
+  const onDelete = useCallback(
+    async (id: string) => {
+      await del({ where: { id } });
+    },
+    [del],
+  );
+
+  const handleOpenList = useCallback((list: TodoList) => {
+    setCurrentOpenList(list);
+  }, []);
+
+  const handleDeleteList = useCallback(
+    (id: string) => {
+      onDelete(id);
+    },
+    [onDelete],
+  );
+
+  const handleCloseList = useCallback(() => {
+    setCurrentOpenList(undefined);
+  }, []);
 
   return (
-    <div className="flex justify-between">
-      <p className={todo.done ? 'line-through' : ''}>{todo.title}</p>
-      <div className="flex gap-1 items-center">
-        <Checkbox
-          checked={isDone}
-          disabled={isUpdating || isDeleting}
-          onCheckedChange={onToggleDone}
+    <Card>
+      <CardHeader>
+        <CardTitle>Todo List</CardTitle>
+        <div className="w-full flex justify-end">
+          <CreateTodoListDialog />
+        </div>
+      </CardHeader>
+      <CardContent className="grid gap-8 grid-cols-1">
+        <div className="flex flex-col gap-2">
+          {todoLists?.map((list) => (
+            <div
+              className="flex justify-between items-center"
+              key={list.id}
+            >
+              <div className="flex items-center gap-2">
+                <div>
+                  <p
+                    className="text-sm cursor-pointer"
+                    onClick={() => handleOpenList(list)}
+                  >
+                    {list.name}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {list.createdAt.toLocaleString()}
+                  </p>
+                </div>
+              </div>
+              <Button
+                disabled={isDeleting}
+                onClick={() => handleDeleteList(list.id)}
+                size="sm"
+                variant="destructive"
+              >
+                Delete
+              </Button>
+            </div>
+          ))}
+        </div>
+        <TodoListDialog
+          list={currentOpenList}
+          onClose={handleCloseList}
         />
-        <Button
-          disabled={isUpdating || isDeleting}
-          size="icon"
-          variant="ghost"
-        >
-          <TrashIcon
-            className="cursor-pointer"
-            onClick={onDelete}
-          />
-        </Button>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
-};
+}

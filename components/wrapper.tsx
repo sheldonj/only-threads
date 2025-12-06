@@ -3,6 +3,7 @@
 import { Logo } from './logo';
 import { ThemeToggle } from './theme-toggle';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QuerySettingsProvider } from '@zenstackhq/tanstack-query/react';
 import Link from 'next/link';
 
 export const Wrapper = (props: { readonly children: React.ReactNode }) => {
@@ -32,7 +33,9 @@ export const WrapperWithQuery = (props: {
 }) => {
   return (
     <QueryClientProvider client={queryClient}>
-      {props.children}
+      <QuerySettingsProvider value={{ endpoint: '/api/model' }}>
+        {props.children}
+      </QuerySettingsProvider>
     </QueryClientProvider>
   );
 };

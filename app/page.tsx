@@ -1,4 +1,4 @@
-import { SignInButton, SignInFallback } from '@/components/sign-in-btn';
+import { SignInButton, SignInFallback } from '@/components/sign-in-button';
 import { Suspense } from 'react';
 
 export default async function Home() {

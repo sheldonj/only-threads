@@ -12,8 +12,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PasswordInput } from '@/components/ui/password-input';
-import { client, signIn, signUp } from '@/lib/auth-client';
-import { DiscordLogoIcon, GitHubLogoIcon } from '@radix-ui/react-icons';
+import { signUp } from '@/lib/auth-client';
 import { Loader2, X } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -30,8 +29,8 @@ export const SignUp = () => {
   const [imagePreview, setImagePreview] = useState<null | string>(null);
   const router = useRouter();
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
     if (file) {
       setImage(file);
       const reader = new FileReader();
@@ -60,8 +59,8 @@ export const SignUp = () => {
               <Label htmlFor="first-name">First name</Label>
               <Input
                 id="first-name"
-                onChange={(e) => {
-                  setFirstName(e.target.value);
+                onChange={(event) => {
+                  setFirstName(event.target.value);
                 }}
                 placeholder="Max"
                 required
@@ -72,8 +71,8 @@ export const SignUp = () => {
               <Label htmlFor="last-name">Last name</Label>
               <Input
                 id="last-name"
-                onChange={(e) => {
-                  setLastName(e.target.value);
+                onChange={(event) => {
+                  setLastName(event.target.value);
                 }}
                 placeholder="Robinson"
                 required
@@ -85,8 +84,8 @@ export const SignUp = () => {
             <Label htmlFor="email">Email</Label>
             <Input
               id="email"
-              onChange={(e) => {
-                setEmail(e.target.value);
+              onChange={(event) => {
+                setEmail(event.target.value);
               }}
               placeholder="m@example.com"
               required
@@ -99,7 +98,7 @@ export const SignUp = () => {
             <PasswordInput
               autoComplete="new-password"
               id="password"
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(event) => setPassword(event.target.value)}
               placeholder="Password"
               value={password}
             />
@@ -109,7 +108,7 @@ export const SignUp = () => {
             <PasswordInput
               autoComplete="new-password"
               id="password_confirmation"
-              onChange={(e) => setPasswordConfirmation(e.target.value)}
+              onChange={(event) => setPasswordConfirmation(event.target.value)}
               placeholder="Confirm Password"
               value={passwordConfirmation}
             />

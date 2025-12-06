@@ -17,7 +17,7 @@ const eslintConfig = defineConfig([
       'canonical/filename-match-regex': 'off',
       'eslint-comments/no-unlimited-disable': 'off',
       'func-style': 0,
-      indent: ['error', 2, { SwitchCase: 1 }],
+      indent: 'off', // Disabled to avoid conflict with Prettier
       'react-hooks/rules-of-hooks': 'off',
       // 'import/no-unassigned-import': 0,
       'react/forbid-component-props': 0,

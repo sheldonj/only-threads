@@ -15,20 +15,20 @@
   "language": "en",
   "version": "0.2",
   "words": [
-    "zenstackhq",
-    "zenstack",
-    "zmodel",
-    "neondatabase",
-    "tanstack",
-    "tailwindcss",
-    "shadcn",
-    "radix",
-    "hookform",
-    "lucide",
+    "antialiased",
     "clsx",
     "geist",
-    "antialiased",
-    "myvintagecollection"
+    "hookform",
+    "kysely",
+    "lucide",
+    "myvintagecollection",
+    "neondatabase",
+    "radix",
+    "shadcn",
+    "tailwindcss",
+    "tanstack",
+    "zenstack",
+    "zenstackhq",
+    "zmodel"
   ]
 }
-

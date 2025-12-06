@@ -16,10 +16,13 @@ export default function CopyButton({ textToCopy }: CopyButtonProps) {
   const [isCopied, setIsCopied] = useState(false);
 
   useEffect(() => {
-    if (isCopied) {
-      const timer = setTimeout(() => setIsCopied(false), 2_000);
-      return () => clearTimeout(timer);
+    if (!isCopied) {
+      return undefined;
     }
+
+    const timer = setTimeout(() => setIsCopied(false), 2_000);
+
+    return () => clearTimeout(timer);
   }, [isCopied]);
 
   const handleCopy = async () => {
@@ -27,6 +30,7 @@ export default function CopyButton({ textToCopy }: CopyButtonProps) {
       await navigator.clipboard.writeText(textToCopy);
       setIsCopied(true);
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to copy text: ', error);
     }
   };
