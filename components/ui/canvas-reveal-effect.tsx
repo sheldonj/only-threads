@@ -192,7 +192,7 @@ const ShaderMaterial = ({
 	uniforms: Uniforms;
 }) => {
 	const { size } = useThree();
-	const ref = useRef<THREE.Mesh>();
+	const ref = useRef<THREE.Mesh>(null!);
 	let lastFrameTime = 0;
 
 	useFrame(({ clock }) => {
@@ -282,9 +282,13 @@ const ShaderMaterial = ({
 	}, [size.width, size.height, source]);
 
 	return (
+		// @ts-expect-error - @react-three/fiber doesn't officially support React 19 yet
 		<mesh ref={ref as any}>
+			{/* @ts-expect-error - @react-three/fiber doesn't officially support React 19 yet */}
 			<planeGeometry args={[2, 2]} />
+			{/* @ts-expect-error - @react-three/fiber doesn't officially support React 19 yet */}
 			<primitive object={material} attach="material" />
+			{/* @ts-expect-error - @react-three/fiber doesn't officially support React 19 yet */}
 		</mesh>
 	);
 };
