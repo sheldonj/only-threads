@@ -1,0 +1,111 @@
+{
+  "[css]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "[html]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "[markdown]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "[scss]": {
+    "editor.defaultFormatter": "vscode.css-language-features"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "[yaml]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "[zmodel]": {
+    "editor.defaultFormatter": "zenstack.zenstack"
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+  "editor.formatOnSave": true,
+  "editor.tabSize": 2,
+  "eslint.format.enable": true,
+  "eslint.validate": [
+    "css",
+    "html",
+    "javascript",
+    "javascriptreact",
+    "json",
+    "markdown",
+    "typescript",
+    "typescriptreact",
+    "yaml"
+  ],
+  "eslint.workingDirectories": [
+    {
+      "mode": "auto"
+    }
+  ],
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+  "files.exclude": {
+    "**/*.log": true,
+    "**/*.tsbuildinfo": true,
+    "**/.turbo": true,
+    "**/__generated__": false,
+    "**/__generated__*": false,
+    "**/dist": false,
+    "**/generated": false,
+    "**/node_modules": true,
+    "**/out": true,
+    "**/playwright-report": true,
+    "**/storybook-static": true,
+    "**/test-results": true
+  },
+  "prettier.enable": false,
+  "search.exclude": {
+    "**/*.log": true,
+    "**/*.tsbuildinfo": true,
+    "**/.next": true,
+    "**/.turbo": true,
+    "**/__generated__": true,
+    "**/__generated__*": true,
+    "**/dist": true,
+    "**/generated": true,
+    "**/node_modules": true,
+    "**/out": true,
+    "**/playwright-report": true,
+    "**/storybook-static": true,
+    "**/test-results": true
+  },
+  "tailwindCSS.experimental.classRegex": [
+    [
+      "cn\\(([^)]*)\\)",
+      "(?:'|\"|`)([^']*)(?:'|\"|`)"
+    ],
+    [
+      "clsx\\(([^)]*)\\)",
+      "(?:'|\"|`)([^']*)(?:'|\"|`)"
+    ],
+    [
+      "cva\\(([^)]*)\\)",
+      "(?:'|\"|`)([^']*)(?:'|\"|`)"
+    ]
+  ],
+  "tailwindCSS.experimental.configFile": "./packages/@cashew/ui/src/globals.css",
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "typescript.tsdk": "node_modules/typescript/lib"
+}

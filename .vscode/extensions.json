@@ -1,0 +1,11 @@
+{
+  "recommendations": [
+    "streetsidesoftware.code-spell-checker",
+    "bradlc.vscode-tailwindcss",
+    "Prisma.prisma",
+    "dbaeumer.vscode-eslint",
+    "ms-playwright.playwright",
+    "zenstack.zenstack",
+    "minko.image-manager"
+  ]
+}

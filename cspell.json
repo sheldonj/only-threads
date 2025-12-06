@@ -1,0 +1,34 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "zenstackhq",
+    "zenstack",
+    "zmodel",
+    "neondatabase",
+    "tanstack",
+    "tailwindcss",
+    "shadcn",
+    "radix",
+    "hookform",
+    "lucide",
+    "clsx",
+    "geist",
+    "antialiased",
+    "myvintagecollection"
+  ],
+  "ignorePaths": [
+    "node_modules",
+    ".next",
+    "pnpm-lock.yaml",
+    "package-lock.json",
+    "zenstack/schema.ts",
+    "zenstack/input.ts",
+    "zenstack/models.ts"
+  ],
+  "ignoreRegExpList": [
+    "/[a-z]+[A-Z][a-zA-Z]+/",
+    "/@[a-z-]+\\/[a-z-]+/"
+  ]
+}
+
