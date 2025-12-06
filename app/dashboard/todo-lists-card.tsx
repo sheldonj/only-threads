@@ -280,7 +280,9 @@ export default function TodoListsCard() {
                     {list.name}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {list.createdAt.toLocaleString()}
+                    {list.createdAt
+                      ? new Date(list.createdAt).toLocaleString()
+                      : ''}
                   </p>
                 </div>
               </div>
