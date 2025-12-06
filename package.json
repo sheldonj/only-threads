@@ -10,8 +10,8 @@
     "typecheck": "tsc --noEmit",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "lint:fix": "next lint --fix",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "up": "npm i -D @zenstackhq/cli@next && npm i @zenstackhq/orm@next @zenstackhq/better-auth@next @zenstackhq/server@next @zenstackhq/plugin-policy@next @zenstackhq/tanstack-query@next"
   },
   "dependencies": {
