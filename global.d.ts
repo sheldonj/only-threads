@@ -1,7 +1,7 @@
 // Extend JSX to support Three.js elements with React 19
 // @react-three/fiber doesn't officially support React 19 yet, so we need to extend the types
 import type * as THREE from 'three';
-import type { Object3DNode } from '@react-three/fiber';
+import { type Object3DNode } from '@react-three/fiber';
 
 declare module '@react-three/fiber' {
   interface ThreeElements {
