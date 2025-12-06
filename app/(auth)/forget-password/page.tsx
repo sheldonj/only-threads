@@ -29,9 +29,13 @@ export default function Component() {
         setError('');
 
         try {
-            const res = await client.forgetPassword({
-                email,
-                redirectTo: '/reset-password',
+            // Use the reset password method to send reset email
+            await client.$fetch('/api/auth/forget-password', {
+                method: 'POST',
+                body: {
+                    email,
+                    redirectTo: '/reset-password',
+                },
             });
             setIsSubmitted(true);
         } catch (err) {
