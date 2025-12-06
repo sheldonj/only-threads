@@ -26,7 +26,7 @@ export default function RootLayout({
                 <link rel="icon" href="/favicon/favicon.ico" sizes="any" />
             </head>
             <body
-                className={`${GeistSans.variable} ${GeistMono.variable} font-sans`}
+                className={`${GeistSans.variable} ${GeistMono.variable} font-sans w-full`}
             >
                 <ThemeProvider attribute="class" defaultTheme="dark">
                     <Wrapper>

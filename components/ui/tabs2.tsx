@@ -40,7 +40,7 @@ export const Tabs = ({
 		<>
 			<div
 				className={cn(
-					"flex flex-row items-center justify-start mt-0 [perspective:1000px] relative overflow-auto sm:overflow-visible no-visible-scrollbar border-x w-full border-t max-w-max bg-opacity-0",
+					"flex flex-row items-center justify-start mt-0 [perspective:1000px] relative overflow-auto sm:overflow-visible no-visible-scrollbar border-x w-full border-t max-w-max bg-transparent",
 					containerClassName,
 				)}
 			>
@@ -82,7 +82,7 @@ export const Tabs = ({
 							className={cn(
 								"relative block text-black dark:text-white",
 								active.value === tab.value
-									? "text-opacity-100 font-medium"
+									? "opacity-100 font-medium"
 									: "opacity-40 ",
 							)}
 						>
@@ -133,7 +133,7 @@ export const FadeInDiv = ({
 						},
 					}}
 					className={cn(
-						"w-50 h-full",
+						"w-full h-full",
 						isActive(tab) ? "" : "hidden",
 						className,
 					)}
