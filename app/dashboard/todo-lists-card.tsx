@@ -27,7 +27,9 @@ const CreateTodoListDialog = () => {
   const [name, setName] = useState('');
   const [open, setOpen] = useState(false);
   const client = useClientQueries(schema);
-  const { isPending, mutateAsync: create } = client.todoList.useCreate({ optimisticUpdate: true });
+  const { isPending, mutateAsync: create } = client.todoList.useCreate({
+    optimisticUpdate: true,
+  });
 
   useEffect(() => {
     if (open) {
@@ -92,9 +94,12 @@ const CreateTodoListDialog = () => {
 
 const TodoItem = ({ todo }: { readonly todo: Todo }) => {
   const client = useClientQueries(schema);
-  const { isPending: isUpdating, mutateAsync: update } =
-    client.todo.useUpdate({ optimisticUpdate: true });
-  const { isPending: isDeleting, mutateAsync: del } = client.todo.useDelete({ optimisticUpdate: true });
+  const { isPending: isUpdating, mutateAsync: update } = client.todo.useUpdate({
+    optimisticUpdate: true,
+  });
+  const { isPending: isDeleting, mutateAsync: del } = client.todo.useDelete({
+    optimisticUpdate: true,
+  });
   const [isDone, setIsDone] = useState(todo.done);
 
   const onToggleDone = useCallback(async () => {
@@ -146,7 +151,9 @@ const TodoListDialog = ({
     { enabled: Boolean(list) },
   );
 
-  const { isPending, mutateAsync: create } = client.todo.useCreate({ optimisticUpdate: true });
+  const { isPending, mutateAsync: create } = client.todo.useCreate({
+    optimisticUpdate: true,
+  });
 
   const onOpenChange = useCallback(
     (open: boolean) => {
@@ -224,8 +231,9 @@ export default function TodoListsCard() {
     orderBy: { createdAt: 'desc' },
   });
 
-  const { isPending: isDeleting, mutateAsync: del } =
-    client.todoList.useDelete({ optimisticUpdate: true });
+  const { isPending: isDeleting, mutateAsync: del } = client.todoList.useDelete(
+    { optimisticUpdate: true },
+  );
   // current editing TodoList
   const [currentOpenList, setCurrentOpenList] = useState<TodoList>();
 

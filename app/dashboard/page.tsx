@@ -3,14 +3,15 @@
 import { OrganizationCard } from './organization-card';
 import TodoListsCard from './todo-lists-card';
 import UserCard from './user-card';
-import { useSession, useActiveOrganization, client } from '@/lib/auth-client';
+import { client, useActiveOrganization, useSession } from '@/lib/auth-client';
+import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
 
 export default function DashboardPage() {
   const { data: session, isPending: isSessionPending } = useSession();
-  const { data: organization, isPending: isOrgPending } = useActiveOrganization();
+  const { data: organization, isPending: isOrgPending } =
+    useActiveOrganization();
   const router = useRouter();
 
   const { data: activeSessions, isPending: isSessionsPending } = useQuery({
@@ -26,7 +27,7 @@ export default function DashboardPage() {
     if (!isSessionPending && !session) {
       router.push('/sign-in');
     }
-  }, [session, isSessionPending, router]);
+  }, [isSessionPending, router, session]);
 
   if (isSessionPending || isSessionsPending || isOrgPending) {
     return null;

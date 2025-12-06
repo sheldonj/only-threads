@@ -89,6 +89,9 @@
     "eslint": "^9",
     "eslint-config-canonical": "44.3.37",
     "eslint-config-next": "16.0.7",
+    "knip": "^5.71.0",
+    "postcss": "^8.4.49",
+    "postcss-load-config": "^6.0.1",
     "prettier": "^3.7.4",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.7.2"
@@ -104,9 +107,10 @@
     "db:push": "zen db push",
     "dev": "next dev",
     "dev:secure": "next dev --experimental-https",
+    "knip": "knip",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "prebuild": "pnpm lint",
+    "prebuild": "pnpm lint && pnpm knip",
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "up": "npm i -D @zenstackhq/cli@next && npm i @zenstackhq/orm@next @zenstackhq/better-auth@next @zenstackhq/server@next @zenstackhq/plugin-policy@next @zenstackhq/tanstack-query@next"
