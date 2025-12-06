@@ -49,33 +49,25 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast, Toaster } from 'sonner';
 
-type User = {
-    id: string;
-    email: string;
-    name: string;
-    role: 'admin' | 'user';
-};
-
 export default function AdminDashboard() {
   const queryClient = useQueryClient();
   const router = useRouter();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newUser, setNewUser] = useState({
     email: '',
-    password: '',
     name: '',
+    password: '',
     role: 'user' as const,
   });
   const [isLoading, setIsLoading] = useState<string | undefined>();
   const [isBanDialogOpen, setIsBanDialogOpen] = useState(false);
   const [banForm, setBanForm] = useState({
-    userId: '',
-    reason: '',
     expirationDate: undefined as Date | undefined,
+    reason: '',
+    userId: '',
   });
 
   const { data: users, isLoading: isUsersLoading } = useQuery({
-    queryKey: ['users'],
     queryFn: async () => {
       const data = await client.admin.listUsers(
         {
@@ -87,24 +79,25 @@ export default function AdminDashboard() {
         },
         {
           throw: true,
-        }
+        },
       );
       return data?.users || [];
     },
+    queryKey: ['users'],
   });
 
-  const handleCreateUser = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleCreateUser = async (event: React.FormEvent) => {
+    event.preventDefault();
     setIsLoading('create');
     try {
       await client.admin.createUser({
         email: newUser.email,
-        password: newUser.password,
         name: newUser.name,
+        password: newUser.password,
         role: newUser.role,
       });
       toast.success('User created successfully');
-      setNewUser({ email: '', password: '', name: '', role: 'user' });
+      setNewUser({ email: '', name: '', password: '', role: 'user' });
       setIsDialogOpen(false);
       queryClient.invalidateQueries({
         queryKey: ['users'],
@@ -163,11 +156,11 @@ export default function AdminDashboard() {
       if (!banForm.expirationDate) {
         throw new Error('Expiration date is required');
       }
+
       await client.admin.banUser({
-        userId: banForm.userId,
+        banExpiresIn: banForm.expirationDate.getTime() - Date.now(),
         banReason: banForm.reason,
-        banExpiresIn:
-                    banForm.expirationDate.getTime() - new Date().getTime(),
+        userId: banForm.userId,
       });
       toast.success('User banned successfully');
       setIsBanDialogOpen(false);
@@ -187,7 +180,10 @@ export default function AdminDashboard() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-2xl">Admin Dashboard</CardTitle>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <Dialog
+            onOpenChange={setIsDialogOpen}
+            open={isDialogOpen}
+          >
             <DialogTrigger asChild>
               <Button>
                 <Plus className="mr-2 h-4 w-4" /> Create User
@@ -198,15 +194,13 @@ export default function AdminDashboard() {
                 <DialogTitle>Create New User</DialogTitle>
               </DialogHeader>
               <form
-                onSubmit={handleCreateUser}
                 className="space-y-4"
+                onSubmit={handleCreateUser}
               >
                 <div>
                   <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"
-                    type="email"
-                    value={newUser.email}
                     onChange={(e) =>
                       setNewUser({
                         ...newUser,
@@ -214,14 +208,14 @@ export default function AdminDashboard() {
                       })
                     }
                     required
+                    type="email"
+                    value={newUser.email}
                   />
                 </div>
                 <div>
                   <Label htmlFor="password">Password</Label>
                   <Input
                     id="password"
-                    type="password"
-                    value={newUser.password}
                     onChange={(e) =>
                       setNewUser({
                         ...newUser,
@@ -229,13 +223,14 @@ export default function AdminDashboard() {
                       })
                     }
                     required
+                    type="password"
+                    value={newUser.password}
                   />
                 </div>
                 <div>
                   <Label htmlFor="name">Name</Label>
                   <Input
                     id="name"
-                    value={newUser.name}
                     onChange={(e) =>
                       setNewUser({
                         ...newUser,
@@ -243,43 +238,38 @@ export default function AdminDashboard() {
                       })
                     }
                     required
+                    value={newUser.name}
                   />
                 </div>
                 <div>
                   <Label htmlFor="role">Role</Label>
                   <Select
-                    value={newUser.role}
-                    onValueChange={(
-                      value: 'admin' | 'user'
-                    ) =>
+                    onValueChange={(value: 'admin' | 'user') =>
                       setNewUser({
                         ...newUser,
                         role: value as 'user',
                       })
                     }
+                    value={newUser.role}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select role" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="admin">
-                                                Admin
-                      </SelectItem>
-                      <SelectItem value="user">
-                                                User
-                      </SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                      <SelectItem value="user">User</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <Button
-                  type="submit"
                   className="w-full"
                   disabled={isLoading === 'create'}
+                  type="submit"
                 >
                   {isLoading === 'create' ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                            Creating...
+                      Creating...
                     </>
                   ) : (
                     'Create User'
@@ -289,22 +279,21 @@ export default function AdminDashboard() {
             </DialogContent>
           </Dialog>
           <Dialog
-            open={isBanDialogOpen}
             onOpenChange={setIsBanDialogOpen}
+            open={isBanDialogOpen}
           >
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Ban User</DialogTitle>
               </DialogHeader>
               <form
-                onSubmit={handleBanUser}
                 className="space-y-4"
+                onSubmit={handleBanUser}
               >
                 <div>
                   <Label htmlFor="reason">Reason</Label>
                   <Input
                     id="reason"
-                    value={banForm.reason}
                     onChange={(e) =>
                       setBanForm({
                         ...banForm,
@@ -312,29 +301,24 @@ export default function AdminDashboard() {
                       })
                     }
                     required
+                    value={banForm.reason}
                   />
                 </div>
                 <div className="flex flex-col space-y-1.5">
-                  <Label htmlFor="expirationDate">
-                                        Expiration Date
-                  </Label>
+                  <Label htmlFor="expirationDate">Expiration Date</Label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
-                        id="expirationDate"
-                        variant={'outline'}
                         className={cn(
                           'w-full justify-start text-left font-normal',
-                          !banForm.expirationDate &&
-                                                        'text-muted-foreground'
+                          !banForm.expirationDate && 'text-muted-foreground',
                         )}
+                        id="expirationDate"
+                        variant="outline"
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {banForm.expirationDate ? (
-                          format(
-                            banForm.expirationDate,
-                            'PPP'
-                          )
+                          format(banForm.expirationDate, 'PPP')
                         ) : (
                           <span>Pick a date</span>
                         )}
@@ -342,32 +326,28 @@ export default function AdminDashboard() {
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
                       <Calendar
+                        initialFocus
                         mode="single"
-                        selected={
-                          banForm.expirationDate
-                        }
                         onSelect={(date) =>
                           setBanForm({
                             ...banForm,
                             expirationDate: date,
                           })
                         }
-                        initialFocus
+                        selected={banForm.expirationDate}
                       />
                     </PopoverContent>
                   </Popover>
                 </div>
                 <Button
-                  type="submit"
                   className="w-full"
-                  disabled={
-                    isLoading === `ban-${banForm.userId}`
-                  }
+                  disabled={isLoading === `ban-${banForm.userId}`}
+                  type="submit"
                 >
                   {isLoading === `ban-${banForm.userId}` ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                            Banning...
+                      Banning...
                     </>
                   ) : (
                     'Ban User'
@@ -398,154 +378,102 @@ export default function AdminDashboard() {
                   <TableRow key={user.id}>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>{user.name}</TableCell>
-                    <TableCell>
-                      {user.role || 'user'}
-                    </TableCell>
+                    <TableCell>{user.role || 'user'}</TableCell>
                     <TableCell>
                       {user.banned ? (
-                        <Badge variant="destructive">
-                                                    Yes
-                        </Badge>
+                        <Badge variant="destructive">Yes</Badge>
                       ) : (
-                        <Badge variant="outline">
-                                                    No
-                        </Badge>
+                        <Badge variant="outline">No</Badge>
                       )}
                     </TableCell>
                     <TableCell>
                       <div className="flex space-x-2">
                         <Button
+                          disabled={isLoading?.startsWith('delete')}
+                          onClick={() => handleDeleteUser(user.id)}
+                          size="sm"
                           variant="destructive"
-                          size="sm"
-                          onClick={() =>
-                            handleDeleteUser(
-                              user.id
-                            )
-                          }
-                          disabled={isLoading?.startsWith(
-                            'delete'
-                          )}
                         >
-                          {isLoading ===
-                                                    `delete-${user.id}` ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <Trash className="h-4 w-4" />
-                            )}
+                          {isLoading === `delete-${user.id}` ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash className="h-4 w-4" />
+                          )}
                         </Button>
                         <Button
+                          disabled={isLoading?.startsWith('revoke')}
+                          onClick={() => handleRevokeSessions(user.id)}
+                          size="sm"
                           variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            handleRevokeSessions(
-                              user.id
-                            )
-                          }
-                          disabled={isLoading?.startsWith(
-                            'revoke'
-                          )}
                         >
-                          {isLoading ===
-                                                    `revoke-${user.id}` ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <RefreshCw className="h-4 w-4" />
-                            )}
+                          {isLoading === `revoke-${user.id}` ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <RefreshCw className="h-4 w-4" />
+                          )}
                         </Button>
                         <Button
+                          disabled={isLoading?.startsWith('impersonate')}
+                          onClick={() => handleImpersonateUser(user.id)}
+                          size="sm"
                           variant="secondary"
-                          size="sm"
-                          onClick={() =>
-                            handleImpersonateUser(
-                              user.id
-                            )
-                          }
-                          disabled={isLoading?.startsWith(
-                            'impersonate'
-                          )}
                         >
-                          {isLoading ===
-                                                    `impersonate-${user.id}` ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <>
-                                <UserCircle className="h-4 w-4 mr-2" />
-                                                            Impersonate
-                              </>
-                            )}
+                          {isLoading === `impersonate-${user.id}` ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <>
+                              <UserCircle className="h-4 w-4 mr-2" />
+                              Impersonate
+                            </>
+                          )}
                         </Button>
                         <Button
-                          variant="outline"
-                          size="sm"
+                          disabled={isLoading?.startsWith('ban')}
                           onClick={async () => {
                             setBanForm({
-                              userId: user.id,
+                              expirationDate: undefined,
                               reason: '',
-                              expirationDate:
-                                                                undefined,
+                              userId: user.id,
                             });
                             if (user.banned) {
-                              setIsLoading(
-                                `ban-${user.id}`
-                              );
+                              setIsLoading(`ban-${user.id}`);
                               await client.admin.unbanUser(
                                 {
                                   userId: user.id,
                                 },
                                 {
-                                  onError(
-                                    context
-                                  ) {
+                                  onError(context) {
                                     toast.error(
-                                      context
-                                        .error
-                                        .message ||
-                                                                                'Failed to unban user'
+                                      context.error.message ||
+                                        'Failed to unban user',
                                     );
-                                    setIsLoading(
-                                      undefined
-                                    );
+                                    setIsLoading(undefined);
                                   },
                                   onSuccess() {
-                                    queryClient.invalidateQueries(
-                                      {
-                                        queryKey:
-                                                                                    [
-                                                                                      'users',
-                                                                                    ],
-                                      }
-                                    );
-                                    toast.success(
-                                      'User unbanned successfully'
-                                    );
+                                    queryClient.invalidateQueries({
+                                      queryKey: ['users'],
+                                    });
+                                    toast.success('User unbanned successfully');
                                   },
-                                }
+                                },
                               );
-                              queryClient.invalidateQueries(
-                                {
-                                  queryKey: [
-                                    'users',
-                                  ],
-                                }
-                              );
+                              queryClient.invalidateQueries({
+                                queryKey: ['users'],
+                              });
                             } else {
-                              setIsBanDialogOpen(
-                                true
-                              );
+                              setIsBanDialogOpen(true);
                             }
                           }}
-                          disabled={isLoading?.startsWith(
-                            'ban'
-                          )}
+                          size="sm"
+                          variant="outline"
                         >
-                          {isLoading ===
-                                                    `ban-${user.id}` ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : user.banned ? (
-                              'Unban'
-                            ) : (
-                              'Ban'
-                            )}
+                          {isLoading === `ban-${user.id}` ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : user.banned ? (
+                            'Unban'
+                          ) : (
+                            'Ban'
+                          )}
                         </Button>
                       </div>
                     </TableCell>

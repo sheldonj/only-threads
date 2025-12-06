@@ -24,7 +24,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PasswordInput } from '@/components/ui/password-input';
 import { client, signOut, useSession } from '@/lib/auth-client';
-import { Session } from '@/lib/auth-types';
+import { type Session } from '@/lib/auth-types';
 import { MobileIcon } from '@radix-ui/react-icons';
 import { Edit, Laptop, Loader2, LogOut, X } from 'lucide-react';
 import Image from 'next/image';
@@ -34,8 +34,8 @@ import { toast } from 'sonner';
 import { UAParser } from 'ua-parser-js';
 
 export default function UserCard(props: {
-    session: Session | null;
-    activeSessions: Session['session'][];
+  readonly activeSessions: Array<Session['session']>;
+  readonly session: null | Session;
 }) {
   const router = useRouter();
   const { data } = useSession();
@@ -43,7 +43,7 @@ export default function UserCard(props: {
   const [isTerminating, setIsTerminating] = useState<string>();
   const [isSignOut, setIsSignOut] = useState<boolean>(false);
   const [emailVerificationPending, setEmailVerificationPending] =
-        useState<boolean>(false);
+    useState<boolean>(false);
   return (
     <Card>
       <CardHeader>
@@ -54,13 +54,11 @@ export default function UserCard(props: {
           <div className="flex items-center gap-4">
             <Avatar className="hidden h-9 w-9 sm:flex ">
               <AvatarImage
-                src={session?.user.image || '#'}
                 alt="Avatar"
                 className="object-cover"
+                src={session?.user.image || '#'}
               />
-              <AvatarFallback>
-                {session?.user.name.charAt(0)}
-              </AvatarFallback>
+              <AvatarFallback>{session?.user.name.charAt(0)}</AvatarFallback>
             </Avatar>
             <div className="grid gap-1">
               <p className="text-sm font-medium leading-none">
@@ -76,13 +74,11 @@ export default function UserCard(props: {
           <Alert>
             <AlertTitle>Verify Your Email Address</AlertTitle>
             <AlertDescription className="text-muted-foreground">
-                            Please verify your email address. Check your inbox
-                            for the verification email. If you haven&apos;t received
-                            the email, click the button below to resend.
+              Please verify your email address. Check your inbox for the
+              verification email. If you haven&apos;t received the email, click
+              the button below to resend.
             </AlertDescription>
             <Button
-              size="sm"
-              variant="secondary"
               className="mt-2"
               onClick={async () => {
                 await client.sendVerificationEmail(
@@ -90,25 +86,28 @@ export default function UserCard(props: {
                     email: session?.user.email || '',
                   },
                   {
-                    onRequest(context) {
-                      setEmailVerificationPending(true);
-                    },
                     onError(context) {
                       toast.error(context.error.message);
                       setEmailVerificationPending(false);
                     },
+                    onRequest(context) {
+                      setEmailVerificationPending(true);
+                    },
                     onSuccess() {
-                      toast.success(
-                        'Verification email sent successfully'
-                      );
+                      toast.success('Verification email sent successfully');
                       setEmailVerificationPending(false);
                     },
-                  }
+                  },
                 );
               }}
+              size="sm"
+              variant="secondary"
             >
               {emailVerificationPending ? (
-                <Loader2 size={15} className="animate-spin" />
+                <Loader2
+                  className="animate-spin"
+                  size={15}
+                />
               ) : (
                 'Resend Verification Email'
               )}
@@ -124,57 +123,42 @@ export default function UserCard(props: {
               return (
                 <div key={session.id}>
                   <div className="flex items-center gap-2 text-sm  text-black font-medium dark:text-white">
-                    {new UAParser(
-                      session.userAgent || ''
-                    ).getDevice().type === 'mobile' ? (
+                    {new UAParser(session.userAgent || '').getDevice().type ===
+                    'mobile' ? (
                         <MobileIcon />
                       ) : (
                         <Laptop size={16} />
                       )}
-                    {
-                      new UAParser(
-                        session.userAgent || ''
-                      ).getOS().name
-                    }
-                                        ,{' '}
-                    {
-                      new UAParser(
-                        session.userAgent || ''
-                      ).getBrowser().name
-                    }
+                    {new UAParser(session.userAgent || '').getOS().name},{' '}
+                    {new UAParser(session.userAgent || '').getBrowser().name}
                     <button
                       className="text-red-500 opacity-80  cursor-pointer text-xs border-muted-foreground border-red-600  underline "
                       onClick={async () => {
                         setIsTerminating(session.id);
-                        const res =
-                                                    await client.revokeSession({
-                                                      token: session.token,
-                                                    });
+                        const res = await client.revokeSession({
+                          token: session.token,
+                        });
 
                         if (res.error) {
-                          toast.error(
-                            res.error.message
-                          );
+                          toast.error(res.error.message);
                         } else {
-                          toast.success(
-                            'Session terminated successfully'
-                          );
+                          toast.success('Session terminated successfully');
                         }
+
                         router.refresh();
                         setIsTerminating(undefined);
                       }}
                     >
                       {isTerminating === session.id ? (
                         <Loader2
-                          size={15}
                           className="animate-spin"
+                          size={15}
                         />
-                      ) : session.id ===
-                                              props.session?.session.id ? (
-                          'Sign Out'
-                        ) : (
-                          'Terminate'
-                        )}
+                      ) : session.id === props.session?.session.id ? (
+                        'Sign Out'
+                      ) : (
+                        'Terminate'
+                      )}
                     </button>
                   </div>
                 </div>
@@ -186,7 +170,7 @@ export default function UserCard(props: {
         <ChangePassword />
         <Button
           className="gap-2 z-10"
-          variant="secondary"
+          disabled={isSignOut}
           onClick={async () => {
             setIsSignOut(true);
             await signOut({
@@ -198,15 +182,18 @@ export default function UserCard(props: {
             });
             setIsSignOut(false);
           }}
-          disabled={isSignOut}
+          variant="secondary"
         >
           <span className="text-sm">
             {isSignOut ? (
-              <Loader2 size={15} className="animate-spin" />
+              <Loader2
+                className="animate-spin"
+                size={15}
+              />
             ) : (
               <div className="flex items-center gap-2">
                 <LogOut size={16} />
-                                Sign Out
+                Sign Out
               </div>
             )}
           </span>
@@ -216,16 +203,7 @@ export default function UserCard(props: {
   );
 }
 
-async function convertImageToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
-function ChangePassword() {
+const ChangePassword = () => {
   const [currentPassword, setCurrentPassword] = useState<string>('');
   const [newPassword, setNewPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
@@ -233,23 +211,28 @@ function ChangePassword() {
   const [open, setOpen] = useState<boolean>(false);
   const [signOutDevices, setSignOutDevices] = useState<boolean>(false);
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      onOpenChange={setOpen}
+      open={open}
+    >
       <DialogTrigger asChild>
-        <Button className="gap-2 z-10" variant="outline" size="sm">
+        <Button
+          className="gap-2 z-10"
+          size="sm"
+          variant="outline"
+        >
           <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="1em"
             height="1em"
             viewBox="0 0 24 24"
+            width="1em"
+            xmlns="http://www.w3.org/2000/svg"
           >
             <path
-              fill="currentColor"
               d="M2.5 18.5v-1h19v1zm.535-5.973l-.762-.442l.965-1.693h-1.93v-.884h1.93l-.965-1.642l.762-.443L4 9.066l.966-1.643l.761.443l-.965 1.642h1.93v.884h-1.93l.965 1.693l-.762.442L4 10.835zm8 0l-.762-.442l.966-1.693H9.308v-.884h1.93l-.965-1.642l.762-.443L12 9.066l.966-1.643l.761.443l-.965 1.642h1.93v.884h-1.93l.965 1.693l-.762.442L12 10.835zm8 0l-.762-.442l.966-1.693h-1.931v-.884h1.93l-.965-1.642l.762-.443L20 9.066l.966-1.643l.761.443l-.965 1.642h1.93v.884h-1.93l.965 1.693l-.762.442L20 10.835z"
-            ></path>
+              fill="currentColor"
+            />
           </svg>
-          <span className="text-sm text-muted-foreground">
-                        Change Password
-          </span>
+          <span className="text-sm text-muted-foreground">Change Password</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] w-11/12">
@@ -260,32 +243,30 @@ function ChangePassword() {
         <div className="grid gap-2">
           <Label htmlFor="current-password">Current Password</Label>
           <PasswordInput
-            id="current-password"
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
             autoComplete="new-password"
+            id="current-password"
+            onChange={(e) => setCurrentPassword(e.target.value)}
             placeholder="Password"
+            value={currentPassword}
           />
           <Label htmlFor="new-password">New Password</Label>
           <PasswordInput
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
             autoComplete="new-password"
+            onChange={(e) => setNewPassword(e.target.value)}
             placeholder="New Password"
+            value={newPassword}
           />
           <Label htmlFor="password">Confirm Password</Label>
           <PasswordInput
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
             autoComplete="new-password"
+            onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="Confirm Password"
+            value={confirmPassword}
           />
           <div className="flex gap-2 items-center">
             <Checkbox
               onCheckedChange={(checked) =>
-                checked
-                  ? setSignOutDevices(true)
-                  : setSignOutDevices(false)
+                checked ? setSignOutDevices(true) : setSignOutDevices(false)
               }
             />
             <p className="text-sm">Sign out from other devices</p>
@@ -298,23 +279,23 @@ function ChangePassword() {
                 toast.error('Passwords do not match');
                 return;
               }
+
               if (newPassword.length < 8) {
-                toast.error(
-                  'Password must be at least 8 characters'
-                );
+                toast.error('Password must be at least 8 characters');
                 return;
               }
+
               setLoading(true);
               const res = await client.changePassword({
-                newPassword: newPassword,
-                currentPassword: currentPassword,
+                currentPassword,
+                newPassword,
                 revokeOtherSessions: signOutDevices,
               });
               setLoading(false);
               if (res.error) {
                 toast.error(
                   res.error.message ||
-                                        "Couldn't change your password! Make sure it's correct"
+                    "Couldn't change your password! Make sure it's correct",
                 );
               } else {
                 setOpen(false);
@@ -326,7 +307,10 @@ function ChangePassword() {
             }}
           >
             {loading ? (
-              <Loader2 size={15} className="animate-spin" />
+              <Loader2
+                className="animate-spin"
+                size={15}
+              />
             ) : (
               'Change Password'
             )}
@@ -335,14 +319,23 @@ function ChangePassword() {
       </DialogContent>
     </Dialog>
   );
+};
+
+async function convertImageToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
 
-function EditUserDialog() {
-  const { data, isPending, error } = useSession();
+const EditUserDialog = () => {
+  const { data, error, isPending } = useSession();
   const [name, setName] = useState<string>();
   const router = useRouter();
   const [image, setImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<null | string>(null);
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -351,17 +344,26 @@ function EditUserDialog() {
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
       };
+
       reader.readAsDataURL(file);
     }
   };
+
   const [open, setOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      onOpenChange={setOpen}
+      open={open}
+    >
       <DialogTrigger asChild>
-        <Button size="sm" className="gap-2" variant="secondary">
+        <Button
+          className="gap-2"
+          size="sm"
+          variant="secondary"
+        >
           <Edit size={13} />
-                    Edit User
+          Edit User
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] w-11/12">
@@ -373,12 +375,12 @@ function EditUserDialog() {
           <Label htmlFor="name">Full Name</Label>
           <Input
             id="name"
-            type="name"
-            placeholder={data?.user.name}
-            required
             onChange={(e) => {
               setName(e.target.value);
             }}
+            placeholder={data?.user.name}
+            required
+            type="name"
           />
           <div className="grid gap-2">
             <Label htmlFor="image">Profile Image</Label>
@@ -386,20 +388,20 @@ function EditUserDialog() {
               {imagePreview && (
                 <div className="relative w-16 h-16 rounded-sm overflow-hidden">
                   <Image
-                    src={imagePreview}
                     alt="Profile preview"
                     layout="fill"
                     objectFit="cover"
+                    src={imagePreview}
                   />
                 </div>
               )}
               <div className="flex items-center gap-2 w-full">
                 <Input
-                  id="image"
-                  type="file"
                   accept="image/*"
-                  onChange={handleImageChange}
                   className="w-full text-muted-foreground"
+                  id="image"
+                  onChange={handleImageChange}
+                  type="file"
                 />
                 {imagePreview && (
                   <X
@@ -420,20 +422,16 @@ function EditUserDialog() {
             onClick={async () => {
               setIsLoading(true);
               await client.updateUser({
-                image: image
-                  ? await convertImageToBase64(image)
-                  : undefined,
-                name: name ? name : undefined,
                 fetchOptions: {
-                  onSuccess: () => {
-                    toast.success(
-                      'User updated successfully'
-                    );
-                  },
                   onError: (error) => {
                     toast.error(error.error.message);
                   },
+                  onSuccess: () => {
+                    toast.success('User updated successfully');
+                  },
                 },
+                image: image ? await convertImageToBase64(image) : undefined,
+                name: name ? name : undefined,
               });
               setName('');
               router.refresh();
@@ -444,7 +442,10 @@ function EditUserDialog() {
             }}
           >
             {isLoading ? (
-              <Loader2 size={15} className="animate-spin" />
+              <Loader2
+                className="animate-spin"
+                size={15}
+              />
             ) : (
               'Update'
             )}
@@ -453,4 +454,4 @@ function EditUserDialog() {
       </DialogContent>
     </Dialog>
   );
-}
+};

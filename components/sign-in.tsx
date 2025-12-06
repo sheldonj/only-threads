@@ -32,7 +32,7 @@ export default function SignIn() {
       <CardHeader>
         <CardTitle className="text-lg md:text-xl">Sign In</CardTitle>
         <CardDescription className="text-xs md:text-sm">
-                    Enter your email below to login to your account
+          Enter your email below to login to your account
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -41,12 +41,12 @@ export default function SignIn() {
             <Label htmlFor="email">Email</Label>
             <Input
               id="email"
-              type="email"
-              placeholder="m@example.com"
-              required
               onChange={(e) => {
                 setEmail(e.target.value);
               }}
+              placeholder="m@example.com"
+              required
+              type="email"
               value={email}
             />
           </div>
@@ -54,18 +54,18 @@ export default function SignIn() {
             <div className="flex items-center">
               <Label htmlFor="password">Password</Label>
               <Link
-                href="/forget-password"
                 className="ml-auto inline-block text-sm underline"
+                href="/forget-password"
               >
-                                Forgot your password?
+                Forgot your password?
               </Link>
             </div>
             <PasswordInput
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
               autoComplete="password"
+              id="password"
+              onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
+              value={password}
             />
           </div>
           <div className="flex items-center gap-2">
@@ -78,33 +78,36 @@ export default function SignIn() {
           </div>
 
           <Button
-            type="submit"
             className="w-full"
             disabled={loading}
             onClick={async () => {
               await signIn.email(
                 {
-                  email: email,
-                  password: password,
                   callbackURL: '/dashboard',
+                  email,
+                  password,
                   rememberMe,
                 },
                 {
+                  onError: (context) => {
+                    toast.error(context.error.message);
+                  },
                   onRequest: () => {
                     setLoading(true);
                   },
                   onResponse: () => {
                     setLoading(false);
                   },
-                  onError: (ctx) => {
-                    toast.error(ctx.error.message);
-                  },
-                }
+                },
               );
             }}
+            type="submit"
           >
             {loading ? (
-              <Loader2 size={16} className="animate-spin" />
+              <Loader2
+                className="animate-spin"
+                size={16}
+              />
             ) : (
               'Login'
             )}
@@ -114,8 +117,7 @@ export default function SignIn() {
       <CardFooter>
         <div className="flex justify-center w-full border-t py-4">
           <p className="text-center text-xs text-neutral-500">
-                        Secured by{' '}
-            <span className="text-orange-400">better-auth.</span>
+            Secured by <span className="text-orange-400">better-auth.</span>
           </p>
         </div>
       </CardFooter>

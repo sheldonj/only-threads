@@ -34,7 +34,7 @@ import {
   useListOrganizations,
   useSession,
 } from '@/lib/auth-client';
-import { ActiveOrganization, Session } from '@/lib/auth-types';
+import { type ActiveOrganization, type Session } from '@/lib/auth-types';
 import { ChevronDownIcon, PlusIcon } from '@radix-ui/react-icons';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Loader2, MailPlus } from 'lucide-react';
@@ -42,25 +42,26 @@ import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
-export function OrganizationCard(props: {
-    session: Session | null;
-    activeOrganization: ActiveOrganization | null;
-}) {
+export const OrganizationCard = (props: {
+  readonly activeOrganization: ActiveOrganization | null;
+  readonly session: null | Session;
+}) => {
   const organizations = useListOrganizations();
-  const [optimisticOrg, setOptimisticOrg] =
-        useState<ActiveOrganization | null>(props.activeOrganization);
+  const [optimisticOrg, setOptimisticOrg] = useState<ActiveOrganization | null>(
+    props.activeOrganization,
+  );
   const [isRevoking, setIsRevoking] = useState<string[]>([]);
   const inviteVariants = {
-    hidden: { opacity: 0, height: 0 },
-    visible: { opacity: 1, height: 'auto' },
-    exit: { opacity: 0, height: 0 },
+    exit: { height: 0, opacity: 0 },
+    hidden: { height: 0, opacity: 0 },
+    visible: { height: 'auto', opacity: 1 },
   };
 
   const { data } = useSession();
   const session = data || props.session;
 
   const currentMember = optimisticOrg?.members?.find(
-    (member) => member.userId === session?.user.id
+    (member) => member.userId === session?.user.id,
   );
 
   return (
@@ -72,7 +73,7 @@ export function OrganizationCard(props: {
             <DropdownMenuTrigger asChild>
               <div className="flex items-center gap-1 cursor-pointer">
                 <p className="text-sm">
-                  <span className="font-bold"></span>{' '}
+                  <span className="font-bold" />{' '}
                   {optimisticOrg?.name || 'Personal'}
                 </p>
 
@@ -99,15 +100,15 @@ export function OrganizationCard(props: {
                     if (org.id === optimisticOrg?.id) {
                       return;
                     }
+
                     setOptimisticOrg({
-                      members: [],
                       invitations: [],
+                      members: [],
                       ...org,
                     });
-                    const { data } =
-                                            await organization.setActive({
-                                              organizationId: org.id,
-                                            });
+                    const { data } = await organization.setActive({
+                      organizationId: org.id,
+                    });
                     console.log('Set active org', data);
                     setOptimisticOrg(data);
                   }}
@@ -143,72 +144,60 @@ export function OrganizationCard(props: {
         <div className="flex gap-8 flex-col md:flex-row">
           <div className="flex flex-col gap-2 flex-grow">
             <p className="font-medium border-b-2 border-b-foreground/10">
-                            Members
+              Members
             </p>
             <div className="flex flex-col gap-2">
               {optimisticOrg?.members?.map((member) => (
                 <div
-                  key={member.id}
                   className="flex justify-between items-center"
+                  key={member.id}
                 >
                   <div className="flex items-center gap-2">
                     <Avatar className="sm:flex w-9 h-9">
                       <AvatarImage
-                        src={member.user.image || ''}
                         className="object-cover"
+                        src={member.user.image || ''}
                       />
                       <AvatarFallback>
                         {member.user.name?.charAt(0)}
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="text-sm">
-                        {member.user.name}
-                      </p>
+                      <p className="text-sm">{member.user.name}</p>
                       <p className="text-xs text-muted-foreground">
                         {member.role}
                       </p>
                     </div>
                   </div>
                   {member.role !== 'owner' &&
-                                        (currentMember?.role === 'owner' ||
-                                            currentMember?.role ===
-                                                'admin') && (
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => {
+                    (currentMember?.role === 'owner' ||
+                      currentMember?.role === 'admin') && (
+                      <Button
+                        onClick={() => {
                         organization.removeMember({
-                          memberIdOrEmail:
-                                                            member.id,
+                          memberIdOrEmail: member.id,
                         });
                       }}
-                    >
-                      {currentMember?.id === member.id
-                        ? 'Leave'
-                        : 'Remove'}
-                    </Button>
-                  )}
+                      size="sm"
+                      variant="destructive"
+                      >
+                        {currentMember?.id === member.id ? 'Leave' : 'Remove'}
+                      </Button>
+                    )}
                 </div>
               ))}
               {!optimisticOrg?.id && (
                 <div>
                   <div className="flex items-center gap-2">
                     <Avatar>
-                      <AvatarImage
-                        src={session?.user.image || ''}
-                      />
+                      <AvatarImage src={session?.user.image || ''} />
                       <AvatarFallback>
                         {session?.user.name?.charAt(0)}
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="text-sm">
-                        {session?.user.name}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                                                Owner
-                      </p>
+                      <p className="text-sm">{session?.user.name}</p>
+                      <p className="text-xs text-muted-foreground">Owner</p>
                     </div>
                   </div>
                 </div>
@@ -217,116 +206,79 @@ export function OrganizationCard(props: {
           </div>
           <div className="flex flex-col gap-2 flex-grow">
             <p className="font-medium border-b-2 border-b-foreground/10">
-                            Invites
+              Invites
             </p>
             <div className="flex flex-col gap-2">
               <AnimatePresence>
                 {optimisticOrg?.invitations
-                  ?.filter(
-                    (invitation) =>
-                      invitation.status === 'pending'
-                  )
+                  ?.filter((invitation) => invitation.status === 'pending')
                   .map((invitation) => (
                     <motion.div
-                      key={invitation.id}
-                      className="flex items-center justify-between"
-                      variants={inviteVariants}
-                      initial="hidden"
                       animate="visible"
+                      className="flex items-center justify-between"
                       exit="exit"
+                      initial="hidden"
+                      key={invitation.id}
                       layout
+                      variants={inviteVariants}
                     >
                       <div>
-                        <p className="text-sm">
-                          {invitation.email}
-                        </p>
+                        <p className="text-sm">{invitation.email}</p>
                         <p className="text-xs text-muted-foreground">
                           {invitation.role}
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
                         <Button
-                          disabled={isRevoking.includes(
-                            invitation.id
-                          )}
-                          size="sm"
-                          variant="destructive"
+                          disabled={isRevoking.includes(invitation.id)}
                           onClick={() => {
                             organization.cancelInvitation(
                               {
-                                invitationId:
-                                                                    invitation.id,
+                                invitationId: invitation.id,
                               },
                               {
-                                onRequest:
-                                                                    () => {
-                                                                      setIsRevoking(
-                                                                        [
-                                                                          ...isRevoking,
-                                                                          invitation.id,
-                                                                        ]
-                                                                      );
-                                                                    },
-                                onSuccess:
-                                                                    () => {
-                                                                      toast.message(
-                                                                        'Invitation revoked successfully'
-                                                                      );
-                                                                      setIsRevoking(
-                                                                        isRevoking.filter(
-                                                                          (
-                                                                            id
-                                                                          ) =>
-                                                                            id !==
-                                                                                    invitation.id
-                                                                        )
-                                                                      );
-                                                                      setOptimisticOrg(
-                                                                        {
-                                                                          ...optimisticOrg,
-                                                                          invitations:
-                                                                                    optimisticOrg?.invitations?.filter(
-                                                                                      (
-                                                                                        inv
-                                                                                      ) =>
-                                                                                        inv.id !==
-                                                                                            invitation.id
-                                                                                    ),
-                                                                        }
-                                                                      );
-                                                                    },
-                                onError: (
-                                  ctx
-                                ) => {
-                                  toast.error(
-                                    ctx
-                                      .error
-                                      .message
+                                onError: (context) => {
+                                  toast.error(context.error.message);
+                                  setIsRevoking(
+                                    isRevoking.filter(
+                                      (id) => id !== invitation.id,
+                                    ),
+                                  );
+                                },
+                                onRequest: () => {
+                                  setIsRevoking([...isRevoking, invitation.id]);
+                                },
+                                onSuccess: () => {
+                                  toast.message(
+                                    'Invitation revoked successfully',
                                   );
                                   setIsRevoking(
                                     isRevoking.filter(
-                                      (
-                                        id
-                                      ) =>
-                                        id !==
-                                                                                invitation.id
-                                    )
+                                      (id) => id !== invitation.id,
+                                    ),
                                   );
+                                  setOptimisticOrg({
+                                    ...optimisticOrg,
+                                    invitations:
+                                      optimisticOrg?.invitations?.filter(
+                                        (inv) => inv.id !== invitation.id,
+                                      ),
+                                  });
                                 },
-                              }
+                              },
                             );
                           }}
+                          size="sm"
+                          variant="destructive"
                         >
-                          {isRevoking.includes(
-                            invitation.id
-                          ) ? (
-                              <Loader2
-                                className="animate-spin"
-                                size={16}
-                              />
-                            ) : (
-                              'Revoke'
-                            )}
+                          {isRevoking.includes(invitation.id) ? (
+                            <Loader2
+                              className="animate-spin"
+                              size={16}
+                            />
+                          ) : (
+                            'Revoke'
+                          )}
                         </Button>
                         <div>
                           <CopyButton
@@ -339,18 +291,17 @@ export function OrganizationCard(props: {
               </AnimatePresence>
               {optimisticOrg?.invitations?.length === 0 && (
                 <motion.p
-                  className="text-sm text-muted-foreground"
-                  initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
+                  className="text-sm text-muted-foreground"
                   exit={{ opacity: 0 }}
+                  initial={{ opacity: 0 }}
                 >
-                                    No Active Invitations
+                  No Active Invitations
                 </motion.p>
               )}
               {!optimisticOrg?.id && (
                 <Label className="text-xs text-muted-foreground">
-                                    You can&apos;t invite members to your
-                                    personal workspace.
+                  You can&apos;t invite members to your personal workspace.
                 </Label>
               )}
             </div>
@@ -361,8 +312,8 @@ export function OrganizationCard(props: {
             <div>
               {optimisticOrg?.id && (
                 <InviteMemberDialog
-                  setOptimisticOrg={setOptimisticOrg}
                   optimisticOrg={optimisticOrg}
+                  setOptimisticOrg={setOptimisticOrg}
                 />
               )}
             </div>
@@ -371,22 +322,19 @@ export function OrganizationCard(props: {
       </CardContent>
     </Card>
   );
-}
+};
 
-function CreateOrganizationDialog() {
+const CreateOrganizationDialog = () => {
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [isSlugEdited, setIsSlugEdited] = useState(false);
-  const [logo, setLogo] = useState<string | null>(null);
+  const [logo, setLogo] = useState<null | string>(null);
 
   useEffect(() => {
     if (!isSlugEdited) {
-      const generatedSlug = name
-        .trim()
-        .toLowerCase()
-        .replace(/\s+/g, '-');
+      const generatedSlug = name.trim().toLowerCase().replaceAll(/\s+/g, '-');
       setSlug(generatedSlug);
     }
   }, [isSlugEdited, name]);
@@ -407,14 +355,22 @@ function CreateOrganizationDialog() {
       reader.onloadend = () => {
         setLogo(reader.result as string);
       };
+
       reader.readAsDataURL(file);
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      onOpenChange={setOpen}
+      open={open}
+    >
       <DialogTrigger asChild>
-        <Button size="sm" className="w-full gap-2" variant="default">
+        <Button
+          className="w-full gap-2"
+          size="sm"
+          variant="default"
+        >
           <PlusIcon />
           <p>New Organization</p>
         </Button>
@@ -423,44 +379,44 @@ function CreateOrganizationDialog() {
         <DialogHeader>
           <DialogTitle>New Organization</DialogTitle>
           <DialogDescription>
-                        Create a new organization to collaborate with your team.
+            Create a new organization to collaborate with your team.
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <Label>Organization Name</Label>
             <Input
+              onChange={(event) => setName(event.target.value)}
               placeholder="Name"
               value={name}
-              onChange={(e) => setName(e.target.value)}
             />
           </div>
           <div className="flex flex-col gap-2">
             <Label>Organization Slug</Label>
             <Input
-              value={slug}
-              onChange={(e) => {
-                setSlug(e.target.value);
+              onChange={(event) => {
+                setSlug(event.target.value);
                 setIsSlugEdited(true);
               }}
               placeholder="Slug"
+              value={slug}
             />
           </div>
           <div className="flex flex-col gap-2">
             <Label>Logo</Label>
             <Input
-              type="file"
               accept="image/*"
               onChange={handleLogoChange}
+              type="file"
             />
             {logo && (
               <div className="mt-2">
                 <Image
-                  src={logo}
                   alt="Logo preview"
                   className="w-16 h-16 object-cover"
-                  width={16}
                   height={16}
+                  src={logo}
+                  width={16}
                 />
               </div>
             )}
@@ -473,30 +429,31 @@ function CreateOrganizationDialog() {
               setLoading(true);
               await organization.create(
                 {
-                  name: name,
-                  slug: slug,
                   logo: logo || undefined,
+                  name,
+                  slug,
                 },
                 {
-                  onResponse: () => {
-                    setLoading(false);
-                  },
-                  onSuccess: () => {
-                    toast.success(
-                      'Organization created successfully'
-                    );
-                    setOpen(false);
-                  },
                   onError: (error) => {
                     toast.error(error.error.message);
                     setLoading(false);
                   },
-                }
+                  onResponse: () => {
+                    setLoading(false);
+                  },
+                  onSuccess: () => {
+                    toast.success('Organization created successfully');
+                    setOpen(false);
+                  },
+                },
               );
             }}
           >
             {loading ? (
-              <Loader2 className="animate-spin" size={16} />
+              <Loader2
+                className="animate-spin"
+                size={16}
+              />
             ) : (
               'Create'
             )}
@@ -505,15 +462,15 @@ function CreateOrganizationDialog() {
       </DialogContent>
     </Dialog>
   );
-}
+};
 
-function InviteMemberDialog({
-  setOptimisticOrg,
+const InviteMemberDialog = ({
   optimisticOrg,
+  setOptimisticOrg,
 }: {
-    setOptimisticOrg: (org: ActiveOrganization | null) => void;
-    optimisticOrg: ActiveOrganization | null;
-}) {
+  readonly optimisticOrg: ActiveOrganization | null;
+  readonly setOptimisticOrg: (org: ActiveOrganization | null) => void;
+}) => {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [role, setRole] = useState('member');
@@ -521,7 +478,11 @@ function InviteMemberDialog({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button size="sm" className="w-full gap-2" variant="secondary">
+        <Button
+          className="w-full gap-2"
+          size="sm"
+          variant="secondary"
+        >
           <MailPlus size={16} />
           <p>Invite Member</p>
         </Button>
@@ -530,18 +491,21 @@ function InviteMemberDialog({
         <DialogHeader>
           <DialogTitle>Invite Member</DialogTitle>
           <DialogDescription>
-                        Invite a member to your organization.
+            Invite a member to your organization.
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-2">
           <Label>Email</Label>
           <Input
+            onChange={(e) => setEmail(e.target.value)}
             placeholder="Email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
           />
           <Label>Role</Label>
-          <Select value={role} onValueChange={setRole}>
+          <Select
+            onValueChange={setRole}
+            value={role}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Select a role" />
             </SelectTrigger>
@@ -557,36 +521,35 @@ function InviteMemberDialog({
               disabled={loading}
               onClick={async () => {
                 const invite = organization.inviteMember({
-                  email: email,
-                  role: role as 'member',
+                  email,
                   fetchOptions: {
-                    throw: true,
-                    onSuccess: (ctx) => {
+                    onSuccess: (context) => {
                       if (optimisticOrg) {
                         setOptimisticOrg({
                           ...optimisticOrg,
                           invitations: [
-                            ...(optimisticOrg?.invitations ||
-                                                            []),
-                            ctx.data,
+                            ...(optimisticOrg?.invitations || []),
+                            context.data,
                           ],
                         });
                       }
                     },
+                    throw: true,
                   },
+                  role: role as 'member',
                 });
                 toast.promise(invite, {
+                  error: (error) => error.error.message,
                   loading: 'Inviting member...',
                   success: 'Member invited successfully',
-                  error: (error) => error.error.message,
                 });
               }}
             >
-                            Invite
+              Invite
             </Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
-}
+};

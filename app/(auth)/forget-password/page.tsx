@@ -23,19 +23,19 @@ export default function Component() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     setIsSubmitting(true);
     setError('');
 
     try {
       // Use the reset password method to send reset email
       await client.$fetch('/api/auth/forget-password', {
-        method: 'POST',
         body: {
           email,
           redirectTo: '/reset-password',
         },
+        method: 'POST',
       });
       setIsSubmitted(true);
     } catch {
@@ -52,26 +52,24 @@ export default function Component() {
           <CardHeader>
             <CardTitle>Check your email</CardTitle>
             <CardDescription>
-                            We&apos;ve sent a password reset link to your email.
+              We&apos;ve sent a password reset link to your email.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Alert>
               <CheckCircle2 className="h-4 w-4" />
               <AlertDescription>
-                                If you don&apos;t see the email, check your spam
-                                folder.
+                If you don&apos;t see the email, check your spam folder.
               </AlertDescription>
             </Alert>
           </CardContent>
           <CardFooter>
             <Button
-              variant="outline"
               className="w-full"
               onClick={() => setIsSubmitted(false)}
+              variant="outline"
             >
-              <ArrowLeft className="mr-2 h-4 w-4" /> Back to reset
-                            password
+              <ArrowLeft className="mr-2 h-4 w-4" /> Back to reset password
             </Button>
           </CardFooter>
         </Card>
@@ -82,12 +80,12 @@ export default function Component() {
   return (
     <main className="flex flex-col items-center justify-center min-h-[calc(100vh-10rem)]">
       {/* Radial gradient for the container to give a faded look */}
-      <div className="absolute pointer-events-none inset-0 flex items-center justify-center dark:bg-black bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]"></div>
+      <div className="absolute pointer-events-none inset-0 flex items-center justify-center dark:bg-black bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]" />
       <Card className="w-[350px]">
         <CardHeader>
           <CardTitle>Forgot password</CardTitle>
           <CardDescription>
-                        Enter your email to reset your password
+            Enter your email to reset your password
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -97,24 +95,27 @@ export default function Component() {
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
-                  type="email"
+                  onChange={(event) => setEmail(event.target.value)}
                   placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
                   required
+                  type="email"
+                  value={email}
                 />
               </div>
             </div>
             {error && (
-              <Alert variant="destructive" className="mt-4">
+              <Alert
+                className="mt-4"
+                variant="destructive"
+              >
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
             <Button
               className="w-full mt-4"
-              type="submit"
               disabled={isSubmitting}
+              type="submit"
             >
               {isSubmitting ? 'Sending...' : 'Send reset link'}
             </Button>
@@ -122,8 +123,11 @@ export default function Component() {
         </CardContent>
         <CardFooter className="flex justify-center">
           <Link href="/sign-in">
-            <Button variant="link" className="px-0">
-                            Back to sign in
+            <Button
+              className="px-0"
+              variant="link"
+            >
+              Back to sign in
             </Button>
           </Link>
         </CardFooter>

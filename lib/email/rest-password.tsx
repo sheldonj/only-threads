@@ -8,20 +8,20 @@ import {
   Html,
   Link,
   Preview,
-  Text,
-  Tailwind,
   Section,
-} from "@react-email/components";
-import * as React from "react";
+  Tailwind,
+  Text,
+} from '@react-email/components';
+import * as React from 'react';
 
-interface BetterAuthResetPasswordEmailProps {
-	username?: string;
-	resetLink?: string;
-}
+type BetterAuthResetPasswordEmailProps = {
+  readonly resetLink?: string;
+  readonly username?: string;
+};
 
 export const ResetPasswordEmail = ({
-  username,
   resetLink,
+  username,
 }: BetterAuthResetPasswordEmailProps) => {
   const previewText = `Reset your BetterAuth password`;
   return (
@@ -32,34 +32,37 @@ export const ResetPasswordEmail = ({
         <Body className="bg-white my-auto mx-auto font-sans px-2">
           <Container className="border border-solid border-[#eaeaea] rounded my-[40px] mx-auto p-[20px] max-w-[465px]">
             <Heading className="text-black text-[24px] font-normal text-center p-0 my-[30px] mx-0">
-							Reset your <strong>Better Auth</strong> password
+              Reset your <strong>Better Auth</strong> password
             </Heading>
             <Text className="text-black text-[14px] leading-[24px]">
-							Hello {username},
+              Hello {username},
             </Text>
             <Text className="text-black text-[14px] leading-[24px]">
-							We received a request to reset your password for your Better Auth
-							account. If you didn&apos;t make this request, you can safely ignore
-							this email.
+              We received a request to reset your password for your Better Auth
+              account. If you didn&apos;t make this request, you can safely
+              ignore this email.
             </Text>
             <Section className="text-center mt-[32px] mb-[32px]">
               <Button
                 className="bg-[#000000] rounded text-white text-[12px] font-semibold no-underline text-center px-5 py-3"
                 href={resetLink}
               >
-								Reset Password
+                Reset Password
               </Button>
             </Section>
             <Text className="text-black text-[14px] leading-[24px]">
-							Or copy and paste this URL into your browser:{" "}
-              <Link href={resetLink} className="text-blue-600 no-underline">
+              Or copy and paste this URL into your browser:{' '}
+              <Link
+                className="text-blue-600 no-underline"
+                href={resetLink}
+              >
                 {resetLink}
               </Link>
             </Text>
             <Hr className="border border-solid border-[#eaeaea] my-[26px] mx-0 w-full" />
             <Text className="text-[#666666] text-[12px] leading-[24px]">
-							If you didn&apos;t request a password reset, please ignore this email
-							or contact support if you have concerns.
+              If you didn&apos;t request a password reset, please ignore this
+              email or contact support if you have concerns.
             </Text>
           </Container>
         </Body>
@@ -71,6 +74,5 @@ export const ResetPasswordEmail = ({
 export function reactResetPasswordEmail(
   props: BetterAuthResetPasswordEmailProps,
 ) {
-  console.log(props);
   return <ResetPasswordEmail {...props} />;
 }

@@ -6,9 +6,9 @@ import { NextRequestHandler } from '@zenstackhq/server/next';
 import { headers } from 'next/headers';
 
 async function getClient() {
-  const reqHeaders = await headers();
+  const requestHeaders = await headers();
   const sessionResult = await auth.api.getSession({
-    headers: reqHeaders,
+    headers: requestHeaders,
   });
 
   if (!sessionResult) {
@@ -16,27 +16,25 @@ async function getClient() {
     return authDb;
   }
 
-  let organizationId: string | undefined = undefined;
-  let organizationRole: string | undefined = undefined;
+  let organizationId: string | undefined;
+  let organizationRole: string | undefined;
   const { session } = sessionResult;
 
   if (session.activeOrganizationId) {
     // if there's an active orgId, get the role of the user in the org
     organizationId = session.activeOrganizationId;
-    const org = await auth.api.getFullOrganization({ headers: reqHeaders });
+    const org = await auth.api.getFullOrganization({ headers: requestHeaders });
     if (org?.members) {
-      const myMember = org.members.find(
-        (m) => m.userId === session.userId
-      );
+      const myMember = org.members.find((m) => m.userId === session.userId);
       organizationRole = myMember?.role;
     }
   }
 
   // create enhanced client with user context
   const userContext = {
-    userId: session.userId,
     organizationId,
     organizationRole,
+    userId: session.userId,
   };
   return authDb.$setAuth(userContext as any);
 }

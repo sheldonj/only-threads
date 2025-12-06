@@ -1,19 +1,4 @@
 {
-  "name": "@better-auth/demo",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "db:generate": "zen generate --lite",
-    "db:push": "zen db push",
-    "dev": "next dev",
-    "dev:secure": "next dev --experimental-https",
-    "typecheck": "tsc --noEmit",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "up": "npm i -D @zenstackhq/cli@next && npm i @zenstackhq/orm@next @zenstackhq/better-auth@next @zenstackhq/server@next @zenstackhq/plugin-policy@next @zenstackhq/tanstack-query@next"
-  },
   "dependencies": {
     "@better-fetch/fetch": "^1.1.18",
     "@hookform/resolvers": "^3.10.0",
@@ -102,12 +87,28 @@
     "dotenv": "^16.4.7",
     "dotenv-cli": "^7.4.4",
     "eslint": "^9",
+    "eslint-config-canonical": "44.3.37",
     "eslint-config-next": "16.0.7",
-    "eslint-plugin-canonical": "^5.1.3",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.7.2"
   },
+  "name": "@better-auth/demo",
   "overrides": {
     "whatwg-url": "^14.0.0"
-  }
+  },
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "next build",
+    "db:generate": "zen generate --lite",
+    "db:push": "zen db push",
+    "dev": "next dev",
+    "dev:secure": "next dev --experimental-https",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "up": "npm i -D @zenstackhq/cli@next && npm i @zenstackhq/orm@next @zenstackhq/better-auth@next @zenstackhq/server@next @zenstackhq/plugin-policy@next @zenstackhq/tanstack-query@next"
+  },
+  "version": "0.1.0"
 }

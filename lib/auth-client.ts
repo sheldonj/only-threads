@@ -3,22 +3,22 @@ import { createAuthClient } from 'better-auth/react';
 import { toast } from 'sonner';
 
 export const client = createAuthClient({
-  plugins: [organizationClient(), adminClient()],
   fetchOptions: {
-    onError(e) {
-      if (e.error.status === 429) {
+    onError(event) {
+      if (event.error.status === 429) {
         toast.error('Too many requests. Please try again later.');
       }
     },
   },
+  plugins: [organizationClient(), adminClient()],
 });
 
 export const {
-  signUp,
+  organization,
   signIn,
   signOut,
-  useSession,
-  organization,
-  useListOrganizations,
+  signUp,
   useActiveOrganization,
+  useListOrganizations,
+  useSession,
 } = client;

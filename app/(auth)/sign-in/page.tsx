@@ -12,14 +12,14 @@ export default function Page() {
           <Tabs
             tabs={[
               {
+                content: <SignIn />,
                 title: 'Sign In',
                 value: 'sign-in',
-                content: <SignIn />,
               },
               {
+                content: <SignUp />,
                 title: 'Sign Up',
                 value: 'sign-up',
-                content: <SignUp />,
               },
             ]}
           />

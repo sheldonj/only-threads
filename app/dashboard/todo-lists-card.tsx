@@ -15,7 +15,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useActiveOrganization } from '@/lib/auth-client';
-import { Todo, TodoList } from '@/zenstack/models';
+import { type Todo, type TodoList } from '@/zenstack/models';
 import { schema } from '@/zenstack/schema-lite';
 import { PlusIcon, TrashIcon } from '@radix-ui/react-icons';
 import { useClientQueries } from '@zenstackhq/tanstack-query/react';
@@ -31,9 +31,9 @@ export default function TodoListsCard() {
     orderBy: { createdAt: 'desc' },
   });
 
-  const { mutateAsync: del, isPending: isDeleting } =
-        client.todoList.useDelete();
-    // current editing TodoList
+  const { isPending: isDeleting, mutateAsync: del } =
+    client.todoList.useDelete();
+  // current editing TodoList
   const [currentOpenList, setCurrentOpenList] = useState<TodoList>();
 
   // refetch todo lists when active org changes
@@ -55,8 +55,8 @@ export default function TodoListsCard() {
         <div className="flex flex-col gap-2">
           {todoLists?.map((list) => (
             <div
-              key={list.id}
               className="flex justify-between items-center"
+              key={list.id}
             >
               <div className="flex items-center gap-2">
                 <div>
@@ -72,12 +72,12 @@ export default function TodoListsCard() {
                 </div>
               </div>
               <Button
-                size="sm"
-                variant="destructive"
                 disabled={isDeleting}
                 onClick={() => onDelete(list.id)}
+                size="sm"
+                variant="destructive"
               >
-                                Delete
+                Delete
               </Button>
             </div>
           ))}
@@ -91,11 +91,11 @@ export default function TodoListsCard() {
   );
 }
 
-function CreateTodoListDialog() {
+const CreateTodoListDialog = () => {
   const [name, setName] = useState('');
   const [open, setOpen] = useState(false);
   const client = useClientQueries(schema);
-  const { mutateAsync: create, isPending } = client.todoList.useCreate();
+  const { isPending, mutateAsync: create } = client.todoList.useCreate();
 
   useEffect(() => {
     if (open) {
@@ -104,15 +104,21 @@ function CreateTodoListDialog() {
   }, [open]);
 
   async function onCreate() {
-    await create({ data: { name: name } });
+    await create({ data: { name } });
     toast.success('Todo list created successfully');
     setOpen(false);
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      onOpenChange={setOpen}
+      open={open}
+    >
       <DialogTrigger asChild>
-        <Button size="sm" variant="default">
+        <Button
+          size="sm"
+          variant="default"
+        >
           <PlusIcon />
           <p>New Todo List</p>
         </Button>
@@ -120,24 +126,28 @@ function CreateTodoListDialog() {
       <DialogContent className="sm:max-w-[425px] w-11/12">
         <DialogHeader>
           <DialogTitle>New Todo List</DialogTitle>
-          <DialogDescription>
-                        Create a new todo list.
-          </DialogDescription>
+          <DialogDescription>Create a new todo list.</DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <Label>List Name</Label>
             <Input
+              onChange={(e) => setName(e.target.value)}
               placeholder="Name"
               value={name}
-              onChange={(e) => setName(e.target.value)}
             />
           </div>
         </div>
         <DialogFooter>
-          <Button disabled={isPending} onClick={onCreate}>
+          <Button
+            disabled={isPending}
+            onClick={onCreate}
+          >
             {isPending ? (
-              <Loader2 className="animate-spin" size={16} />
+              <Loader2
+                className="animate-spin"
+                size={16}
+              />
             ) : (
               'Create'
             )}
@@ -146,27 +156,27 @@ function CreateTodoListDialog() {
       </DialogContent>
     </Dialog>
   );
-}
+};
 
-function TodoListDialog({
+const TodoListDialog = ({
   list,
   onClose,
 }: {
-    list?: TodoList;
-    onClose: () => void;
-}) {
+  readonly list?: TodoList;
+  readonly onClose: () => void;
+}) => {
   const [title, setTitle] = useState('');
   const client = useClientQueries(schema);
 
   const { data: todos } = client.todo.useFindMany(
     {
-      where: { listId: list?.id },
       orderBy: { createdAt: 'desc' },
+      where: { listId: list?.id },
     },
-    { enabled: !!list }
+    { enabled: Boolean(list) },
   );
 
-  const { mutateAsync: create, isPending } = client.todo.useCreate();
+  const { isPending, mutateAsync: create } = client.todo.useCreate();
 
   function onOpenChange(open: boolean) {
     if (!open) {
@@ -180,20 +190,21 @@ function TodoListDialog({
     }
 
     await create({
-      data: { title, listId: list!.id },
+      data: { listId: list!.id, title },
     });
     setTitle('');
   }
 
   return (
-    <Dialog open={!!list} onOpenChange={onOpenChange}>
+    <Dialog
+      onOpenChange={onOpenChange}
+      open={Boolean(list)}
+    >
       <DialogContent className="sm:max-w-[425px] w-11/12">
         <DialogHeader>
           <DialogTitle>{list?.name}</DialogTitle>
           <div className="pt-4">
             <Input
-              placeholder="Enter title and press enter to create"
-              value={title}
               disabled={isPending}
               onChange={(e) => setTitle(e.target.value)}
               onKeyUp={(e) => {
@@ -201,29 +212,34 @@ function TodoListDialog({
                   onCreate();
                 }
               }}
+              placeholder="Enter title and press enter to create"
+              value={title}
             />
             <div className="mt-4">
               {todos?.map((todo) => (
-                <TodoItem key={todo.id} todo={todo} />
+                <TodoItem
+                  key={todo.id}
+                  todo={todo}
+                />
               ))}
             </div>
           </div>
         </DialogHeader>
-        <DialogFooter></DialogFooter>
+        <DialogFooter />
       </DialogContent>
     </Dialog>
   );
-}
+};
 
-function TodoItem({ todo }: { todo: Todo }) {
+const TodoItem = ({ todo }: { readonly todo: Todo }) => {
   const client = useClientQueries(schema);
-  const { mutateAsync: update, isPending: isUpdating } =
-        client.todo.useUpdate();
-  const { mutateAsync: del, isPending: isDeleting } = client.todo.useDelete();
+  const { isPending: isUpdating, mutateAsync: update } =
+    client.todo.useUpdate();
+  const { isPending: isDeleting, mutateAsync: del } = client.todo.useDelete();
   const [isDone, setIsDone] = useState(todo.done);
 
   async function onToggleDone() {
-    await update({ where: { id: todo.id }, data: { done: !todo.done } });
+    await update({ data: { done: !todo.done }, where: { id: todo.id } });
     setIsDone(!todo.done);
   }
 
@@ -236,18 +252,21 @@ function TodoItem({ todo }: { todo: Todo }) {
       <p className={todo.done ? 'line-through' : ''}>{todo.title}</p>
       <div className="flex gap-1 items-center">
         <Checkbox
+          checked={isDone}
           disabled={isUpdating || isDeleting}
           onCheckedChange={onToggleDone}
-          checked={isDone}
         />
         <Button
+          disabled={isUpdating || isDeleting}
           size="icon"
           variant="ghost"
-          disabled={isUpdating || isDeleting}
         >
-          <TrashIcon className="cursor-pointer" onClick={onDelete} />
+          <TrashIcon
+            className="cursor-pointer"
+            onClick={onDelete}
+          />
         </Button>
       </div>
     </div>
   );
-}
+};

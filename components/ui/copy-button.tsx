@@ -1,23 +1,23 @@
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Copy, Check } from "lucide-react";
+import { Button } from '@/components/ui/button';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from '@/components/ui/tooltip';
+import { Check, Copy } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-interface CopyButtonProps {
-	textToCopy: string;
-}
+type CopyButtonProps = {
+  readonly textToCopy: string;
+};
 
 export default function CopyButton({ textToCopy }: CopyButtonProps) {
   const [isCopied, setIsCopied] = useState(false);
 
   useEffect(() => {
     if (isCopied) {
-      const timer = setTimeout(() => setIsCopied(false), 2000);
+      const timer = setTimeout(() => setIsCopied(false), 2_000);
       return () => clearTimeout(timer);
     }
   }, [isCopied]);
@@ -26,8 +26,8 @@ export default function CopyButton({ textToCopy }: CopyButtonProps) {
     try {
       await navigator.clipboard.writeText(textToCopy);
       setIsCopied(true);
-    } catch (err) {
-      console.error("Failed to copy text: ", err);
+    } catch (error) {
+      console.error('Failed to copy text: ', error);
     }
   };
 
@@ -36,10 +36,10 @@ export default function CopyButton({ textToCopy }: CopyButtonProps) {
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
-            variant="link"
-            size="icon"
-            onClick={handleCopy}
             className="h-8 w-8"
+            onClick={handleCopy}
+            size="icon"
+            variant="link"
           >
             {isCopied ? (
               <Check className="h-4 w-4 " />
@@ -50,7 +50,7 @@ export default function CopyButton({ textToCopy }: CopyButtonProps) {
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>{isCopied ? "Copied!" : "Copy to clipboard"}</p>
+          <p>{isCopied ? 'Copied!' : 'Copy to clipboard'}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

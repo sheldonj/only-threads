@@ -14,7 +14,7 @@ import { PasswordInput } from '@/components/ui/password-input';
 import { client } from '@/lib/auth-client';
 import { AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 
 export default function ResetPassword() {
@@ -23,26 +23,32 @@ export default function ResetPassword() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setError('');
-    const res = await client.resetPassword({
-      newPassword: password,
-    });
-    if (res.error) {
-      toast.error(res.error.message);
-    }
-    setIsSubmitting(false);
-    router.push('/sign-in');
-  }
+
+  const handleSubmit = useCallback(
+    async (event: React.FormEvent) => {
+      event.preventDefault();
+      setIsSubmitting(true);
+      setError('');
+      const response = await client.resetPassword({
+        newPassword: password,
+      });
+      if (response.error) {
+        toast.error(response.error.message);
+      }
+
+      setIsSubmitting(false);
+      router.push('/sign-in');
+    },
+    [password, router],
+  );
+
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-10rem)]">
       <Card className="w-[350px]">
         <CardHeader>
           <CardTitle>Reset password</CardTitle>
           <CardDescription>
-                        Enter new password and confirm it to reset your password
+            Enter new password and confirm it to reset your password
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -51,38 +57,37 @@ export default function ResetPassword() {
               <div className="flex flex-col space-y-1.5">
                 <Label htmlFor="email">New password</Label>
                 <PasswordInput
-                  id="password"
-                  value={password}
-                  onChange={(e) =>
-                    setPassword(e.target.value)
-                  }
                   autoComplete="password"
+                  id="password"
+                  onChange={(event) => setPassword(event.target.value)}
                   placeholder="Password"
+                  value={password}
                 />
               </div>
               <div className="flex flex-col space-y-1.5">
                 <Label htmlFor="email">Confirm password</Label>
                 <PasswordInput
-                  id="password"
-                  value={confirmPassword}
-                  onChange={(e) =>
-                    setConfirmPassword(e.target.value)
-                  }
                   autoComplete="password"
+                  id="password"
+                  onChange={(event) => setConfirmPassword(event.target.value)}
                   placeholder="Password"
+                  value={confirmPassword}
                 />
               </div>
             </div>
             {error && (
-              <Alert variant="destructive" className="mt-4">
+              <Alert
+                className="mt-4"
+                variant="destructive"
+              >
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
             <Button
               className="w-full mt-4"
-              type="submit"
               disabled={isSubmitting}
+              type="submit"
             >
               {isSubmitting ? 'Resetting...' : 'Reset password'}
             </Button>

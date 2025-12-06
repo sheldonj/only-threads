@@ -12,22 +12,22 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PasswordInput } from '@/components/ui/password-input';
-import { DiscordLogoIcon, GitHubLogoIcon } from '@radix-ui/react-icons';
-import { useState } from 'react';
 import { client, signIn, signUp } from '@/lib/auth-client';
-import Image from 'next/image';
+import { DiscordLogoIcon, GitHubLogoIcon } from '@radix-ui/react-icons';
 import { Loader2, X } from 'lucide-react';
-import { toast } from 'sonner';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
-export function SignUp() {
+export const SignUp = () => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirmation, setPasswordConfirmation] = useState('');
   const [image, setImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<null | string>(null);
   const router = useRouter();
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,9 +38,11 @@ export function SignUp() {
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
       };
+
       reader.readAsDataURL(file);
     }
   };
+
   const [loading, setLoading] = useState(false);
 
   return (
@@ -48,7 +50,7 @@ export function SignUp() {
       <CardHeader>
         <CardTitle className="text-lg md:text-xl">Sign Up</CardTitle>
         <CardDescription className="text-xs md:text-sm">
-                    Enter your information to create an account
+          Enter your information to create an account
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -58,11 +60,11 @@ export function SignUp() {
               <Label htmlFor="first-name">First name</Label>
               <Input
                 id="first-name"
-                placeholder="Max"
-                required
                 onChange={(e) => {
                   setFirstName(e.target.value);
                 }}
+                placeholder="Max"
+                required
                 value={firstName}
               />
             </div>
@@ -70,11 +72,11 @@ export function SignUp() {
               <Label htmlFor="last-name">Last name</Label>
               <Input
                 id="last-name"
-                placeholder="Robinson"
-                required
                 onChange={(e) => {
                   setLastName(e.target.value);
                 }}
+                placeholder="Robinson"
+                required
                 value={lastName}
               />
             </div>
@@ -83,35 +85,33 @@ export function SignUp() {
             <Label htmlFor="email">Email</Label>
             <Input
               id="email"
-              type="email"
-              placeholder="m@example.com"
-              required
               onChange={(e) => {
                 setEmail(e.target.value);
               }}
+              placeholder="m@example.com"
+              required
+              type="email"
               value={email}
             />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="password">Password</Label>
             <PasswordInput
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
               autoComplete="new-password"
+              id="password"
+              onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
+              value={password}
             />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="password">Confirm Password</Label>
             <PasswordInput
-              id="password_confirmation"
-              value={passwordConfirmation}
-              onChange={(e) =>
-                setPasswordConfirmation(e.target.value)
-              }
               autoComplete="new-password"
+              id="password_confirmation"
+              onChange={(e) => setPasswordConfirmation(e.target.value)}
               placeholder="Confirm Password"
+              value={passwordConfirmation}
             />
           </div>
           <div className="grid gap-2">
@@ -120,20 +120,20 @@ export function SignUp() {
               {imagePreview && (
                 <div className="relative w-16 h-16 rounded-sm overflow-hidden">
                   <Image
-                    src={imagePreview}
                     alt="Profile preview"
                     layout="fill"
                     objectFit="cover"
+                    src={imagePreview}
                   />
                 </div>
               )}
               <div className="flex items-center gap-2 w-full">
                 <Input
-                  id="image"
-                  type="file"
                   accept="image/*"
-                  onChange={handleImageChange}
                   className="w-full"
+                  id="image"
+                  onChange={handleImageChange}
+                  type="file"
                 />
                 {imagePreview && (
                   <X
@@ -148,37 +148,38 @@ export function SignUp() {
             </div>
           </div>
           <Button
-            type="submit"
             className="w-full"
             disabled={loading}
             onClick={async () => {
               await signUp.email({
-                email,
-                password,
-                name: `${firstName} ${lastName}`,
-                image: image
-                  ? await convertImageToBase64(image)
-                  : '',
                 callbackURL: '/dashboard',
+                email,
                 fetchOptions: {
-                  onResponse: () => {
-                    setLoading(false);
+                  onError: (context) => {
+                    toast.error(context.error.message);
                   },
                   onRequest: () => {
                     setLoading(true);
                   },
-                  onError: (ctx) => {
-                    toast.error(ctx.error.message);
+                  onResponse: () => {
+                    setLoading(false);
                   },
                   onSuccess: async () => {
                     router.push('/dashboard');
                   },
                 },
+                image: image ? await convertImageToBase64(image) : '',
+                name: `${firstName} ${lastName}`,
+                password,
               });
             }}
+            type="submit"
           >
             {loading ? (
-              <Loader2 size={16} className="animate-spin" />
+              <Loader2
+                className="animate-spin"
+                size={16}
+              />
             ) : (
               'Create an account'
             )}
@@ -188,14 +189,13 @@ export function SignUp() {
       <CardFooter>
         <div className="flex justify-center w-full border-t py-4">
           <p className="text-center text-xs text-neutral-500">
-                        Secured by{' '}
-            <span className="text-orange-400">better-auth.</span>
+            Secured by <span className="text-orange-400">better-auth.</span>
           </p>
         </div>
       </CardFooter>
     </Card>
   );
-}
+};
 
 async function convertImageToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {

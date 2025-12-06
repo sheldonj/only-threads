@@ -10,35 +10,40 @@ import {
 import { AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
-export function InvitationError() {
+export const InvitationError = () => {
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
         <div className="flex items-center space-x-2">
           <AlertCircle className="w-6 h-6 text-destructive" />
           <CardTitle className="text-xl text-destructive">
-                        Invitation Error
+            Invitation Error
           </CardTitle>
         </div>
         <CardDescription>
-                    There was an issue with your invitation.
+          There was an issue with your invitation.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <p className="mb-4 text-sm text-muted-foreground">
-                    The invitation you&apos;re trying to access is either invalid or
-                    you don&apos;t have the correct permissions. Please check your
-                    email for a valid invitation or contact the person who sent
-                    it.
+          The invitation you&apos;re trying to access is either invalid or you
+          don&apos;t have the correct permissions. Please check your email for a
+          valid invitation or contact the person who sent it.
         </p>
       </CardContent>
       <CardFooter>
-        <Link href="/" className="w-full">
-          <Button variant="outline" className="w-full">
-                        Go back to home
+        <Link
+          className="w-full"
+          href="/"
+        >
+          <Button
+            className="w-full"
+            variant="outline"
+          >
+            Go back to home
           </Button>
         </Link>
       </CardFooter>
     </Card>
   );
-}
+};
