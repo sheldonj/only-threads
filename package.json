@@ -89,6 +89,7 @@
     "eslint": "^9",
     "eslint-config-canonical": "44.3.37",
     "eslint-config-next": "16.0.7",
+    "prettier": "^3.7.4",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.7.2"
   },
@@ -97,7 +98,6 @@
     "whatwg-url": "^14.0.0"
   },
   "private": true,
-  "type": "module",
   "scripts": {
     "build": "next build",
     "db:generate": "zen generate --lite",
