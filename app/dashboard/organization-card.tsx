@@ -33,8 +33,8 @@ import {
   organization,
   useListOrganizations,
   useSession,
-} from '@/lib/auth-client';
-import { type ActiveOrganization, type Session } from '@/lib/auth-types';
+} from '@/lib/auth/client';
+import { type ActiveOrganization, type Session } from '@/lib/auth/types';
 import { ChevronDownIcon, PlusIcon } from '@radix-ui/react-icons';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Loader2, MailPlus } from 'lucide-react';

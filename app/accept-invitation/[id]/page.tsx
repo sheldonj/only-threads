@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { client, organization } from '@/lib/auth-client';
+import { client, organization } from '@/lib/auth/client';
 import { CheckIcon, XIcon } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';

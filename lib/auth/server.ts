@@ -1,7 +1,7 @@
-import { db as database } from './db';
-import { reactInvitationEmail } from './email/invitation';
-import { resend } from './email/resend';
-import { reactResetPasswordEmail } from './email/rest-password';
+import { db as database } from '@/lib/database/client';
+import { reactInvitationEmail } from '@/lib/email/invitation';
+import { resend } from '@/lib/email/resend';
+import { reactResetPasswordEmail } from '@/lib/email/rest-password';
 import { zenstackAdapter } from '@zenstackhq/better-auth';
 import { betterAuth } from 'better-auth';
 import { nextCookies } from 'better-auth/next-js';

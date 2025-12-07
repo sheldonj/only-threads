@@ -3,7 +3,7 @@
 import { OrganizationCard } from './organization-card';
 import TodoListsCard from './todo-lists-card';
 import UserCard from './user-card';
-import { client, useActiveOrganization, useSession } from '@/lib/auth-client';
+import { client, useActiveOrganization, useSession } from '@/lib/auth/client';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';

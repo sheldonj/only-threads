@@ -1,4 +1,4 @@
-import { type Session } from './lib/auth-types';
+import { type Session } from './lib/auth/types';
 import { betterFetch } from '@better-fetch/fetch';
 import { type NextRequest, NextResponse } from 'next/server';
 

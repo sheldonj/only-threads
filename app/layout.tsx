@@ -3,7 +3,7 @@ import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 import { Wrapper, WrapperWithQuery } from '@/components/wrapper';
-import { createMetadata } from '@/lib/metadata';
+import { createMetadata } from '@/lib/utils/metadata';
 import { GeistMono } from 'geist/font/mono';
 import { GeistSans } from 'geist/font/sans';
 

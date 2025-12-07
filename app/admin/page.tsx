@@ -33,8 +33,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { client } from '@/lib/auth-client';
-import { cn } from '@/lib/utils';
+import { client } from '@/lib/auth/client';
+import { cn } from '@/lib/utils/cn';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import {

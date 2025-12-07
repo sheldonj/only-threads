@@ -12,8 +12,8 @@ const config: KnipConfig = {
     'postcss.config.mjs',
     'next.config.ts',
     'proxy.ts',
-    'lib/auth.ts',
-    'lib/db.ts',
+    'lib/auth/server.ts',
+    'lib/database/client.ts',
     'lib/zenstack/generated/**/*.ts',
     'components/ui/**/*.{ts,tsx}',
     'hooks/**/*.{ts,tsx}', // UI component library hooks

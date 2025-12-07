@@ -1,5 +1,5 @@
-import { auth } from '@/lib/auth';
-import { authDb } from '@/lib/db';
+import { auth } from '@/lib/auth/server';
+import { authDb } from '@/lib/database/client';
 import { schema } from '@/lib/zenstack/generated/schema';
 import { RPCApiHandler } from '@zenstackhq/server/api';
 import { NextRequestHandler } from '@zenstackhq/server/next';

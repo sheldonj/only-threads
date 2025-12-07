@@ -12,7 +12,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PasswordInput } from '@/components/ui/password-input';
-import { signUp } from '@/lib/auth-client';
+import { signUp } from '@/lib/auth/client';
 import { Loader2, X } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
