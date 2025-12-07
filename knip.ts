@@ -14,7 +14,7 @@ const config: KnipConfig = {
     'proxy.ts',
     'lib/auth.ts',
     'lib/db.ts',
-    'zenstack/**/*.ts',
+    'lib/zenstack/generated/**/*.ts',
     'components/ui/**/*.{ts,tsx}',
     'hooks/**/*.{ts,tsx}', // UI component library hooks
   ],
@@ -30,7 +30,8 @@ const config: KnipConfig = {
     'global.d.ts',
     'tsconfig.tsbuildinfo',
     // Generated files from zenstack
-    'zenstack/dev.db',
+    'lib/zenstack/generated/**',
+    'data/**',
   ],
 
   // Ignore dependencies that might be used but not directly imported
@@ -71,7 +72,7 @@ const config: KnipConfig = {
     'components/**/*.{ts,tsx}',
     'lib/**/*.{ts,tsx}',
     'hooks/**/*.{ts,tsx}',
-    'zenstack/**/*.{ts,tsx}',
+    '!lib/zenstack/generated/**',
   ],
 };
 

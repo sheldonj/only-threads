@@ -1,5 +1,5 @@
 /* eslint-disable unicorn/prevent-abbreviations */
-import { schema } from '@/zenstack/schema';
+import { schema } from '@/lib/zenstack/generated/schema';
 import { ZenStackClient } from '@zenstackhq/orm';
 import { PolicyPlugin } from '@zenstackhq/plugin-policy';
 import SQLite from 'better-sqlite3';
@@ -7,7 +7,7 @@ import { SqliteDialect } from 'kysely';
 
 export const db = new ZenStackClient(schema, {
   dialect: new SqliteDialect({
-    database: new SQLite('zenstack/dev.db'),
+    database: new SQLite('data/dev.db'),
   }),
 });
 

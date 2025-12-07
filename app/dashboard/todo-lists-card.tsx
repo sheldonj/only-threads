@@ -15,8 +15,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useActiveOrganization } from '@/lib/auth-client';
-import { type Todo, type TodoList } from '@/zenstack/models';
-import { schema } from '@/zenstack/schema-lite';
+import { type Todo, type TodoList } from '@/lib/zenstack/generated/models';
+import { schema } from '@/lib/zenstack/generated/schema-lite';
 import { PlusIcon, TrashIcon } from '@radix-ui/react-icons';
 import { useClientQueries } from '@zenstackhq/tanstack-query/react';
 import { Loader2 } from 'lucide-react';

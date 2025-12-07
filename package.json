@@ -103,8 +103,8 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "db:generate": "zen generate --lite",
-    "db:push": "zen db push",
+    "db:generate": "zen generate --lite --schema lib/zenstack/schema/base.zmodel --output lib/zenstack/generated",
+    "db:push": "zen db push --schema lib/zenstack/schema/base.zmodel",
     "dev": "next dev",
     "dev:secure": "next dev --experimental-https",
     "knip": "knip",

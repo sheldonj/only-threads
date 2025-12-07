@@ -1,0 +1,21 @@
+import "./auth"
+import "./organizations"
+import "./todos"
+
+datasource db {
+    provider = 'sqlite'
+    url = 'file:../../../data/dev.db'
+}
+
+plugin policy {
+    provider = "@zenstackhq/plugin-policy"
+}
+
+/// Shape of the `auth()` function
+type Auth {
+    userId           String  @id
+    organizationId   String?
+    organizationRole String?
+
+    @@auth
+}
