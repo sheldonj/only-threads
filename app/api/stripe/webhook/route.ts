@@ -1,8 +1,8 @@
 import { db } from '@/lib/database/client';
 import { stripe } from '@/lib/stripe/client';
 import { headers } from 'next/headers';
-import { NextRequest, NextResponse } from 'next/server';
-import Stripe from 'stripe';
+import { type NextRequest, NextResponse } from 'next/server';
+import { type Stripe } from 'stripe';
 
 export async function POST(request: NextRequest) {
   const body = await request.text();
@@ -10,22 +10,30 @@ export async function POST(request: NextRequest) {
   const signature = headersList.get('stripe-signature');
 
   if (!signature) {
-    return NextResponse.json({ error: 'Missing stripe-signature header' }, { status: 400 });
+    return NextResponse.json(
+      { error: 'Missing stripe-signature header' },
+      { status: 400 },
+    );
   }
 
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
   if (!webhookSecret) {
+    // eslint-disable-next-line no-console -- logging configuration errors
     console.error('STRIPE_WEBHOOK_SECRET is not set');
-    return NextResponse.json({ error: 'Webhook secret not configured' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Webhook secret not configured' },
+      { status: 500 },
+    );
   }
 
   let event: Stripe.Event;
 
   try {
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-  } catch (err) {
-    console.error('Webhook signature verification failed:', err);
+  } catch (error) {
+    // eslint-disable-next-line no-console -- logging webhook errors for debugging
+    console.error('Webhook signature verification failed:', error);
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
   }
 
@@ -36,6 +44,7 @@ export async function POST(request: NextRequest) {
     const courseId = session.metadata?.courseId;
 
     if (!userId || !courseId) {
+      // eslint-disable-next-line no-console -- logging webhook errors for debugging
       console.error('Missing metadata in checkout session:', session.id);
       return NextResponse.json({ error: 'Missing metadata' }, { status: 400 });
     }
@@ -56,10 +65,10 @@ export async function POST(request: NextRequest) {
         },
       });
 
+      // eslint-disable-next-line no-console -- logging successful purchase creation
       console.log(`Purchase created for user ${userId}, course ${courseId}`);
     }
   }
 
   return NextResponse.json({ received: true });
 }
-

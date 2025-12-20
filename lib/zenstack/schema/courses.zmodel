@@ -1,17 +1,18 @@
 import "./auth"
 
 model Course {
-  id          String     @id @default(cuid())
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  id          String        @id @default(cuid())
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
   title       String
-  slug        String     @unique
+  slug        String        @unique
   description String?
   coverImage  String?
-  price       Float      // in cents for Stripe
-  published   Boolean    @default(false)
+  price       Float         // in cents for Stripe
+  published   Boolean       @default(false)
   lessons     Lesson[]
   purchases   Purchase[]
+  events      CourseEvent[]
 
   @@map('course')
 
@@ -22,16 +23,17 @@ model Course {
 }
 
 model Lesson {
-  id          String   @id @default(cuid())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id          String           @id @default(cuid())
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
   title       String
   description String?
-  videoUrl    String?  // placeholder for video hosting
-  content     String?  // rich text/markdown content
-  order       Int      @default(0)
+  videoUrl    String?          // placeholder for video hosting
+  content     String?          // rich text/markdown content
+  order       Int              @default(0)
   courseId    String
-  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course      Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  progress    LessonProgress[]
 
   @@map('lesson')
 
@@ -60,5 +62,45 @@ model Purchase {
   @@allow('read', auth() != null && auth().role == 'admin')
   // System creates purchases (via webhook), admins can manage
   @@allow('create,update,delete', auth() != null && auth().role == 'admin')
+}
+
+model LessonProgress {
+  id          String    @id @default(cuid())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lessonId    String
+  lesson      Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  completed   Boolean   @default(false)
+  completedAt DateTime?
+
+  @@unique([userId, lessonId])
+  @@map('lesson_progress')
+
+  // Users can manage their own progress
+  @@allow('all', auth() != null && auth().userId == userId)
+  // Admins can read all
+  @@allow('read', auth() != null && auth().role == 'admin')
+}
+
+model CourseEvent {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  type      String   // 'started' | 'completed'
+  emailSent Boolean  @default(false)
+
+  @@map('course_event')
+
+  // Users can create their own events
+  @@allow('create', auth() != null && auth().userId == userId)
+  // Users can read their own, admins can read all
+  @@allow('read', auth() != null && (auth().userId == userId || auth().role == 'admin'))
+  // Admins can update (e.g., mark emailSent)
+  @@allow('update', auth() != null && auth().role == 'admin')
 }
 

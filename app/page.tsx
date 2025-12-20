@@ -7,10 +7,26 @@ import { Suspense } from 'react';
 
 export default async function Home() {
   const features = [
-    { description: 'Access courses anytime, anywhere', icon: PlayCircle, title: 'On-Demand Learning' },
-    { description: 'Learn from industry experts', icon: GraduationCap, title: 'Expert Instructors' },
-    { description: 'Wide range of topics to explore', icon: BookOpen, title: 'Comprehensive Courses' },
-    { description: 'Earn credentials for your achievements', icon: Trophy, title: 'Certificates' },
+    {
+      description: 'Access courses anytime, anywhere',
+      icon: PlayCircle,
+      title: 'On-Demand Learning',
+    },
+    {
+      description: 'Learn from industry experts',
+      icon: GraduationCap,
+      title: 'Expert Instructors',
+    },
+    {
+      description: 'Wide range of topics to explore',
+      icon: BookOpen,
+      title: 'Comprehensive Courses',
+    },
+    {
+      description: 'Earn credentials for your achievements',
+      icon: Trophy,
+      title: 'Certificates',
+    },
   ];
 
   return (
@@ -21,8 +37,8 @@ export default async function Home() {
             Learn Something New Today
           </h1>
           <p className="text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto">
-            Expand your skills with our curated collection of courses. 
-            Learn at your own pace and achieve your goals.
+            Expand your skills with our curated collection of courses. your own
+            pace and achieve your goals.
           </p>
         </div>
 
@@ -52,8 +68,12 @@ export default async function Home() {
                 <feature.icon className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <h3 className="font-semibold text-foreground">{feature.title}</h3>
-                <p className="text-sm text-muted-foreground">{feature.description}</p>
+                <h3 className="font-semibold text-foreground">
+                  {feature.title}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {feature.description}
+                </p>
               </div>
             </div>
           ))}

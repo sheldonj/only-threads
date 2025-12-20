@@ -2,8 +2,15 @@
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { useCourseQueries } from '@/lib/hooks/use-models';
+import { type Course, type Lesson } from '@/lib/zenstack/generated/models';
 import { BookOpen, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -38,7 +45,7 @@ export default function CourseCatalogPage() {
 
       {courses && courses.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {courses.map((course) => (
+          {courses.map((course: Course & { lessons?: Lesson[] }) => (
             <Card
               className="flex flex-col overflow-hidden hover:shadow-lg transition-shadow"
               key={course.id}
@@ -92,8 +99,12 @@ export default function CourseCatalogPage() {
       ) : (
         <div className="text-center py-16">
           <BookOpen className="h-16 w-16 mx-auto text-muted-foreground/40 mb-4" />
-          <h2 className="text-xl font-semibold mb-2">No courses available yet</h2>
-          <p className="text-muted-foreground">Check back soon for new courses!</p>
+          <h2 className="text-xl font-semibold mb-2">
+            No courses available yet
+          </h2>
+          <p className="text-muted-foreground">
+            Check back soon for new courses!
+          </p>
         </div>
       )}
     </div>

@@ -113,7 +113,7 @@
   },
   "private": true,
   "scripts": {
-    "build": "next build",
+    "build": "NODE_OPTIONS='--max-old-space-size=12288' next build",
     "db:generate": "zen generate --lite --schema lib/zenstack/schema/base.zmodel --output lib/zenstack/generated",
     "db:push": "zen db push --schema lib/zenstack/schema/base.zmodel",
     "dev": "next dev",

@@ -19,53 +19,50 @@ import { Loader2 } from 'lucide-react';
 import { useRef } from 'react';
 import { useForm } from 'react-hook-form';
 
-interface CourseFormProps {
+type CourseFormProps = {
   readonly initialData?: Partial<CourseFormData>;
+  readonly isSubmitting?: boolean;
   readonly onSubmit: (data: CourseFormData) => Promise<void>;
   readonly submitLabel?: string;
-  readonly isSubmitting?: boolean;
-}
+};
 
 export function CourseForm({
   initialData,
+  isSubmitting = false,
   onSubmit,
   submitLabel = 'Save Course',
-  isSubmitting = false,
 }: CourseFormProps) {
   // Track if slug was manually edited by the user
-  const slugManuallyEdited = useRef(!!initialData?.slug);
+  const slugManuallyEdited = useRef(Boolean(initialData?.slug));
 
   const form = useForm<CourseFormData>({
-    resolver: zodResolver(courseSchema),
     defaultValues: {
-      title: initialData?.title ?? '',
-      slug: initialData?.slug ?? '',
-      description: initialData?.description ?? '',
       coverImage: initialData?.coverImage ?? '',
+      description: initialData?.description ?? '',
       price: initialData?.price ?? 0,
       published: initialData?.published ?? false,
+      slug: initialData?.slug ?? '',
+      title: initialData?.title ?? '',
     },
+    resolver: zodResolver(courseSchema),
   });
 
-  const generateSlug = (title: string) => {
-    return title
-      .toLowerCase()
-      .trim()
-      .replace(/[^\w\s-]/g, '')
-      .replace(/[\s_-]+/g, '-')
-      .replace(/^-+|-+$/g, '');
-  };
-
-  const handleTitleChange = (value: string, onChange: (value: string) => void) => {
+  const handleTitleChange = (
+    value: string,
+    onChange: (value: string) => void,
+  ) => {
     onChange(value);
-    
+
     // Only auto-generate slug if it hasn't been manually edited
     if (!slugManuallyEdited.current && value) {
       form.setValue('slug', generateSlug(value), { shouldValidate: false });
     }
   };
 
-  const handleSlugChange = (value: string, onChange: (value: string) => void) => {
+  const handleSlugChange = (
+    value: string,
+    onChange: (value: string) => void,
+  ) => {
     slugManuallyEdited.current = true;
     onChange(value);
   };
@@ -93,7 +90,9 @@ export function CourseForm({
                 <Input
                   placeholder="Introduction to TypeScript"
                   {...field}
-                  onChange={(e) => handleTitleChange(e.target.value, field.onChange)}
+                  onChange={(event) =>
+                    handleTitleChange(event.target.value, field.onChange)
+                  }
                 />
               </FormControl>
               <FormMessage />
@@ -111,7 +110,9 @@ export function CourseForm({
                 <Input
                   placeholder="introduction-to-typescript"
                   {...field}
-                  onChange={(e) => handleSlugChange(e.target.value, field.onChange)}
+                  onChange={(event) =>
+                    handleSlugChange(event.target.value, field.onChange)
+                  }
                 />
               </FormControl>
               <FormDescription>
@@ -170,7 +171,9 @@ export function CourseForm({
                   placeholder="4999"
                   type="number"
                   {...field}
-                  onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                  onChange={(event) =>
+                    field.onChange(Number.parseInt(event.target.value, 10) || 0)
+                  }
                 />
               </FormControl>
               <FormDescription>
@@ -195,7 +198,7 @@ export function CourseForm({
               <FormControl>
                 <Switch
                   checked={field.value}
-                  onCheckedChange={field.onChange}
+                  onCheckedChange={(checked) => field.onChange(checked)}
                 />
               </FormControl>
             </FormItem>
@@ -219,4 +222,13 @@ export function CourseForm({
       </form>
     </Form>
   );
+}
+
+function generateSlug(title: string) {
+  return title
+    .toLowerCase()
+    .trim()
+    .replaceAll(/[^\s\w-]/gu, '')
+    .replaceAll(/[\s_-]+/gu, '-')
+    .replaceAll(/^-+|-+$/gu, '');
 }

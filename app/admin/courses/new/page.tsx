@@ -2,10 +2,16 @@
 
 import { CourseForm } from '@/components/courses/course-form';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { useSession } from '@/lib/auth/client';
 import { useCourseQueries } from '@/lib/hooks/use-models';
-import type { CourseFormData } from '@/lib/validations/course';
+import { type CourseFormData } from '@/lib/validations/course';
 import { AlertTriangle, ArrowLeft, ShieldAlert } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -17,7 +23,7 @@ export default function NewCoursePage() {
   const { data: session, isPending: isSessionPending } = useSession();
   const course = useCourseQueries();
   const createCourse = course.useCreate();
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<null | string>(null);
 
   const isAdmin = session?.user?.role === 'admin';
 
@@ -36,18 +42,32 @@ export default function NewCoursePage() {
       });
       toast.success('Course created successfully!');
       router.push('/admin/courses');
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
-      
+    } catch (caughtError) {
+      const errorMessage =
+        caughtError instanceof Error
+          ? caughtError.message
+          : 'An unexpected error occurred';
+
       // Check for common error patterns
-      if (errorMessage.includes('denied') || errorMessage.includes('permission') || errorMessage.includes('Access')) {
-        setError('You do not have permission to create courses. Please ensure you have admin privileges.');
-      } else if (errorMessage.includes('unique') || errorMessage.includes('slug')) {
-        setError('A course with this URL slug already exists. Please choose a different slug.');
+      if (
+        errorMessage.includes('denied') ||
+        errorMessage.includes('permission') ||
+        errorMessage.includes('Access')
+      ) {
+        setError(
+          'You do not have permission to create courses. Please ensure you have admin privileges.',
+        );
+      } else if (
+        errorMessage.includes('unique') ||
+        errorMessage.includes('slug')
+      ) {
+        setError(
+          'A course with this URL slug already exists. Please choose a different slug.',
+        );
       } else {
         setError(errorMessage);
       }
-      
+
       toast.error('Failed to create course');
     }
   };
@@ -73,7 +93,14 @@ export default function NewCoursePage() {
           <ShieldAlert className="h-4 w-4" />
           <AlertTitle>Not Authenticated</AlertTitle>
           <AlertDescription>
-            Please <Link href="/sign-in" className="underline font-medium">sign in</Link> to access the admin area.
+            Please{' '}
+            <Link
+              className="underline font-medium"
+              href="/sign-in"
+            >
+              sign in
+            </Link>{' '}
+            to access the admin area.
           </AlertDescription>
         </Alert>
       </div>
@@ -83,9 +110,9 @@ export default function NewCoursePage() {
   return (
     <div className="container mx-auto p-4 max-w-2xl">
       <div className="mb-4">
-        <Link 
-          href="/admin/courses" 
+        <Link
           className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+          href="/admin/courses"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Courses
@@ -93,14 +120,19 @@ export default function NewCoursePage() {
       </div>
 
       {!isAdmin && (
-        <Alert variant="destructive" className="mb-4">
+        <Alert
+          className="mb-4"
+          variant="destructive"
+        >
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Admin Access Required</AlertTitle>
           <AlertDescription>
-            You need admin privileges to create courses. Your current role is: <strong>{session.user?.role || 'user'}</strong>.
+            You need admin privileges to create courses. Your current role is:{' '}
+            <strong>{session.user?.role || 'user'}</strong>.
             <br />
             <span className="text-sm mt-1 block">
-              To become an admin, update your user role in the database or contact the site administrator.
+              To become an admin, update your user role in the database or
+              contact the site administrator.
             </span>
           </AlertDescription>
         </Alert>
@@ -110,22 +142,26 @@ export default function NewCoursePage() {
         <CardHeader>
           <CardTitle>Create New Course</CardTitle>
           <CardDescription>
-            Fill in the details below to create a new course. You can add lessons after creating the course.
+            Fill in the details below to create a new course. You can add
+            lessons after creating the course.
           </CardDescription>
         </CardHeader>
         <CardContent>
           {error && (
-            <Alert variant="destructive" className="mb-4">
+            <Alert
+              className="mb-4"
+              variant="destructive"
+            >
               <AlertTriangle className="h-4 w-4" />
               <AlertTitle>Error</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-          
+
           <CourseForm
+            isSubmitting={createCourse.isPending}
             onSubmit={handleSubmit}
             submitLabel="Create Course"
-            isSubmitting={createCourse.isPending}
           />
         </CardContent>
       </Card>

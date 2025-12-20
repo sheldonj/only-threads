@@ -2,10 +2,16 @@
 
 import { CourseForm } from '@/components/courses/course-form';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { useSession } from '@/lib/auth/client';
 import { useCourseQueries } from '@/lib/hooks/use-models';
-import type { CourseFormData } from '@/lib/validations/course';
+import { type CourseFormData } from '@/lib/validations/course';
 import { AlertTriangle, ArrowLeft, Loader2, ShieldAlert } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -13,14 +19,14 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 
 export default function EditCoursePage() {
-  const params = useParams<{ id: string }>();
+  const parameters = useParams<{ id: string }>();
   const router = useRouter();
   const { data: session, isPending: isSessionPending } = useSession();
   const courseQueries = useCourseQueries();
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<null | string>(null);
 
   const { data: course, isLoading } = courseQueries.useFindUnique({
-    where: { id: params.id },
+    where: { id: parameters.id },
   });
 
   const updateCourse = courseQueries.useUpdate();
@@ -39,21 +45,35 @@ export default function EditCoursePage() {
           slug: data.slug,
           title: data.title,
         },
-        where: { id: params.id },
+        where: { id: parameters.id },
       });
       toast.success('Course updated successfully!');
       router.push('/admin/courses');
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
-      
-      if (errorMessage.includes('denied') || errorMessage.includes('permission') || errorMessage.includes('Access')) {
-        setError('You do not have permission to update courses. Please ensure you have admin privileges.');
-      } else if (errorMessage.includes('unique') || errorMessage.includes('slug')) {
-        setError('A course with this URL slug already exists. Please choose a different slug.');
+    } catch (caughtError) {
+      const errorMessage =
+        caughtError instanceof Error
+          ? caughtError.message
+          : 'An unexpected error occurred';
+
+      if (
+        errorMessage.includes('denied') ||
+        errorMessage.includes('permission') ||
+        errorMessage.includes('Access')
+      ) {
+        setError(
+          'You do not have permission to update courses. Please ensure you have admin privileges.',
+        );
+      } else if (
+        errorMessage.includes('unique') ||
+        errorMessage.includes('slug')
+      ) {
+        setError(
+          'A course with this URL slug already exists. Please choose a different slug.',
+        );
       } else {
         setError(errorMessage);
       }
-      
+
       toast.error('Failed to update course');
     }
   };
@@ -79,7 +99,14 @@ export default function EditCoursePage() {
           <ShieldAlert className="h-4 w-4" />
           <AlertTitle>Not Authenticated</AlertTitle>
           <AlertDescription>
-            Please <Link href="/sign-in" className="underline font-medium">sign in</Link> to access the admin area.
+            Please{' '}
+            <Link
+              className="underline font-medium"
+              href="/sign-in"
+            >
+              sign in
+            </Link>{' '}
+            to access the admin area.
           </AlertDescription>
         </Alert>
       </div>
@@ -93,9 +120,15 @@ export default function EditCoursePage() {
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Course Not Found</AlertTitle>
           <AlertDescription>
-            The course you&apos;re looking for doesn&apos;t exist or you don&apos;t have permission to view it.
+            The course you&apos;re looking for doesn&apos;t exist or you
+            don&apos;t have permission to view it.
             <br />
-            <Link href="/admin/courses" className="underline font-medium">Back to Course Management</Link>
+            <Link
+              className="underline font-medium"
+              href="/admin/courses"
+            >
+              Back to Course Management
+            </Link>
           </AlertDescription>
         </Alert>
       </div>
@@ -105,9 +138,9 @@ export default function EditCoursePage() {
   return (
     <div className="container mx-auto p-4 max-w-2xl">
       <div className="mb-4">
-        <Link 
-          href="/admin/courses" 
+        <Link
           className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+          href="/admin/courses"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Courses
@@ -115,11 +148,15 @@ export default function EditCoursePage() {
       </div>
 
       {!isAdmin && (
-        <Alert variant="destructive" className="mb-4">
+        <Alert
+          className="mb-4"
+          variant="destructive"
+        >
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Admin Access Required</AlertTitle>
           <AlertDescription>
-            You need admin privileges to edit courses. Your current role is: <strong>{session.user?.role || 'user'}</strong>.
+            You need admin privileges to edit courses. Your current role is:{' '}
+            <strong>{session.user?.role || 'user'}</strong>.
           </AlertDescription>
         </Alert>
       )}
@@ -133,13 +170,16 @@ export default function EditCoursePage() {
         </CardHeader>
         <CardContent>
           {error && (
-            <Alert variant="destructive" className="mb-4">
+            <Alert
+              className="mb-4"
+              variant="destructive"
+            >
               <AlertTriangle className="h-4 w-4" />
               <AlertTitle>Error</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-          
+
           <CourseForm
             initialData={{
               coverImage: course.coverImage ?? '',
@@ -149,9 +189,9 @@ export default function EditCoursePage() {
               slug: course.slug,
               title: course.title,
             }}
+            isSubmitting={updateCourse.isPending}
             onSubmit={handleSubmit}
             submitLabel="Update Course"
-            isSubmitting={updateCourse.isPending}
           />
         </CardContent>
       </Card>

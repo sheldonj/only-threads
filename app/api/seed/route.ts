@@ -19,39 +19,74 @@ const TEST_USERS = [
 
 const TEST_COURSES = [
   {
-    title: 'Introduction to JavaScript',
+    description:
+      'Learn the fundamentals of JavaScript programming, from variables and functions to DOM manipulation.',
+    lessons: [
+      {
+        description: 'Understanding let, const, and primitive types',
+        order: 1,
+        title: 'Variables and Data Types',
+      },
+      {
+        description: 'Creating and using functions effectively',
+        order: 2,
+        title: 'Functions and Scope',
+      },
+      {
+        description: 'Interacting with web pages using JavaScript',
+        order: 3,
+        title: 'DOM Manipulation',
+      },
+    ],
+    price: 2_999, // $29.99
+    published: true,
     slug: 'intro-to-javascript',
-    description: 'Learn the fundamentals of JavaScript programming, from variables and functions to DOM manipulation.',
-    price: 2999, // $29.99
-    published: true,
-    lessons: [
-      { title: 'Variables and Data Types', description: 'Understanding let, const, and primitive types', order: 1 },
-      { title: 'Functions and Scope', description: 'Creating and using functions effectively', order: 2 },
-      { title: 'DOM Manipulation', description: 'Interacting with web pages using JavaScript', order: 3 },
-    ],
+    title: 'Introduction to JavaScript',
   },
   {
-    title: 'React Fundamentals',
+    description:
+      'Master React.js from the ground up. Learn components, hooks, and state management.',
+    lessons: [
+      {
+        description: 'Building your first React components',
+        order: 1,
+        title: 'Components and JSX',
+      },
+      {
+        description: 'Managing data flow in React applications',
+        order: 2,
+        title: 'State and Props',
+      },
+      {
+        description: 'useState, useEffect, and custom hooks',
+        order: 3,
+        title: 'Hooks Deep Dive',
+      },
+    ],
+    price: 4_999, // $49.99
+    published: true,
     slug: 'react-fundamentals',
-    description: 'Master React.js from the ground up. Learn components, hooks, and state management.',
-    price: 4999, // $49.99
-    published: true,
-    lessons: [
-      { title: 'Components and JSX', description: 'Building your first React components', order: 1 },
-      { title: 'State and Props', description: 'Managing data flow in React applications', order: 2 },
-      { title: 'Hooks Deep Dive', description: 'useState, useEffect, and custom hooks', order: 3 },
-    ],
+    title: 'React Fundamentals',
   },
   {
-    title: 'Building APIs with Node.js',
-    slug: 'nodejs-apis',
-    description: 'Create robust REST APIs using Node.js and Express. Covers authentication, databases, and deployment.',
-    price: 3999, // $39.99
-    published: true,
+    description:
+      'Create robust REST APIs using Node.js and Express. Covers authentication, databases, and deployment.',
     lessons: [
-      { title: 'Express.js Basics', description: 'Setting up routes and middleware', order: 1 },
-      { title: 'Database Integration', description: 'Connecting to databases and creating models', order: 2 },
+      {
+        description: 'Setting up routes and middleware',
+        order: 1,
+        title: 'Express.js Basics',
+      },
+      {
+        description: 'Connecting to databases and creating models',
+        order: 2,
+        title: 'Database Integration',
+      },
     ],
+    price: 3_999, // $39.99
+    published: true,
+    slug: 'nodejs-apis',
+    title: 'Building APIs with Node.js',
   },
 ];
 
@@ -142,11 +177,11 @@ export async function POST() {
     console.error('Seed error:', error);
     return NextResponse.json(
       {
-        error: error instanceof Error ? error.message : 'Failed to seed database',
+        error:
+          error instanceof Error ? error.message : 'Failed to seed database',
         success: false,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-

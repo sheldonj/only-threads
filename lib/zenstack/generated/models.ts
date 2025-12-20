@@ -14,6 +14,8 @@ export type Verification = $ModelResult<$Schema, "Verification">;
 export type Course = $ModelResult<$Schema, "Course">;
 export type Lesson = $ModelResult<$Schema, "Lesson">;
 export type Purchase = $ModelResult<$Schema, "Purchase">;
+export type LessonProgress = $ModelResult<$Schema, "LessonProgress">;
+export type CourseEvent = $ModelResult<$Schema, "CourseEvent">;
 /**
  * Shape of the `auth()` function
  */

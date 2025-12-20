@@ -2,7 +2,7 @@ import { auth } from '@/lib/auth/server';
 import { db } from '@/lib/database/client';
 import { stripe } from '@/lib/stripe/client';
 import { headers } from 'next/headers';
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,7 +19,10 @@ export async function GET(request: NextRequest) {
     const courseId = searchParams.get('courseId');
 
     if (!courseId) {
-      return NextResponse.json({ error: 'Course ID is required' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Course ID is required' },
+        { status: 400 },
+      );
     }
 
     // Get course from database
@@ -32,7 +35,10 @@ export async function GET(request: NextRequest) {
     }
 
     if (!course.published) {
-      return NextResponse.json({ error: 'Course is not available for purchase' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Course is not available for purchase' },
+        { status: 400 },
+      );
     }
 
     // Check if already purchased
@@ -44,7 +50,9 @@ export async function GET(request: NextRequest) {
     });
 
     if (existingPurchase) {
-      return NextResponse.redirect(new URL(`/learn/${course.slug}`, request.url));
+      return NextResponse.redirect(
+        new URL(`/learn/${course.slug}`, request.url),
+      );
     }
 
     // Handle free courses
@@ -57,7 +65,9 @@ export async function GET(request: NextRequest) {
           userId: sessionResult.session.userId,
         },
       });
-      return NextResponse.redirect(new URL(`/learn/${course.slug}`, request.url));
+      return NextResponse.redirect(
+        new URL(`/learn/${course.slug}`, request.url),
+      );
     }
 
     // Create Stripe checkout session
@@ -89,13 +99,19 @@ export async function GET(request: NextRequest) {
     });
 
     if (!checkoutSession.url) {
-      return NextResponse.json({ error: 'Failed to create checkout session' }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Failed to create checkout session' },
+        { status: 500 },
+      );
     }
 
     return NextResponse.redirect(checkoutSession.url);
   } catch (error) {
+    // eslint-disable-next-line no-console -- logging checkout errors for debugging
     console.error('Checkout error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 },
+    );
   }
 }
-

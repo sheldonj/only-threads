@@ -17,28 +17,28 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 
-interface LessonFormProps {
+type LessonFormProps = {
   readonly initialData?: Partial<LessonFormData>;
+  readonly isSubmitting?: boolean;
   readonly onSubmit: (data: LessonFormData) => Promise<void>;
   readonly submitLabel?: string;
-  readonly isSubmitting?: boolean;
-}
+};
 
 export function LessonForm({
   initialData,
+  isSubmitting = false,
   onSubmit,
   submitLabel = 'Save Lesson',
-  isSubmitting = false,
 }: LessonFormProps) {
   const form = useForm<LessonFormData>({
-    resolver: zodResolver(lessonSchema),
     defaultValues: {
-      title: initialData?.title ?? '',
-      description: initialData?.description ?? '',
-      videoUrl: initialData?.videoUrl ?? '',
       content: initialData?.content ?? '',
+      description: initialData?.description ?? '',
       order: initialData?.order ?? 0,
+      title: initialData?.title ?? '',
+      videoUrl: initialData?.videoUrl ?? '',
     },
+    resolver: zodResolver(lessonSchema),
   });
 
   const handleSubmit = async (data: LessonFormData) => {
@@ -136,7 +136,9 @@ export function LessonForm({
                   min="0"
                   type="number"
                   {...field}
-                  onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                  onChange={(event) =>
+                    field.onChange(Number.parseInt(event.target.value, 10) || 0)
+                  }
                 />
               </FormControl>
               <FormDescription>

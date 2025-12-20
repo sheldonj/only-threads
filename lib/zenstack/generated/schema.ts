@@ -93,6 +93,18 @@ const _schema = {
                     type: "Purchase",
                     array: true,
                     relation: { opposite: "user" }
+                },
+                lessonProgress: {
+                    name: "lessonProgress",
+                    type: "LessonProgress",
+                    array: true,
+                    relation: { opposite: "user" }
+                },
+                courseEvents: {
+                    name: "courseEvents",
+                    type: "CourseEvent",
+                    array: true,
+                    relation: { opposite: "user" }
                 }
             },
             attributes: [
@@ -365,6 +377,12 @@ const _schema = {
                     type: "Purchase",
                     array: true,
                     relation: { opposite: "course" }
+                },
+                events: {
+                    name: "events",
+                    type: "CourseEvent",
+                    array: true,
+                    relation: { opposite: "course" }
                 }
             },
             attributes: [
@@ -437,6 +455,12 @@ const _schema = {
                     type: "Course",
                     attributes: [{ name: "@relation", args: [{ name: "fields", value: ExpressionUtils.array([ExpressionUtils.field("courseId")]) }, { name: "references", value: ExpressionUtils.array([ExpressionUtils.field("id")]) }, { name: "onDelete", value: ExpressionUtils.literal("Cascade") }] }],
                     relation: { opposite: "lessons", fields: ["courseId"], references: ["id"], onDelete: "Cascade" }
+                },
+                progress: {
+                    name: "progress",
+                    type: "LessonProgress",
+                    array: true,
+                    relation: { opposite: "lesson" }
                 }
             },
             attributes: [
@@ -512,6 +536,142 @@ const _schema = {
             uniqueFields: {
                 id: { type: "String" },
                 userId_courseId: { userId: { type: "String" }, courseId: { type: "String" } }
+            }
+        },
+        LessonProgress: {
+            name: "LessonProgress",
+            fields: {
+                id: {
+                    name: "id",
+                    type: "String",
+                    id: true,
+                    attributes: [{ name: "@id" }, { name: "@default", args: [{ name: "value", value: ExpressionUtils.call("cuid") }] }],
+                    default: ExpressionUtils.call("cuid")
+                },
+                createdAt: {
+                    name: "createdAt",
+                    type: "DateTime",
+                    attributes: [{ name: "@default", args: [{ name: "value", value: ExpressionUtils.call("now") }] }],
+                    default: ExpressionUtils.call("now")
+                },
+                updatedAt: {
+                    name: "updatedAt",
+                    type: "DateTime",
+                    updatedAt: true,
+                    attributes: [{ name: "@updatedAt" }]
+                },
+                userId: {
+                    name: "userId",
+                    type: "String",
+                    foreignKeyFor: [
+                        "user"
+                    ]
+                },
+                user: {
+                    name: "user",
+                    type: "User",
+                    attributes: [{ name: "@relation", args: [{ name: "fields", value: ExpressionUtils.array([ExpressionUtils.field("userId")]) }, { name: "references", value: ExpressionUtils.array([ExpressionUtils.field("id")]) }, { name: "onDelete", value: ExpressionUtils.literal("Cascade") }] }],
+                    relation: { opposite: "lessonProgress", fields: ["userId"], references: ["id"], onDelete: "Cascade" }
+                },
+                lessonId: {
+                    name: "lessonId",
+                    type: "String",
+                    foreignKeyFor: [
+                        "lesson"
+                    ]
+                },
+                lesson: {
+                    name: "lesson",
+                    type: "Lesson",
+                    attributes: [{ name: "@relation", args: [{ name: "fields", value: ExpressionUtils.array([ExpressionUtils.field("lessonId")]) }, { name: "references", value: ExpressionUtils.array([ExpressionUtils.field("id")]) }, { name: "onDelete", value: ExpressionUtils.literal("Cascade") }] }],
+                    relation: { opposite: "progress", fields: ["lessonId"], references: ["id"], onDelete: "Cascade" }
+                },
+                completed: {
+                    name: "completed",
+                    type: "Boolean",
+                    attributes: [{ name: "@default", args: [{ name: "value", value: ExpressionUtils.literal(false) }] }],
+                    default: false
+                },
+                completedAt: {
+                    name: "completedAt",
+                    type: "DateTime",
+                    optional: true
+                }
+            },
+            attributes: [
+                { name: "@@unique", args: [{ name: "fields", value: ExpressionUtils.array([ExpressionUtils.field("userId"), ExpressionUtils.field("lessonId")]) }] },
+                { name: "@@map", args: [{ name: "name", value: ExpressionUtils.literal("lesson_progress") }] },
+                { name: "@@allow", args: [{ name: "operation", value: ExpressionUtils.literal("all") }, { name: "condition", value: ExpressionUtils.binary(ExpressionUtils.binary(ExpressionUtils.call("auth"), "!=", ExpressionUtils._null()), "&&", ExpressionUtils.binary(ExpressionUtils.member(ExpressionUtils.call("auth"), ["userId"]), "==", ExpressionUtils.field("userId"))) }] },
+                { name: "@@allow", args: [{ name: "operation", value: ExpressionUtils.literal("read") }, { name: "condition", value: ExpressionUtils.binary(ExpressionUtils.binary(ExpressionUtils.call("auth"), "!=", ExpressionUtils._null()), "&&", ExpressionUtils.binary(ExpressionUtils.member(ExpressionUtils.call("auth"), ["role"]), "==", ExpressionUtils.literal("admin"))) }] }
+            ],
+            idFields: ["id"],
+            uniqueFields: {
+                id: { type: "String" },
+                userId_lessonId: { userId: { type: "String" }, lessonId: { type: "String" } }
+            }
+        },
+        CourseEvent: {
+            name: "CourseEvent",
+            fields: {
+                id: {
+                    name: "id",
+                    type: "String",
+                    id: true,
+                    attributes: [{ name: "@id" }, { name: "@default", args: [{ name: "value", value: ExpressionUtils.call("cuid") }] }],
+                    default: ExpressionUtils.call("cuid")
+                },
+                createdAt: {
+                    name: "createdAt",
+                    type: "DateTime",
+                    attributes: [{ name: "@default", args: [{ name: "value", value: ExpressionUtils.call("now") }] }],
+                    default: ExpressionUtils.call("now")
+                },
+                userId: {
+                    name: "userId",
+                    type: "String",
+                    foreignKeyFor: [
+                        "user"
+                    ]
+                },
+                user: {
+                    name: "user",
+                    type: "User",
+                    attributes: [{ name: "@relation", args: [{ name: "fields", value: ExpressionUtils.array([ExpressionUtils.field("userId")]) }, { name: "references", value: ExpressionUtils.array([ExpressionUtils.field("id")]) }, { name: "onDelete", value: ExpressionUtils.literal("Cascade") }] }],
+                    relation: { opposite: "courseEvents", fields: ["userId"], references: ["id"], onDelete: "Cascade" }
+                },
+                courseId: {
+                    name: "courseId",
+                    type: "String",
+                    foreignKeyFor: [
+                        "course"
+                    ]
+                },
+                course: {
+                    name: "course",
+                    type: "Course",
+                    attributes: [{ name: "@relation", args: [{ name: "fields", value: ExpressionUtils.array([ExpressionUtils.field("courseId")]) }, { name: "references", value: ExpressionUtils.array([ExpressionUtils.field("id")]) }, { name: "onDelete", value: ExpressionUtils.literal("Cascade") }] }],
+                    relation: { opposite: "events", fields: ["courseId"], references: ["id"], onDelete: "Cascade" }
+                },
+                type: {
+                    name: "type",
+                    type: "String"
+                },
+                emailSent: {
+                    name: "emailSent",
+                    type: "Boolean",
+                    attributes: [{ name: "@default", args: [{ name: "value", value: ExpressionUtils.literal(false) }] }],
+                    default: false
+                }
+            },
+            attributes: [
+                { name: "@@map", args: [{ name: "name", value: ExpressionUtils.literal("course_event") }] },
+                { name: "@@allow", args: [{ name: "operation", value: ExpressionUtils.literal("create") }, { name: "condition", value: ExpressionUtils.binary(ExpressionUtils.binary(ExpressionUtils.call("auth"), "!=", ExpressionUtils._null()), "&&", ExpressionUtils.binary(ExpressionUtils.member(ExpressionUtils.call("auth"), ["userId"]), "==", ExpressionUtils.field("userId"))) }] },
+                { name: "@@allow", args: [{ name: "operation", value: ExpressionUtils.literal("read") }, { name: "condition", value: ExpressionUtils.binary(ExpressionUtils.binary(ExpressionUtils.call("auth"), "!=", ExpressionUtils._null()), "&&", ExpressionUtils.binary(ExpressionUtils.binary(ExpressionUtils.member(ExpressionUtils.call("auth"), ["userId"]), "==", ExpressionUtils.field("userId")), "||", ExpressionUtils.binary(ExpressionUtils.member(ExpressionUtils.call("auth"), ["role"]), "==", ExpressionUtils.literal("admin")))) }] },
+                { name: "@@allow", args: [{ name: "operation", value: ExpressionUtils.literal("update") }, { name: "condition", value: ExpressionUtils.binary(ExpressionUtils.binary(ExpressionUtils.call("auth"), "!=", ExpressionUtils._null()), "&&", ExpressionUtils.binary(ExpressionUtils.member(ExpressionUtils.call("auth"), ["role"]), "==", ExpressionUtils.literal("admin"))) }] }
+            ],
+            idFields: ["id"],
+            uniqueFields: {
+                id: { type: "String" }
             }
         }
     },

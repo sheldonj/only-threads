@@ -35,6 +35,7 @@ import {
 } from '@/components/ui/table';
 import { client } from '@/lib/auth/client';
 import { cn } from '@/lib/utils/cn';
+import { type User } from '@/lib/zenstack/generated/models';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import {
@@ -384,7 +385,7 @@ export default function AdminDashboard() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {users?.map((user) => (
+                {users?.map((user: User) => (
                   <TableRow key={user.id}>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>{user.name}</TableCell>

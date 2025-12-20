@@ -57,7 +57,6 @@ const config: KnipConfig = {
     'server-only',
 
     // UI component dependencies that may be used in generated/shadcn components
-    '@hookform/resolvers',
     '@radix-ui/react-toast',
     'react-qr-code',
     'consola',

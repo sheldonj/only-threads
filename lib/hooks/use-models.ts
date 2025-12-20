@@ -9,13 +9,14 @@ export function useCourseQueries() {
   return course;
 }
 
+export function useLessonProgressQueries() {
+  const { lessonProgress } = useClientQueries(schema);
+  return lessonProgress;
+}
+
 export function useLessonQueries() {
   const { lesson } = useClientQueries(schema);
   return lesson;
-}
-
-export function useModels() {
-  return useClientQueries(schema);
 }
 
 export function usePurchaseQueries() {

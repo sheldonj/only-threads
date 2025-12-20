@@ -1,8 +1,15 @@
 'use client';
 
+/* eslint-disable react/no-unknown-property */
+
 import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useSession } from '@/lib/auth/client';
 import { usePurchaseQueries } from '@/lib/hooks/use-models';
@@ -11,47 +18,29 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
-function formatDate(date: Date | string) {
-  return new Date(date).toLocaleDateString('en-US', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
-}
-
-function formatAmount(cents: number) {
-  return new Intl.NumberFormat('en-US', {
-    currency: 'USD',
-    style: 'currency',
-  }).format(cents / 100);
-}
-
 export default function ReceiptPage() {
-  const params = useParams();
+  const parameters = useParams();
   const router = useRouter();
-  const purchaseId = params.id as string;
+  const purchaseId = parameters.id as string;
   const { data: session, isPending: isSessionPending } = useSession();
   const purchaseQueries = usePurchaseQueries();
 
-  const { data: purchase, isLoading: isPurchaseLoading } = purchaseQueries.useFindUnique(
-    {
-      include: {
-        course: true,
+  const { data: purchase, isLoading: isPurchaseLoading } =
+    purchaseQueries.useFindUnique(
+      {
+        include: {
+          course: true,
+        },
+        where: { id: purchaseId },
       },
-      where: { id: purchaseId },
-    },
-    { enabled: Boolean(session) && Boolean(purchaseId) }
-  );
+      { enabled: Boolean(session) && Boolean(purchaseId) },
+    );
 
   useEffect(() => {
     if (!isSessionPending && !session) {
       router.push('/sign-in');
     }
-  }, [isSessionPending, session, router]);
-
-  const handlePrint = () => {
-    window.print();
-  };
+  }, [isSessionPending, router, session]);
 
   const isLoading = isSessionPending || isPurchaseLoading;
 
@@ -73,7 +62,8 @@ export default function ReceiptPage() {
         <div className="text-center py-16">
           <h2 className="text-xl font-semibold mb-2">Purchase not found</h2>
           <p className="text-muted-foreground mb-8">
-            This purchase doesn&apos;t exist or you don&apos;t have access to it.
+            This purchase doesn&apos;t exist or you don&apos;t have access to
+            it.
           </p>
           <Link href="/purchases">
             <Button>Back to Purchases</Button>
@@ -88,7 +78,10 @@ export default function ReceiptPage() {
       {/* Back button - hidden when printing */}
       <div className="mb-6 print:hidden">
         <Link href="/purchases">
-          <Button variant="ghost" size="sm">
+          <Button
+            size="sm"
+            variant="ghost"
+          >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Purchases
           </Button>
@@ -114,17 +107,20 @@ export default function ReceiptPage() {
           <div className="space-y-4">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Date</span>
-              <span className="font-medium">{formatDate(purchase.createdAt)}</span>
+              <span className="font-medium">
+                {formatDate(purchase.createdAt)}
+              </span>
             </div>
 
-            {purchase.stripePaymentId && purchase.stripePaymentId !== 'free' && (
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Transaction ID</span>
-                <span className="font-mono text-xs">
-                  {purchase.stripePaymentId.slice(-12).toUpperCase()}
-                </span>
-              </div>
-            )}
+            {purchase.stripePaymentId &&
+              purchase.stripePaymentId !== 'free' && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Transaction ID</span>
+                  <span className="font-mono text-xs">
+                    {purchase.stripePaymentId.slice(-12).toUpperCase()}
+                  </span>
+                </div>
+              )}
           </div>
 
           <Separator />
@@ -136,14 +132,18 @@ export default function ReceiptPage() {
             </h3>
             <div className="flex justify-between items-start">
               <div className="flex-1">
-                <p className="font-medium">{purchase.course?.title || 'Course'}</p>
+                <p className="font-medium">
+                  {purchase.course?.title || 'Course'}
+                </p>
                 {purchase.course?.description && (
                   <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
                     {purchase.course.description}
                   </p>
                 )}
               </div>
-              <span className="font-medium ml-4">{formatAmount(purchase.amount)}</span>
+              <span className="font-medium ml-4">
+                {formatAmount(purchase.amount)}
+              </span>
             </div>
           </div>
 
@@ -173,8 +173,11 @@ export default function ReceiptPage() {
         </CardFooter>
       </Card>
 
-      {/* Print-only styles */}
-      <style jsx global>{`
+      {/* Print-only styles - styled-jsx */}
+      <style
+        global
+        jsx
+      >{`
         @media print {
           body {
             background: white !important;
@@ -194,3 +197,23 @@ export default function ReceiptPage() {
   );
 }
 
+function formatAmount(cents: number) {
+  return new Intl.NumberFormat('en-US', {
+    currency: 'USD',
+    style: 'currency',
+  }).format(cents / 100);
+}
+
+function formatDate(date: Date | string) {
+  return new Date(date).toLocaleDateString('en-US', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+}
+
+function handlePrint() {
+  globalThis.print();
+}
+
+/* eslint-enable react/no-unknown-property */

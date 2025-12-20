@@ -12,10 +12,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
-import { useSession, signOut } from '@/lib/auth/client';
+import { signOut, useSession } from '@/lib/auth/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { QuerySettingsProvider } from '@zenstackhq/tanstack-query/react';
-import { BookOpen, GraduationCap, Library, LogOut, Receipt, Settings, Shield, User, Users } from 'lucide-react';
+import {
+  BookOpen,
+  GraduationCap,
+  Library,
+  LogOut,
+  Receipt,
+  Settings,
+  Shield,
+  User,
+  Users,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -42,7 +52,9 @@ export const Wrapper = (props: { readonly children: React.ReactNode }) => {
         <Link href="/">
           <div className="flex gap-2 cursor-pointer items-center">
             <Logo />
-            <p className="dark:text-white text-black font-semibold">Learn Something</p>
+            <p className="dark:text-white text-black font-semibold">
+              Learn Something
+            </p>
           </div>
         </Link>
 
@@ -114,9 +126,18 @@ export const Wrapper = (props: { readonly children: React.ReactNode }) => {
                   <div className="px-2 py-1.5">
                     <div className="flex items-center gap-2">
                       <p className="text-sm font-medium">{session.user.name}</p>
-                      {isAdmin && <Badge variant="secondary" className="text-xs">Admin</Badge>}
+                      {isAdmin && (
+                        <Badge
+                          className="text-xs"
+                          variant="secondary"
+                        >
+                          Admin
+                        </Badge>
+                      )}
                     </div>
-                    <p className="text-xs text-muted-foreground">{session.user.email}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {session.user.email}
+                    </p>
                   </div>
                   <DropdownMenuSeparator />
                   <Link href="/library">

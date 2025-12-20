@@ -87,6 +87,18 @@ const _schema = {
                     type: "Purchase",
                     array: true,
                     relation: { opposite: "user" }
+                },
+                lessonProgress: {
+                    name: "lessonProgress",
+                    type: "LessonProgress",
+                    array: true,
+                    relation: { opposite: "user" }
+                },
+                courseEvents: {
+                    name: "courseEvents",
+                    type: "CourseEvent",
+                    array: true,
+                    relation: { opposite: "user" }
                 }
             },
             idFields: ["id"],
@@ -95,6 +107,7 @@ const _schema = {
                 email: { type: "String" }
             }
         },
+
         Session: {
             name: "Session",
             fields: {
@@ -330,6 +343,12 @@ const _schema = {
                     type: "Purchase",
                     array: true,
                     relation: { opposite: "course" }
+                },
+                events: {
+                    name: "events",
+                    type: "CourseEvent",
+                    array: true,
+                    relation: { opposite: "course" }
                 }
             },
             idFields: ["id"],
@@ -392,6 +411,12 @@ const _schema = {
                     name: "course",
                     type: "Course",
                     relation: { opposite: "lessons", fields: ["courseId"], references: ["id"], onDelete: "Cascade" }
+                },
+                progress: {
+                    name: "progress",
+                    type: "LessonProgress",
+                    array: true,
+                    relation: { opposite: "lesson" }
                 }
             },
             idFields: ["id"],
@@ -451,6 +476,119 @@ const _schema = {
             uniqueFields: {
                 id: { type: "String" },
                 userId_courseId: { userId: { type: "String" }, courseId: { type: "String" } }
+            }
+        },
+        LessonProgress: {
+            name: "LessonProgress",
+            fields: {
+                id: {
+                    name: "id",
+                    type: "String",
+                    id: true,
+                    default: ExpressionUtils.call("cuid")
+                },
+                createdAt: {
+                    name: "createdAt",
+                    type: "DateTime",
+                    default: ExpressionUtils.call("now")
+                },
+                updatedAt: {
+                    name: "updatedAt",
+                    type: "DateTime",
+                    updatedAt: true
+                },
+                userId: {
+                    name: "userId",
+                    type: "String",
+                    foreignKeyFor: [
+                        "user"
+                    ]
+                },
+                user: {
+                    name: "user",
+                    type: "User",
+                    relation: { opposite: "lessonProgress", fields: ["userId"], references: ["id"], onDelete: "Cascade" }
+                },
+                lessonId: {
+                    name: "lessonId",
+                    type: "String",
+                    foreignKeyFor: [
+                        "lesson"
+                    ]
+                },
+                lesson: {
+                    name: "lesson",
+                    type: "Lesson",
+                    relation: { opposite: "progress", fields: ["lessonId"], references: ["id"], onDelete: "Cascade" }
+                },
+                completed: {
+                    name: "completed",
+                    type: "Boolean",
+                    default: false
+                },
+                completedAt: {
+                    name: "completedAt",
+                    type: "DateTime",
+                    optional: true
+                }
+            },
+            idFields: ["id"],
+            uniqueFields: {
+                id: { type: "String" },
+                userId_lessonId: { userId: { type: "String" }, lessonId: { type: "String" } }
+            }
+        },
+        CourseEvent: {
+            name: "CourseEvent",
+            fields: {
+                id: {
+                    name: "id",
+                    type: "String",
+                    id: true,
+                    default: ExpressionUtils.call("cuid")
+                },
+                createdAt: {
+                    name: "createdAt",
+                    type: "DateTime",
+                    default: ExpressionUtils.call("now")
+                },
+                userId: {
+                    name: "userId",
+                    type: "String",
+                    foreignKeyFor: [
+                        "user"
+                    ]
+                },
+                user: {
+                    name: "user",
+                    type: "User",
+                    relation: { opposite: "courseEvents", fields: ["userId"], references: ["id"], onDelete: "Cascade" }
+                },
+                courseId: {
+                    name: "courseId",
+                    type: "String",
+                    foreignKeyFor: [
+                        "course"
+                    ]
+                },
+                course: {
+                    name: "course",
+                    type: "Course",
+                    relation: { opposite: "events", fields: ["courseId"], references: ["id"], onDelete: "Cascade" }
+                },
+                type: {
+                    name: "type",
+                    type: "String"
+                },
+                emailSent: {
+                    name: "emailSent",
+                    type: "Boolean",
+                    default: false
+                }
+            },
+            idFields: ["id"],
+            uniqueFields: {
+                id: { type: "String" }
             }
         }
     },

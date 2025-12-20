@@ -1,9 +1,17 @@
 'use client';
 
+/* eslint-disable no-alert */
+
 import { LessonForm } from '@/components/courses/lesson-form';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -22,32 +30,47 @@ import {
 } from '@/components/ui/table';
 import { useSession } from '@/lib/auth/client';
 import { useCourseQueries, useLessonQueries } from '@/lib/hooks/use-models';
-import type { LessonFormData } from '@/lib/validations/course';
-import { AlertTriangle, ArrowLeft, BookOpen, Loader2, Pencil, Plus, ShieldAlert, Trash } from 'lucide-react';
+import { type LessonFormData } from '@/lib/validations/course';
+import { type Lesson } from '@/lib/zenstack/generated/models';
+import {
+  AlertTriangle,
+  ArrowLeft,
+  BookOpen,
+  Loader2,
+  Pencil,
+  Plus,
+  ShieldAlert,
+  Trash,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
 export default function CourseLessonsPage() {
-  const params = useParams<{ id: string }>();
+  const parameters = useParams<{ id: string }>();
   const router = useRouter();
   const { data: session, isPending: isSessionPending } = useSession();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<null | string>(null);
 
   const courseQueries = useCourseQueries();
   const lessonQueries = useLessonQueries();
 
   const isAdmin = session?.user?.role === 'admin';
 
-  const { data: course, isLoading: isCourseLoading } = courseQueries.useFindUnique({
-    where: { id: params.id },
-  });
+  const { data: course, isLoading: isCourseLoading } =
+    courseQueries.useFindUnique({
+      where: { id: parameters.id },
+    });
 
-  const { data: lessons, isLoading: isLessonsLoading, refetch } = lessonQueries.useFindMany({
+  const {
+    data: lessons,
+    isLoading: isLessonsLoading,
+    refetch,
+  } = lessonQueries.useFindMany({
     orderBy: { order: 'asc' },
-    where: { courseId: params.id },
+    where: { courseId: parameters.id },
   });
 
   const createLesson = lessonQueries.useCreate();
@@ -59,7 +82,7 @@ export default function CourseLessonsPage() {
       await createLesson.mutateAsync({
         data: {
           content: data.content || null,
-          courseId: params.id,
+          courseId: parameters.id,
           description: data.description || null,
           order: data.order,
           title: data.title,
@@ -69,21 +92,30 @@ export default function CourseLessonsPage() {
       toast.success('Lesson created successfully!');
       setIsDialogOpen(false);
       refetch();
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
-      
-      if (errorMessage.includes('denied') || errorMessage.includes('permission')) {
+    } catch (caughtError) {
+      const errorMessage =
+        caughtError instanceof Error
+          ? caughtError.message
+          : 'An unexpected error occurred';
+
+      if (
+        errorMessage.includes('denied') ||
+        errorMessage.includes('permission')
+      ) {
         setError('You do not have permission to create lessons.');
       } else {
         setError(errorMessage);
       }
-      
+
       toast.error('Failed to create lesson');
     }
   };
 
   const handleDeleteLesson = async (lessonId: string) => {
-    if (!confirm('Are you sure you want to delete this lesson? This action cannot be undone.')) return;
+    const shouldDelete = confirm(
+      'Are you sure you want to delete this lesson? This action cannot be undone.',
+    );
+    if (!shouldDelete) return;
 
     try {
       await deleteLesson.mutateAsync({ where: { id: lessonId } });
@@ -115,7 +147,14 @@ export default function CourseLessonsPage() {
           <ShieldAlert className="h-4 w-4" />
           <AlertTitle>Not Authenticated</AlertTitle>
           <AlertDescription>
-            Please <Link href="/sign-in" className="underline font-medium">sign in</Link> to access the admin area.
+            Please{' '}
+            <Link
+              className="underline font-medium"
+              href="/sign-in"
+            >
+              sign in
+            </Link>{' '}
+            to access the admin area.
           </AlertDescription>
         </Alert>
       </div>
@@ -129,9 +168,15 @@ export default function CourseLessonsPage() {
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Course Not Found</AlertTitle>
           <AlertDescription>
-            The course you&apos;re looking for doesn&apos;t exist or you don&apos;t have permission to view it.
+            The course you&apos;re looking for doesn&apos;t exist or you
+            don&apos;t have permission to view it.
             <br />
-            <Link href="/admin/courses" className="underline font-medium">Back to Course Management</Link>
+            <Link
+              className="underline font-medium"
+              href="/admin/courses"
+            >
+              Back to Course Management
+            </Link>
           </AlertDescription>
         </Alert>
       </div>
@@ -141,9 +186,9 @@ export default function CourseLessonsPage() {
   return (
     <div className="container mx-auto p-4 space-y-6">
       <div className="flex items-center gap-4">
-        <Link 
-          href="/admin/courses" 
+        <Link
           className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+          href="/admin/courses"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Courses
@@ -155,7 +200,8 @@ export default function CourseLessonsPage() {
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Admin Access Required</AlertTitle>
           <AlertDescription>
-            You need admin privileges to manage lessons. Your current role is: <strong>{session.user?.role || 'user'}</strong>.
+            You need admin privileges to manage lessons. Your current role is:{' '}
+            <strong>{session.user?.role || 'user'}</strong>.
           </AlertDescription>
         </Alert>
       )}
@@ -165,7 +211,8 @@ export default function CourseLessonsPage() {
           <div>
             <CardTitle className="text-2xl">Lessons</CardTitle>
             <CardDescription>
-              Managing lessons for &quot;{course.title}&quot; • {lessons?.length ?? 0} lessons
+              Managing lessons for &quot;{course.title}&quot; •{' '}
+              {lessons?.length ?? 0} lessons
             </CardDescription>
           </div>
           <Dialog
@@ -184,10 +231,11 @@ export default function CourseLessonsPage() {
               <DialogHeader>
                 <DialogTitle>Add New Lesson</DialogTitle>
                 <DialogDescription>
-                  Create a new lesson for this course. Lessons are ordered by the &quot;Order&quot; field.
+                  Create a new lesson for this course. Lessons are ordered by
+                  the &quot;Order&quot; field.
                 </DialogDescription>
               </DialogHeader>
-              
+
               {error && (
                 <Alert variant="destructive">
                   <AlertTriangle className="h-4 w-4" />
@@ -195,12 +243,12 @@ export default function CourseLessonsPage() {
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
-              
+
               <LessonForm
                 initialData={{ order: lessons?.length ?? 0 }}
+                isSubmitting={createLesson.isPending}
                 onSubmit={handleCreateLesson}
                 submitLabel="Create Lesson"
-                isSubmitting={createLesson.isPending}
               />
             </DialogContent>
           </Dialog>
@@ -218,10 +266,12 @@ export default function CourseLessonsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {lessons.map((lesson) => (
+                {lessons.map((lesson: Lesson) => (
                   <TableRow key={lesson.id}>
                     <TableCell>{lesson.order}</TableCell>
-                    <TableCell className="font-medium">{lesson.title}</TableCell>
+                    <TableCell className="font-medium">
+                      {lesson.title}
+                    </TableCell>
                     <TableCell className="text-muted-foreground max-w-xs truncate">
                       {lesson.description || '—'}
                     </TableCell>
@@ -236,7 +286,9 @@ export default function CourseLessonsPage() {
                       <div className="flex space-x-2">
                         <Button
                           onClick={() =>
-                            router.push(`/admin/courses/${params.id}/lessons/${lesson.id}/edit`)
+                            router.push(
+                              `/admin/courses/${parameters.id}/lessons/${lesson.id}/edit`,
+                            )
                           }
                           size="sm"
                           title="Edit Lesson"
@@ -270,9 +322,9 @@ export default function CourseLessonsPage() {
               <p className="text-sm text-muted-foreground mb-6">
                 Start building your course by adding your first lesson.
               </p>
-              <Button 
-                onClick={() => setIsDialogOpen(true)}
+              <Button
                 disabled={!isAdmin}
+                onClick={() => setIsDialogOpen(true)}
               >
                 <Plus className="mr-2 h-4 w-4" /> Add Your First Lesson
               </Button>
@@ -283,3 +335,5 @@ export default function CourseLessonsPage() {
     </div>
   );
 }
+
+/* eslint-enable no-alert */

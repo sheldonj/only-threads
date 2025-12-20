@@ -1,20 +1,22 @@
 import "./courses"
 
 model User {
-    id            String     @id
-    name          String
-    email         String     @unique
-    emailVerified Boolean    @default(false)
-    image         String?
-    createdAt     DateTime   @default(now())
-    updatedAt     DateTime   @default(now()) @updatedAt
-    role          String?
-    banned        Boolean?   @default(false)
-    banReason     String?
-    banExpires    DateTime?
-    sessions      Session[]
-    accounts      Account[]
-    purchases     Purchase[]
+    id             String           @id
+    name           String
+    email          String           @unique
+    emailVerified  Boolean          @default(false)
+    image          String?
+    createdAt      DateTime         @default(now())
+    updatedAt      DateTime         @default(now()) @updatedAt
+    role           String?
+    banned         Boolean?         @default(false)
+    banReason      String?
+    banExpires     DateTime?
+    sessions       Session[]
+    accounts       Account[]
+    purchases      Purchase[]
+    lessonProgress LessonProgress[]
+    courseEvents   CourseEvent[]
 
     @@map('user')
 }

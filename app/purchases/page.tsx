@@ -11,46 +11,33 @@ import {
 } from '@/components/ui/table';
 import { useSession } from '@/lib/auth/client';
 import { usePurchaseQueries } from '@/lib/hooks/use-models';
+import { type Course, type Purchase } from '@/lib/zenstack/generated/models';
 import { Loader2, Receipt, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-
-function formatDate(date: Date | string) {
-  return new Date(date).toLocaleDateString('en-US', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
-}
-
-function formatAmount(cents: number) {
-  return new Intl.NumberFormat('en-US', {
-    currency: 'USD',
-    style: 'currency',
-  }).format(cents / 100);
-}
 
 export default function PurchasesPage() {
   const router = useRouter();
   const { data: session, isPending: isSessionPending } = useSession();
   const purchaseQueries = usePurchaseQueries();
 
-  const { data: purchases, isLoading: isPurchasesLoading } = purchaseQueries.useFindMany(
-    {
-      include: {
-        course: true,
+  const { data: purchases, isLoading: isPurchasesLoading } =
+    purchaseQueries.useFindMany(
+      {
+        include: {
+          course: true,
+        },
+        orderBy: { createdAt: 'desc' },
       },
-      orderBy: { createdAt: 'desc' },
-    },
-    { enabled: Boolean(session) }
-  );
+      { enabled: Boolean(session) },
+    );
 
   useEffect(() => {
     if (!isSessionPending && !session) {
       router.push('/sign-in');
     }
-  }, [isSessionPending, session, router]);
+  }, [isSessionPending, router, session]);
 
   const isLoading = isSessionPending || isPurchasesLoading;
 
@@ -87,7 +74,7 @@ export default function PurchasesPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {purchases.map((purchase) => (
+              {purchases.map((purchase: Purchase & { course?: Course }) => (
                 <TableRow key={purchase.id}>
                   <TableCell className="font-medium">
                     {purchase.course?.title || 'Unknown Course'}
@@ -96,7 +83,10 @@ export default function PurchasesPage() {
                   <TableCell>{formatAmount(purchase.amount)}</TableCell>
                   <TableCell className="text-right">
                     <Link href={`/purchases/${purchase.id}`}>
-                      <Button size="sm" variant="outline">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                      >
                         <Receipt className="mr-2 h-4 w-4" />
                         View Receipt
                       </Button>
@@ -112,7 +102,8 @@ export default function PurchasesPage() {
           <ShoppingBag className="h-16 w-16 mx-auto text-muted-foreground/40 mb-4" />
           <h2 className="text-xl font-semibold mb-2">No purchases yet</h2>
           <p className="text-muted-foreground mb-8">
-            You haven&apos;t made any purchases yet. Browse our courses to get started!
+            You haven&apos;t made any purchases yet. Browse our courses to get
+            started!
           </p>
           <Link href="/courses">
             <Button>Browse Courses</Button>
@@ -123,3 +114,17 @@ export default function PurchasesPage() {
   );
 }
 
+function formatAmount(cents: number) {
+  return new Intl.NumberFormat('en-US', {
+    currency: 'USD',
+    style: 'currency',
+  }).format(cents / 100);
+}
+
+function formatDate(date: Date | string) {
+  return new Date(date).toLocaleDateString('en-US', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+}
