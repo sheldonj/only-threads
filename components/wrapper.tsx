@@ -15,7 +15,7 @@ import {
 import { useSession, signOut } from '@/lib/auth/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { QuerySettingsProvider } from '@zenstackhq/tanstack-query/react';
-import { BookOpen, GraduationCap, Library, LogOut, Settings, Shield, User, Users } from 'lucide-react';
+import { BookOpen, GraduationCap, Library, LogOut, Receipt, Settings, Shield, User, Users } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -123,6 +123,12 @@ export const Wrapper = (props: { readonly children: React.ReactNode }) => {
                     <DropdownMenuItem>
                       <Library className="h-4 w-4 mr-2" />
                       My Courses
+                    </DropdownMenuItem>
+                  </Link>
+                  <Link href="/purchases">
+                    <DropdownMenuItem>
+                      <Receipt className="h-4 w-4 mr-2" />
+                      My Purchases
                     </DropdownMenuItem>
                   </Link>
                   <Link href="/dashboard">
