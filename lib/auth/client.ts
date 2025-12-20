@@ -1,4 +1,4 @@
-import { adminClient, organizationClient } from 'better-auth/client/plugins';
+import { adminClient } from 'better-auth/client/plugins';
 import { createAuthClient } from 'better-auth/react';
 import { toast } from 'sonner';
 
@@ -10,15 +10,7 @@ export const client = createAuthClient({
       }
     },
   },
-  plugins: [organizationClient(), adminClient()],
+  plugins: [adminClient()],
 });
 
-export const {
-  organization,
-  signIn,
-  signOut,
-  signUp,
-  useActiveOrganization,
-  useListOrganizations,
-  useSession,
-} = client;
+export const { signIn, signOut, signUp, useSession } = client;

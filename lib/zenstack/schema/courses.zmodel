@@ -1,0 +1,64 @@
+import "./auth"
+
+model Course {
+  id          String     @id @default(cuid())
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  title       String
+  slug        String     @unique
+  description String?
+  coverImage  String?
+  price       Float      // in cents for Stripe
+  published   Boolean    @default(false)
+  lessons     Lesson[]
+  purchases   Purchase[]
+
+  @@map('course')
+
+  // Anyone can read published courses
+  @@allow('read', published == true)
+  // Admins can do everything
+  @@allow('all', auth() != null && auth().role == 'admin')
+}
+
+model Lesson {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  title       String
+  description String?
+  videoUrl    String?  // placeholder for video hosting
+  content     String?  // rich text/markdown content
+  order       Int      @default(0)
+  courseId    String
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@map('lesson')
+
+  // Purchased users or admins can read lessons
+  @@allow('read', auth() != null && (auth().role == 'admin' || course.purchases?[userId == auth().userId]))
+  // Admins can do everything
+  @@allow('all', auth() != null && auth().role == 'admin')
+}
+
+model Purchase {
+  id              String   @id @default(cuid())
+  createdAt       DateTime @default(now())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId        String
+  course          Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  stripePaymentId String?
+  amount          Float
+
+  @@unique([userId, courseId])
+  @@map('purchase')
+
+  // Users can read their own purchases
+  @@allow('read', auth() != null && auth().userId == userId)
+  // Admins can read all purchases
+  @@allow('read', auth() != null && auth().role == 'admin')
+  // System creates purchases (via webhook), admins can manage
+  @@allow('create,update,delete', auth() != null && auth().role == 'admin')
+}
+

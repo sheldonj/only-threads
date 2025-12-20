@@ -8,11 +8,11 @@ import { GeistMono } from 'geist/font/mono';
 import { GeistSans } from 'geist/font/sans';
 
 export const metadata = createMetadata({
-  description: 'The most comprehensive authentication library for typescript',
-  metadataBase: new URL('https://demo.better-auth.com'),
+  description: 'Learn something new today with our curated collection of courses. Expand your skills at your own pace.',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
   title: {
-    default: 'Better Auth',
-    template: '%s | Better Auth',
+    default: 'Learn Something',
+    template: '%s | Learn Something',
   },
 });
 

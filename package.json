@@ -68,6 +68,7 @@
     "resend": "^4.0.1",
     "server-only": "^0.0.1",
     "sonner": "^1.7.4",
+    "stripe": "^20.1.0",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "three": "^0.168.0",
@@ -84,6 +85,7 @@
     "@types/three": "^0.168.0",
     "@types/ua-parser-js": "^0.7.39",
     "@zenstackhq/cli": "^3.0.0-beta.25",
+    "concurrently": "^9.2.1",
     "dotenv": "^16.4.7",
     "dotenv-cli": "^7.4.4",
     "eslint": "^9",
@@ -100,6 +102,15 @@
   "overrides": {
     "whatwg-url": "^14.0.0"
   },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "better-sqlite3",
+      "@prisma/client",
+      "@prisma/engines",
+      "prisma",
+      "sharp"
+    ]
+  },
   "private": true,
   "scripts": {
     "build": "next build",
@@ -107,11 +118,13 @@
     "db:push": "zen db push --schema lib/zenstack/schema/base.zmodel",
     "dev": "next dev",
     "dev:secure": "next dev --experimental-https",
+    "go": "concurrently --kill-others-on-fail -n next,stripe -c cyan,magenta \"next dev\" \"./scripts/stripe-setup.sh listen --forward-to localhost:3000/api/stripe/webhook\"",
     "knip": "knip",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "prebuild": "pnpm lint && pnpm knip",
     "start": "next start",
+    "stripe:login": "./scripts/stripe-setup.sh login",
     "typecheck": "tsc --noEmit",
     "up": "npm i -D @zenstackhq/cli@next && npm i @zenstackhq/orm@next @zenstackhq/better-auth@next @zenstackhq/server@next @zenstackhq/plugin-policy@next @zenstackhq/tanstack-query@next"
   },

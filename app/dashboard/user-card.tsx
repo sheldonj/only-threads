@@ -2,6 +2,7 @@
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -26,7 +27,7 @@ import { PasswordInput } from '@/components/ui/password-input';
 import { client, signOut, useSession } from '@/lib/auth/client';
 import { type Session } from '@/lib/auth/types';
 import { MobileIcon } from '@radix-ui/react-icons';
-import { Edit, Laptop, Loader2, LogOut, X } from 'lucide-react';
+import { Edit, Laptop, Loader2, LogOut, Shield, User, X } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -317,10 +318,34 @@ export default function UserCard(props: {
               <p className="text-sm font-medium leading-none">
                 {session?.user.name}
               </p>
-              <p className="text-sm">{session?.user.email}</p>
+              <p className="text-sm text-muted-foreground">
+                {session?.user.email}
+              </p>
             </div>
           </div>
           <EditUserDialog />
+        </div>
+
+        {/* User Role Display */}
+        <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 border">
+          {session?.user.role === 'admin' ? (
+            <Shield className="h-5 w-5 text-primary" />
+          ) : (
+            <User className="h-5 w-5 text-muted-foreground" />
+          )}
+          <div className="flex-1">
+            <p className="text-sm font-medium">Account Role</p>
+            <p className="text-xs text-muted-foreground">
+              {session?.user.role === 'admin'
+                ? 'You have full admin access to manage courses and users.'
+                : 'Standard user account for purchasing and viewing courses.'}
+            </p>
+          </div>
+          <Badge
+            variant={session?.user.role === 'admin' ? 'default' : 'secondary'}
+          >
+            {session?.user.role || 'user'}
+          </Badge>
         </div>
 
         {session?.user.emailVerified ? null : (

@@ -1,17 +1,13 @@
 'use client';
 
-import { OrganizationCard } from './organization-card';
-import TodoListsCard from './todo-lists-card';
 import UserCard from './user-card';
-import { client, useActiveOrganization, useSession } from '@/lib/auth/client';
+import { client, useSession } from '@/lib/auth/client';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 export default function DashboardPage() {
   const { data: session, isPending: isSessionPending } = useSession();
-  const { data: organization, isPending: isOrgPending } =
-    useActiveOrganization();
   const router = useRouter();
 
   const { data: activeSessions, isPending: isSessionsPending } = useQuery({
@@ -29,7 +25,7 @@ export default function DashboardPage() {
     }
   }, [isSessionPending, router, session]);
 
-  if (isSessionPending || isSessionsPending || isOrgPending) {
+  if (isSessionPending || isSessionsPending) {
     return null;
   }
 
@@ -44,11 +40,6 @@ export default function DashboardPage() {
           activeSessions={activeSessions || []}
           session={session}
         />
-        <OrganizationCard
-          activeOrganization={organization || null}
-          session={session}
-        />
-        <TodoListsCard />
       </div>
     </div>
   );

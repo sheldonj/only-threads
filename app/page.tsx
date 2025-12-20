@@ -1,59 +1,62 @@
+import { SeedButton } from '@/components/seed-button';
 import { SignInButton, SignInFallback } from '@/components/sign-in-button';
+import { Button } from '@/components/ui/button';
+import { BookOpen, GraduationCap, PlayCircle, Trophy } from 'lucide-react';
+import Link from 'next/link';
 import { Suspense } from 'react';
 
 export default async function Home() {
   const features = [
-    'Email & Password',
-    'Password Reset',
-    'Email Verification',
-    'Roles & Permissions',
-    'Rate Limiting',
-    'Session Management',
+    { description: 'Access courses anytime, anywhere', icon: PlayCircle, title: 'On-Demand Learning' },
+    { description: 'Learn from industry experts', icon: GraduationCap, title: 'Expert Instructors' },
+    { description: 'Wide range of topics to explore', icon: BookOpen, title: 'Comprehensive Courses' },
+    { description: 'Earn credentials for your achievements', icon: Trophy, title: 'Certificates' },
   ];
+
   return (
     <div className="min-h-[80vh] flex items-center justify-center overflow-hidden no-visible-scrollbar px-6 md:px-0">
-      <main className="flex flex-col gap-4 row-start-2 items-center justify-center">
-        <div className="flex flex-col gap-1">
-          <h3 className="font-bold text-4xl text-black dark:text-white text-center">
-            Better Auth.
-          </h3>
-          <p className="text-center break-words text-sm md:text-base">
-            Official demo to showcase{' '}
-            <a
-              className="italic underline"
-              href="https://better-auth.com"
-              rel="noreferrer"
-              target="_blank"
-            >
-              better-auth.
-            </a>{' '}
-            features and capabilities. <br />
+      <main className="flex flex-col gap-8 items-center justify-center max-w-4xl">
+        <div className="flex flex-col gap-3 text-center">
+          <h1 className="font-bold text-4xl md:text-5xl text-black dark:text-white">
+            Learn Something New Today
+          </h1>
+          <p className="text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto">
+            Expand your skills with our curated collection of courses. 
+            Learn at your own pace and achieve your goals.
           </p>
         </div>
-        <div className="md:w-10/12 w-full flex flex-col gap-4">
-          <div className="flex flex-col gap-3 pt-2 flex-wrap">
-            <div className="border-y py-2 border-dotted bg-secondary/60 opacity-80">
-              <div className="text-xs flex items-center gap-2 justify-center text-muted-foreground ">
-                <span className="text-center">
-                  All features on this demo are Implemented with better auth
-                  without any custom backend code
-                </span>
-              </div>
-            </div>
-            <div className="flex gap-2 justify-center flex-wrap">
-              {features.map((feature) => (
-                <span
-                  className="border-b pb-1 text-muted-foreground text-xs cursor-pointer hover:text-foreground duration-150 ease-in-out transition-all hover:border-foreground flex items-center gap-1"
-                  key={feature}
-                >
-                  {feature}.
-                </span>
-              ))}
-            </div>
-          </div>
+
+        <div className="flex gap-4 flex-wrap justify-center">
+          <Link href="/courses">
+            <Button
+              className="px-8"
+              size="lg"
+            >
+              <BookOpen className="mr-2 h-5 w-5" />
+              Browse Courses
+            </Button>
+          </Link>
           <Suspense fallback={<SignInFallback />}>
             <SignInButton />
           </Suspense>
+          <SeedButton />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8 w-full">
+          {features.map((feature) => (
+            <div
+              className="flex items-start gap-4 p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+              key={feature.title}
+            >
+              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <feature.icon className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-foreground">{feature.title}</h3>
+                <p className="text-sm text-muted-foreground">{feature.description}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </main>
     </div>

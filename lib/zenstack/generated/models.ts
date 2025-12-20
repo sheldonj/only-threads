@@ -11,11 +11,9 @@ export type User = $ModelResult<$Schema, "User">;
 export type Session = $ModelResult<$Schema, "Session">;
 export type Account = $ModelResult<$Schema, "Account">;
 export type Verification = $ModelResult<$Schema, "Verification">;
-export type Organization = $ModelResult<$Schema, "Organization">;
-export type Member = $ModelResult<$Schema, "Member">;
-export type Invitation = $ModelResult<$Schema, "Invitation">;
-export type TodoList = $ModelResult<$Schema, "TodoList">;
-export type Todo = $ModelResult<$Schema, "Todo">;
+export type Course = $ModelResult<$Schema, "Course">;
+export type Lesson = $ModelResult<$Schema, "Lesson">;
+export type Purchase = $ModelResult<$Schema, "Purchase">;
 /**
  * Shape of the `auth()` function
  */

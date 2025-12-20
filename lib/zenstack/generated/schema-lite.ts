@@ -82,23 +82,11 @@ const _schema = {
                     array: true,
                     relation: { opposite: "user" }
                 },
-                members: {
-                    name: "members",
-                    type: "Member",
+                purchases: {
+                    name: "purchases",
+                    type: "Purchase",
                     array: true,
                     relation: { opposite: "user" }
-                },
-                invitations: {
-                    name: "invitations",
-                    type: "Invitation",
-                    array: true,
-                    relation: { opposite: "user" }
-                },
-                todoLists: {
-                    name: "todoLists",
-                    type: "TodoList",
-                    array: true,
-                    relation: { opposite: "owner" }
                 }
             },
             idFields: ["id"],
@@ -155,11 +143,6 @@ const _schema = {
                     name: "user",
                     type: "User",
                     relation: { opposite: "sessions", fields: ["userId"], references: ["id"], onDelete: "Cascade" }
-                },
-                activeOrganizationId: {
-                    name: "activeOrganizationId",
-                    type: "String",
-                    optional: true
                 },
                 impersonatedBy: {
                     name: "impersonatedBy",
@@ -289,228 +272,8 @@ const _schema = {
                 id: { type: "String" }
             }
         },
-        Organization: {
-            name: "Organization",
-            fields: {
-                id: {
-                    name: "id",
-                    type: "String",
-                    id: true
-                },
-                name: {
-                    name: "name",
-                    type: "String"
-                },
-                slug: {
-                    name: "slug",
-                    type: "String",
-                    unique: true
-                },
-                logo: {
-                    name: "logo",
-                    type: "String",
-                    optional: true
-                },
-                createdAt: {
-                    name: "createdAt",
-                    type: "DateTime"
-                },
-                metadata: {
-                    name: "metadata",
-                    type: "String",
-                    optional: true
-                },
-                members: {
-                    name: "members",
-                    type: "Member",
-                    array: true,
-                    relation: { opposite: "organization" }
-                },
-                invitations: {
-                    name: "invitations",
-                    type: "Invitation",
-                    array: true,
-                    relation: { opposite: "organization" }
-                },
-                todoLists: {
-                    name: "todoLists",
-                    type: "TodoList",
-                    array: true,
-                    relation: { opposite: "organization" }
-                }
-            },
-            idFields: ["id"],
-            uniqueFields: {
-                id: { type: "String" },
-                slug: { type: "String" }
-            }
-        },
-        Member: {
-            name: "Member",
-            fields: {
-                id: {
-                    name: "id",
-                    type: "String",
-                    id: true
-                },
-                organizationId: {
-                    name: "organizationId",
-                    type: "String",
-                    foreignKeyFor: [
-                        "organization"
-                    ]
-                },
-                organization: {
-                    name: "organization",
-                    type: "Organization",
-                    relation: { opposite: "members", fields: ["organizationId"], references: ["id"], onDelete: "Cascade" }
-                },
-                userId: {
-                    name: "userId",
-                    type: "String",
-                    foreignKeyFor: [
-                        "user"
-                    ]
-                },
-                user: {
-                    name: "user",
-                    type: "User",
-                    relation: { opposite: "members", fields: ["userId"], references: ["id"], onDelete: "Cascade" }
-                },
-                role: {
-                    name: "role",
-                    type: "String"
-                },
-                createdAt: {
-                    name: "createdAt",
-                    type: "DateTime"
-                }
-            },
-            idFields: ["id"],
-            uniqueFields: {
-                id: { type: "String" }
-            }
-        },
-        Invitation: {
-            name: "Invitation",
-            fields: {
-                id: {
-                    name: "id",
-                    type: "String",
-                    id: true
-                },
-                organizationId: {
-                    name: "organizationId",
-                    type: "String",
-                    foreignKeyFor: [
-                        "organization"
-                    ]
-                },
-                organization: {
-                    name: "organization",
-                    type: "Organization",
-                    relation: { opposite: "invitations", fields: ["organizationId"], references: ["id"], onDelete: "Cascade" }
-                },
-                email: {
-                    name: "email",
-                    type: "String"
-                },
-                role: {
-                    name: "role",
-                    type: "String",
-                    optional: true
-                },
-                status: {
-                    name: "status",
-                    type: "String"
-                },
-                expiresAt: {
-                    name: "expiresAt",
-                    type: "DateTime"
-                },
-                inviterId: {
-                    name: "inviterId",
-                    type: "String",
-                    foreignKeyFor: [
-                        "user"
-                    ]
-                },
-                user: {
-                    name: "user",
-                    type: "User",
-                    relation: { opposite: "invitations", fields: ["inviterId"], references: ["id"], onDelete: "Cascade" }
-                }
-            },
-            idFields: ["id"],
-            uniqueFields: {
-                id: { type: "String" }
-            }
-        },
-        TodoList: {
-            name: "TodoList",
-            fields: {
-                id: {
-                    name: "id",
-                    type: "String",
-                    id: true,
-                    default: ExpressionUtils.call("cuid")
-                },
-                createdAt: {
-                    name: "createdAt",
-                    type: "DateTime",
-                    default: ExpressionUtils.call("now")
-                },
-                updatedAt: {
-                    name: "updatedAt",
-                    type: "DateTime",
-                    updatedAt: true
-                },
-                name: {
-                    name: "name",
-                    type: "String"
-                },
-                owner: {
-                    name: "owner",
-                    type: "User",
-                    relation: { opposite: "todoLists", fields: ["ownerId"], references: ["id"], onDelete: "Cascade", hasDefault: true }
-                },
-                ownerId: {
-                    name: "ownerId",
-                    type: "String",
-                    default: ExpressionUtils.member(ExpressionUtils.call("auth"), ["userId"]),
-                    foreignKeyFor: [
-                        "owner"
-                    ]
-                },
-                organization: {
-                    name: "organization",
-                    type: "Organization",
-                    optional: true,
-                    relation: { opposite: "todoLists", fields: ["organizationId"], references: ["id"], onDelete: "Cascade", hasDefault: true }
-                },
-                organizationId: {
-                    name: "organizationId",
-                    type: "String",
-                    optional: true,
-                    default: ExpressionUtils.member(ExpressionUtils.call("auth"), ["organizationId"]),
-                    foreignKeyFor: [
-                        "organization"
-                    ]
-                },
-                todos: {
-                    name: "todos",
-                    type: "Todo",
-                    array: true,
-                    relation: { opposite: "list" }
-                }
-            },
-            idFields: ["id"],
-            uniqueFields: {
-                id: { type: "String" }
-            }
-        },
-        Todo: {
-            name: "Todo",
+        Course: {
+            name: "Course",
             fields: {
                 id: {
                     name: "id",
@@ -532,27 +295,162 @@ const _schema = {
                     name: "title",
                     type: "String"
                 },
-                done: {
-                    name: "done",
+                slug: {
+                    name: "slug",
+                    type: "String",
+                    unique: true
+                },
+                description: {
+                    name: "description",
+                    type: "String",
+                    optional: true
+                },
+                coverImage: {
+                    name: "coverImage",
+                    type: "String",
+                    optional: true
+                },
+                price: {
+                    name: "price",
+                    type: "Float"
+                },
+                published: {
+                    name: "published",
                     type: "Boolean",
                     default: false
                 },
-                listId: {
-                    name: "listId",
+                lessons: {
+                    name: "lessons",
+                    type: "Lesson",
+                    array: true,
+                    relation: { opposite: "course" }
+                },
+                purchases: {
+                    name: "purchases",
+                    type: "Purchase",
+                    array: true,
+                    relation: { opposite: "course" }
+                }
+            },
+            idFields: ["id"],
+            uniqueFields: {
+                id: { type: "String" },
+                slug: { type: "String" }
+            }
+        },
+        Lesson: {
+            name: "Lesson",
+            fields: {
+                id: {
+                    name: "id",
+                    type: "String",
+                    id: true,
+                    default: ExpressionUtils.call("cuid")
+                },
+                createdAt: {
+                    name: "createdAt",
+                    type: "DateTime",
+                    default: ExpressionUtils.call("now")
+                },
+                updatedAt: {
+                    name: "updatedAt",
+                    type: "DateTime",
+                    updatedAt: true
+                },
+                title: {
+                    name: "title",
+                    type: "String"
+                },
+                description: {
+                    name: "description",
+                    type: "String",
+                    optional: true
+                },
+                videoUrl: {
+                    name: "videoUrl",
+                    type: "String",
+                    optional: true
+                },
+                content: {
+                    name: "content",
+                    type: "String",
+                    optional: true
+                },
+                order: {
+                    name: "order",
+                    type: "Int",
+                    default: 0
+                },
+                courseId: {
+                    name: "courseId",
                     type: "String",
                     foreignKeyFor: [
-                        "list"
+                        "course"
                     ]
                 },
-                list: {
-                    name: "list",
-                    type: "TodoList",
-                    relation: { opposite: "todos", fields: ["listId"], references: ["id"], onDelete: "Cascade" }
+                course: {
+                    name: "course",
+                    type: "Course",
+                    relation: { opposite: "lessons", fields: ["courseId"], references: ["id"], onDelete: "Cascade" }
                 }
             },
             idFields: ["id"],
             uniqueFields: {
                 id: { type: "String" }
+            }
+        },
+        Purchase: {
+            name: "Purchase",
+            fields: {
+                id: {
+                    name: "id",
+                    type: "String",
+                    id: true,
+                    default: ExpressionUtils.call("cuid")
+                },
+                createdAt: {
+                    name: "createdAt",
+                    type: "DateTime",
+                    default: ExpressionUtils.call("now")
+                },
+                userId: {
+                    name: "userId",
+                    type: "String",
+                    foreignKeyFor: [
+                        "user"
+                    ]
+                },
+                user: {
+                    name: "user",
+                    type: "User",
+                    relation: { opposite: "purchases", fields: ["userId"], references: ["id"], onDelete: "Cascade" }
+                },
+                courseId: {
+                    name: "courseId",
+                    type: "String",
+                    foreignKeyFor: [
+                        "course"
+                    ]
+                },
+                course: {
+                    name: "course",
+                    type: "Course",
+                    relation: { opposite: "purchases", fields: ["courseId"], references: ["id"], onDelete: "Cascade" }
+                },
+                stripePaymentId: {
+                    name: "stripePaymentId",
+                    type: "String",
+                    optional: true
+                },
+                amount: {
+                    name: "amount",
+                    type: "Float"
+                }
+            },
+            idFields: ["id"],
+            uniqueFields: {
+                id: { type: "String" },
+                userId_courseId: { userId: { type: "String" }, courseId: { type: "String" } }
             }
         }
     },
@@ -564,13 +462,8 @@ const _schema = {
                     name: "userId",
                     type: "String"
                 },
-                organizationId: {
-                    name: "organizationId",
-                    type: "String",
-                    optional: true
-                },
-                organizationRole: {
-                    name: "organizationRole",
+                role: {
+                    name: "role",
                     type: "String",
                     optional: true
                 }

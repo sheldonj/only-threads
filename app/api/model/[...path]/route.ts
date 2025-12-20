@@ -16,32 +16,14 @@ async function getClient() {
     return authDb;
   }
 
-  let organizationId: string | undefined;
-  let organizationRole: string | undefined;
-  const { session } = sessionResult;
-
-  if (session.activeOrganizationId) {
-    // if there's an active orgId, get the role of the user in the org
-    organizationId = session.activeOrganizationId;
-    const org = await auth.api.getFullOrganization({ headers: requestHeaders });
-    if (org?.members) {
-      const myMember = org.members.find(
-        (member) => member.userId === session.userId,
-      );
-      organizationRole = myMember?.role;
-    }
-  }
+  const { session, user } = sessionResult;
 
   // create enhanced client with user context
-  const userContext: {
-    organizationId?: string;
-    organizationRole?: string;
-    userId: string;
-  } = {
-    organizationId,
-    organizationRole,
+  const userContext = {
+    role: user.role ?? undefined,
     userId: session.userId,
   };
+
   return authDb.$setAuth(userContext);
 }
 
