@@ -390,53 +390,59 @@ export default function LessonPage() {
                 {/* Lesson List */}
                 <ScrollArea className="max-h-[60vh] lg:max-h-[calc(100vh-14rem)]">
                   <div className="p-3 space-y-1">
-                    {course.lessons?.map((lessonItem: Lesson, index: number) => {
-                      const isCompleted = completedLessonIds.has(lessonItem.id);
-                      const isCurrent = lessonItem.id === lesson.id;
+                    {course.lessons?.map(
+                      (lessonItem: Lesson, index: number) => {
+                        const isCompleted = completedLessonIds.has(
+                          lessonItem.id,
+                        );
+                        const isCurrent = lessonItem.id === lesson.id;
 
-                      return (
-                        <Link
-                          href={`/learn/${course.slug}/${lessonItem.id}`}
-                          key={lessonItem.id}
-                        >
-                          <div
-                            className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 ${
-                              isCurrent
-                                ? 'bg-sidebar-accent text-sidebar-accent-foreground shadow-md ring-1 ring-sidebar-primary/20'
-                                : 'hover:bg-sidebar-accent/50 text-sidebar-foreground'
-                            }`}
+                        return (
+                          <Link
+                            href={`/learn/${course.slug}/${lessonItem.id}`}
+                            key={lessonItem.id}
                           >
                             <div
-                              className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
-                                isCompleted
-                                  ? 'bg-green-500/20 text-green-500 dark:bg-green-500/30 dark:text-green-400'
-                                  : isCurrent
-                                    ? 'bg-sidebar-primary text-sidebar-primary-foreground shadow-sm'
-                                    : 'bg-sidebar-accent/50 text-sidebar-foreground/70'
+                              className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 ${
+                                isCurrent
+                                  ? 'bg-sidebar-accent text-sidebar-accent-foreground shadow-md ring-1 ring-sidebar-primary/20'
+                                  : 'hover:bg-sidebar-accent/50 text-sidebar-foreground'
                               }`}
                             >
-                              {isCompleted ? (
-                                <Check className="h-4 w-4" />
-                              ) : (
-                                index + 1
-                              )}
-                            </div>
-                            <div className="flex-grow min-w-0">
-                              <p
-                                className={`font-medium truncate text-sm ${
-                                  isCurrent ? 'text-sidebar-accent-foreground' : ''
+                              <div
+                                className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
+                                  isCompleted
+                                    ? 'bg-green-500/20 text-green-500 dark:bg-green-500/30 dark:text-green-400'
+                                    : isCurrent
+                                      ? 'bg-sidebar-primary text-sidebar-primary-foreground shadow-sm'
+                                      : 'bg-sidebar-accent/50 text-sidebar-foreground/70'
                                 }`}
                               >
-                                {lessonItem.title}
-                              </p>
+                                {isCompleted ? (
+                                  <Check className="h-4 w-4" />
+                                ) : (
+                                  index + 1
+                                )}
+                              </div>
+                              <div className="flex-grow min-w-0">
+                                <p
+                                  className={`font-medium truncate text-sm ${
+                                    isCurrent
+                                      ? 'text-sidebar-accent-foreground'
+                                      : ''
+                                  }`}
+                                >
+                                  {lessonItem.title}
+                                </p>
+                              </div>
+                              {isCompleted && (
+                                <CheckCircle2 className="h-4 w-4 text-green-500 dark:text-green-400 shrink-0" />
+                              )}
                             </div>
-                            {isCompleted && (
-                              <CheckCircle2 className="h-4 w-4 text-green-500 dark:text-green-400 shrink-0" />
-                            )}
-                          </div>
-                        </Link>
-                      );
-                    })}
+                          </Link>
+                        );
+                      },
+                    )}
                   </div>
                 </ScrollArea>
               </CardContent>

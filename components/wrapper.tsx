@@ -175,7 +175,9 @@ export const Wrapper = (props: { readonly children: React.ReactNode }) => {
           <ThemeToggle />
         </nav>
       </div>
-      <div className="mt-20 lg:w-8/12 w-full px-4 lg:px-0">{props.children}</div>
+      <div className="mt-20 lg:w-8/12 w-full px-4 lg:px-0">
+        {props.children}
+      </div>
     </div>
   );
 };

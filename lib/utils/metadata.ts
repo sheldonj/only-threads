@@ -1,23 +1,30 @@
 import { type Metadata } from 'next/types';
 
+const getBaseUrl = () =>
+  process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+
 export function createMetadata(override: Metadata): Metadata {
+  const baseUrl = getBaseUrl();
+
   return {
     ...override,
     openGraph: {
       description: override.description ?? undefined,
-      images: 'https://demo.better-auth.com/og.png',
-      siteName: 'Better Auth',
+      images: `${baseUrl}/og.png`,
+      siteName: 'Learn Something',
       title: override.title ?? undefined,
-      url: 'https://demo.better-auth.com',
+      type: 'website',
+      url: baseUrl,
       ...override.openGraph,
     },
     twitter: {
       card: 'summary_large_image',
-      creator: '@baku',
       description: override.description ?? undefined,
-      images: 'https://demo.better-auth.com/og.png',
+      images: `${baseUrl}/og.png`,
       title: override.title ?? undefined,
       ...override.twitter,
     },
   };
 }
+
+export { getBaseUrl };

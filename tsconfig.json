@@ -10,6 +10,7 @@
       "dom.iterable",
       "esnext"
     ],
+    "maxNodeModuleJsDepth": 0,
     "module": "esnext",
     "moduleResolution": "bundler",
     "noEmit": true,
@@ -26,8 +27,8 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": true,
-    "target": "ES2017",
-    "maxNodeModuleJsDepth": 0
+    "target": "ES2017"
+
   },
   "exclude": [
     "node_modules"

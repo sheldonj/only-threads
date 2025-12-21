@@ -1,5 +1,3 @@
-'use client';
-
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -9,30 +7,27 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { useCourseQueries } from '@/lib/hooks/use-models';
-import { type Course, type Lesson } from '@/lib/zenstack/generated/models';
-import { BookOpen, Loader2 } from 'lucide-react';
+import { db } from '@/lib/database/client';
+import { createMetadata } from '@/lib/utils/metadata';
+import { BookOpen } from 'lucide-react';
+import { type Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 
-export default function CourseCatalogPage() {
-  const courseQueries = useCourseQueries();
+export const metadata: Metadata = createMetadata({
+  description:
+    'Browse our collection of courses and start learning today. Find courses on a wide range of topics.',
+  title: 'Course Catalog',
+});
 
-  const { data: courses, isLoading } = courseQueries.useFindMany({
+export default async function CourseCatalogPage() {
+  const courses = await db.course.findMany({
     include: {
       lessons: { select: { id: true } },
     },
     orderBy: { createdAt: 'desc' },
     where: { published: true },
   });
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -45,7 +40,7 @@ export default function CourseCatalogPage() {
 
       {courses && courses.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {courses.map((course: Course & { lessons?: Lesson[] }) => (
+          {courses.map((course) => (
             <Card
               className="flex flex-col overflow-hidden hover:shadow-lg transition-shadow"
               key={course.id}
