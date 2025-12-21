@@ -108,4 +108,3 @@ export function reactAdminSaleNotificationEmail(
 ) {
   return <AdminSaleNotificationEmail {...props} />;
 }
-

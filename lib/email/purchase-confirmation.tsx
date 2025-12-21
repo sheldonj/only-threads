@@ -82,7 +82,10 @@ export const PurchaseConfirmationEmail = ({
             </Section>
             <Text className="text-black text-[14px] leading-[24px]">
               Or copy and paste this URL into your browser:{' '}
-              <Link className="text-blue-600 no-underline" href={courseUrl}>
+              <Link
+                className="text-blue-600 no-underline"
+                href={courseUrl}
+              >
                 {courseUrl}
               </Link>
             </Text>
@@ -103,4 +106,3 @@ export function reactPurchaseConfirmationEmail(
 ) {
   return <PurchaseConfirmationEmail {...props} />;
 }
-

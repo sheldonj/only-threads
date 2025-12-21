@@ -91,6 +91,15 @@
     "**/storybook-static": true,
     "**/test-results": true
   },
+  "sqltools.connections": [
+    {
+      "database": "${workspaceFolder:learn-something}/data/dev.db",
+      "driver": "SQLite",
+      "name": "learndb",
+      "previewLimit": 50
+    }
+  ],
+  "sqltools.useNodeRuntime": true,
   "tailwindCSS.experimental.classRegex": [
     [
       "cn\\(([^)]*)\\)",
