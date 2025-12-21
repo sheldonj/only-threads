@@ -1,0 +1,310 @@
+---
+description: Email template patterns using @react-email/components and Resend
+globs: lib/email/**/*.tsx
+alwaysApply: false
+---
+
+# Email Templates
+
+This project uses @react-email/components for email templates and Resend for sending.
+
+## Email Template Structure
+
+Each email template should export:
+1. A React component for the email
+2. A helper function that returns the JSX element
+
+```typescript
+// lib/email/course-completed.tsx
+import {
+  Body,
+  Button,
+  Container,
+  Head,
+  Heading,
+  Hr,
+  Html,
+  Link,
+  Preview,
+  Section,
+  Tailwind,
+  Text,
+} from '@react-email/components';
+import * as React from 'react';
+
+type CourseCompletedEmailProps = {
+  readonly courseTitle: string;
+  readonly libraryUrl: string;
+  readonly username: string;
+};
+
+export const CourseCompletedEmail = ({
+  courseTitle,
+  libraryUrl,
+  username,
+}: CourseCompletedEmailProps) => {
+  const previewText = `Congratulations! You've completed ${courseTitle}!`;
+  
+  return (
+    <Html>
+      <Head />
+      <Preview>{previewText}</Preview>
+      <Tailwind>
+        <Body className="bg-white my-auto mx-auto font-sans px-2">
+          <Container className="border border-solid border-[#eaeaea] rounded my-[40px] mx-auto p-[20px] max-w-[465px]">
+            <Heading className="text-black text-[24px] font-normal text-center p-0 my-[30px] mx-0">
+              🎉 Congratulations!
+            </Heading>
+            <Text className="text-black text-[14px] leading-[24px]">
+              Hi {username},
+            </Text>
+            <Text className="text-black text-[14px] leading-[24px]">
+              Amazing work! You&apos;ve successfully completed{' '}
+              <strong>{courseTitle}</strong>.
+            </Text>
+            <Section className="text-center mt-[32px] mb-[32px]">
+              <Button
+                className="bg-[#000000] rounded text-white text-[12px] font-semibold no-underline text-center px-5 py-3"
+                href={libraryUrl}
+              >
+                Explore More Courses
+              </Button>
+            </Section>
+            <Text className="text-black text-[14px] leading-[24px]">
+              Check out your library:{' '}
+              <Link className="text-blue-600 no-underline" href={libraryUrl}>
+                {libraryUrl}
+              </Link>
+            </Text>
+            <Hr className="border border-solid border-[#eaeaea] my-[26px] mx-0 w-full" />
+            <Text className="text-[#666666] text-[12px] leading-[24px]">
+              You&apos;re receiving this email because you completed a course.
+            </Text>
+          </Container>
+        </Body>
+      </Tailwind>
+    </Html>
+  );
+};
+
+// Helper function for sending
+export function reactCourseCompletedEmail(props: CourseCompletedEmailProps) {
+  return <CourseCompletedEmail {...props} />;
+}
+```
+
+## Available Components
+
+Import from `@react-email/components`:
+
+```typescript
+import {
+  Body,        // Email body wrapper
+  Button,      // CTA button with href
+  Container,   // Centered container
+  Head,        // HTML head
+  Heading,     // H1-H6 headings
+  Hr,          // Horizontal rule
+  Html,        // HTML wrapper
+  Img,         // Image
+  Link,        // Anchor link
+  Preview,     // Preview text (shown in email clients)
+  Section,     // Content section
+  Tailwind,    // Tailwind CSS wrapper
+  Text,        // Paragraph text
+} from '@react-email/components';
+```
+
+## Styling in Emails
+
+Use inline Tailwind classes within the `<Tailwind>` wrapper:
+
+```typescript
+<Tailwind>
+  <Body className="bg-white my-auto mx-auto font-sans">
+    <Container className="border border-solid border-[#eaeaea] rounded p-[20px]">
+      <Heading className="text-black text-[24px] font-bold">
+        Title
+      </Heading>
+      <Text className="text-black text-[14px] leading-[24px]">
+        Body text
+      </Text>
+      <Button
+        className="bg-[#000000] rounded text-white text-[12px] font-semibold px-5 py-3"
+        href="https://example.com"
+      >
+        Click Here
+      </Button>
+    </Container>
+  </Body>
+</Tailwind>
+```
+
+### Inline Styles (when needed)
+
+For complex styles, use inline style objects:
+
+```typescript
+<div
+  style={{
+    background: 'linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%)',
+    padding: '40px',
+  }}
+>
+```
+
+## Sending Emails
+
+Use the Resend client from `@/lib/email/resend`:
+
+```typescript
+// lib/email/resend.ts
+import { Resend } from 'resend';
+
+export const resend = new Resend(process.env.RESEND_API_KEY);
+```
+
+### Sending Pattern
+
+```typescript
+import { resend } from '@/lib/email/resend';
+import { reactCourseCompletedEmail } from '@/lib/email/course-completed';
+
+const from = process.env.BETTER_AUTH_EMAIL || 'delivered@resend.dev';
+
+await resend.emails.send({
+  from,
+  to: user.email,
+  subject: 'You completed the course!',
+  react: reactCourseCompletedEmail({
+    courseTitle: course.title,
+    libraryUrl: `${baseUrl}/library`,
+    username: user.name,
+  }),
+});
+```
+
+### In Auth Configuration
+
+```typescript
+// lib/auth/server.ts
+import { resend } from '@/lib/email/resend';
+import { reactResetPasswordEmail } from '@/lib/email/reset-password';
+
+export const auth = betterAuth({
+  emailAndPassword: {
+    enabled: true,
+    async sendResetPassword({ url, user }) {
+      await resend.emails.send({
+        from,
+        to: user.email,
+        subject: 'Reset your password',
+        react: reactResetPasswordEmail({
+          resetLink: url,
+          username: user.email,
+        }),
+      });
+    },
+  },
+});
+```
+
+## Common Email Templates
+
+### Password Reset
+
+```typescript
+type ResetPasswordEmailProps = {
+  readonly resetLink: string;
+  readonly username: string;
+};
+
+export const ResetPasswordEmail = ({
+  resetLink,
+  username,
+}: ResetPasswordEmailProps) => (
+  <Html>
+    <Head />
+    <Preview>Reset your password</Preview>
+    <Tailwind>
+      <Body className="bg-white font-sans">
+        <Container className="mx-auto p-[20px] max-w-[465px]">
+          <Heading className="text-[24px]">Reset Your Password</Heading>
+          <Text>Hi {username},</Text>
+          <Text>Click the button below to reset your password:</Text>
+          <Section className="text-center my-[32px]">
+            <Button
+              className="bg-[#000] text-white px-5 py-3 rounded"
+              href={resetLink}
+            >
+              Reset Password
+            </Button>
+          </Section>
+          <Text className="text-[#666] text-[12px]">
+            If you didn&apos;t request this, ignore this email.
+          </Text>
+        </Container>
+      </Body>
+    </Tailwind>
+  </Html>
+);
+
+export function reactResetPasswordEmail(props: ResetPasswordEmailProps) {
+  return <ResetPasswordEmail {...props} />;
+}
+```
+
+### Course Started
+
+```typescript
+type CourseStartedEmailProps = {
+  readonly courseTitle: string;
+  readonly courseUrl: string;
+  readonly username: string;
+};
+
+export const CourseStartedEmail = ({
+  courseTitle,
+  courseUrl,
+  username,
+}: CourseStartedEmailProps) => (
+  <Html>
+    <Head />
+    <Preview>You started {courseTitle}</Preview>
+    <Tailwind>
+      <Body className="bg-white font-sans">
+        <Container className="mx-auto p-[20px] max-w-[465px]">
+          <Heading className="text-[24px]">Welcome to {courseTitle}!</Heading>
+          <Text>Hi {username},</Text>
+          <Text>
+            You&apos;ve started learning <strong>{courseTitle}</strong>.
+            We&apos;re excited to have you!
+          </Text>
+          <Section className="text-center my-[32px]">
+            <Button
+              className="bg-[#000] text-white px-5 py-3 rounded"
+              href={courseUrl}
+            >
+              Continue Learning
+            </Button>
+          </Section>
+        </Container>
+      </Body>
+    </Tailwind>
+  </Html>
+);
+
+export function reactCourseStartedEmail(props: CourseStartedEmailProps) {
+  return <CourseStartedEmail {...props} />;
+}
+```
+
+## Best Practices
+
+1. **Always include Preview text** - Shows in email client previews
+2. **Use Tailwind wrapper** - For consistent styling
+3. **Escape apostrophes** - Use `&apos;` in JSX text
+4. **Keep emails simple** - Not all CSS is supported
+5. **Test with different clients** - Gmail, Outlook, Apple Mail
+6. **Provide plain text fallback** - For accessibility
+7. **Use readonly props** - TypeScript convention for this project

@@ -1,0 +1,298 @@
+---
+description: Page structure, component organization, and SEO patterns for Next.js App Router pages
+globs: app/**/*.tsx
+alwaysApply: false
+---
+
+# Page Organization & SEO
+
+This rule defines how to structure pages, organize components, and implement SEO for the Learn Something platform.
+
+## Directory Structure
+
+For complex pages with multiple components, use this structure:
+
+```
+app/[route]/
+  page.tsx              # Server component - data fetching + SEO
+  client-page.tsx       # Client component wrapper (when interactivity needed)
+  components/           # Page-specific components (colocated)
+    component-name.tsx
+  hooks/                # Page-specific hooks (colocated)
+    use-hook-name.ts
+  opengraph-image.tsx   # Dynamic OG image generation
+  twitter-image.tsx     # Dynamic Twitter card image
+```
+
+## Server Pages (Default)
+
+Pages should be **Server Components by default**. Only use client components when interactivity is required.
+
+### Basic Server Page Pattern
+
+```typescript
+import { db } from '@/lib/database/client';
+import { createMetadata } from '@/lib/utils/metadata';
+import { type Metadata } from 'next';
+
+type Props = {
+  readonly params: Promise<{ slug: string }>;
+};
+
+// Data fetching function (can be reused for metadata)
+const getCourse = (slug: string) =>
+  db.course.findFirst({
+    include: { lessons: { orderBy: { order: 'asc' } } },
+    where: { published: true, slug },
+  });
+
+export default async function CoursePage({ params }: Props) {
+  const { slug } = await params;
+  const course = await getCourse(slug);
+
+  if (!course) {
+    return <NotFound />;
+  }
+
+  return (
+    <>
+      <CourseJsonLd course={course} />
+      <div className="container mx-auto px-4 py-8">
+        {/* Page content */}
+      </div>
+    </>
+  );
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const course = await getCourse(slug);
+
+  if (!course) {
+    return createMetadata({ title: 'Course Not Found' });
+  }
+
+  return createMetadata({
+    description: course.description || `Learn ${course.title}`,
+    openGraph: {
+      images: course.coverImage || undefined,
+      type: 'website',
+    },
+    title: course.title,
+  });
+}
+```
+
+## Client Page Pattern
+
+When a page needs significant interactivity, use the client-page pattern:
+
+### Server Entry Point (`page.tsx`)
+
+```typescript
+import { ClientPage } from './client-page';
+
+export default function Page() {
+  return <ClientPage />;
+}
+```
+
+### Client Implementation (`client-page.tsx`)
+
+```typescript
+'use client';
+
+import { useParams, useRouter } from 'next/navigation';
+import { useLessonData } from './hooks/use-lesson-data';
+import { LessonContent } from './components/lesson-content';
+
+export function ClientPage() {
+  const params = useParams<{ courseSlug: string; lessonId: string }>();
+  const router = useRouter();
+  
+  const { lesson, isLoading } = useLessonData({
+    courseSlug: params.courseSlug,
+    lessonId: params.lessonId,
+  });
+
+  if (isLoading) return <LoadingState />;
+  if (!lesson) return <NotFound />;
+
+  return <LessonContent lesson={lesson} />;
+}
+```
+
+## Component Colocation
+
+### Page-Specific Components
+
+Place in a `components/` subfolder within the route:
+
+```
+app/courses/[slug]/
+  page.tsx
+  components/
+    course-lesson-list.tsx    # Only used by this page
+    course-purchase-card.tsx  # Only used by this page
+    course-not-found.tsx      # Only used by this page
+```
+
+### Shared Components
+
+Place in the root `components/` folder:
+
+```
+components/
+  ui/                 # shadcn/ui components
+  courses/            # Shared course components
+    course-form.tsx   # Used by multiple pages
+    progress-bar.tsx  # Used by multiple pages
+```
+
+### Naming Conventions
+
+- Use descriptive, hyphenated names: `lesson-main-content.tsx`
+- Include the context: `course-sidebar.tsx`, `lesson-loading.tsx`
+- Loading states: `*-loading.tsx`
+- Not found states: `*-not-found.tsx`
+- Empty states: `empty-*.tsx`
+
+## SEO Implementation
+
+### Metadata Helper
+
+Always use `createMetadata()` from `@/lib/utils/metadata`:
+
+```typescript
+import { createMetadata } from '@/lib/utils/metadata';
+
+export const metadata = createMetadata({
+  description: 'Page description for SEO',
+  title: 'Page Title',
+});
+```
+
+### Dynamic Metadata
+
+Export `generateMetadata` for dynamic pages:
+
+```typescript
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const data = await fetchData(slug);
+
+  return createMetadata({
+    description: data.description,
+    openGraph: {
+      images: data.image,
+      type: 'website',
+    },
+    title: data.title,
+  });
+}
+```
+
+### JSON-LD Structured Data
+
+Use JSON-LD components from `@/lib/seo/json-ld`:
+
+```typescript
+import { CourseJsonLd, WebsiteJsonLd } from '@/lib/seo/json-ld';
+
+// In your page component
+<>
+  <CourseJsonLd
+    coverImage={course.coverImage}
+    description={course.description}
+    lessonCount={course.lessons.length}
+    price={course.price}
+    slug={course.slug}
+    title={course.title}
+  />
+  {/* Page content */}
+</>
+```
+
+## Dynamic OG Images
+
+Create `opengraph-image.tsx` and `twitter-image.tsx` for dynamic social images:
+
+```typescript
+import { db } from '@/lib/database/client';
+import { ImageResponse } from 'next/og';
+
+export const runtime = 'nodejs';
+export const alt = 'Course Image';
+export const size = {
+  height: 630,
+  width: 1_200,
+};
+export const contentType = 'image/png';
+
+export default async function Image({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const course = await db.course.findFirst({
+    select: { description: true, title: true },
+    where: { published: true, slug },
+  });
+
+  const title = course?.title || 'Course Not Found';
+
+  return new ImageResponse(
+    <div
+      style={{
+        alignItems: 'center',
+        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        justifyContent: 'center',
+        padding: '60px',
+        width: '100%',
+      }}
+    >
+      <div style={{ color: '#ffffff', fontSize: 64, fontWeight: 700 }}>
+        {title}
+      </div>
+    </div>,
+    { ...size },
+  );
+}
+```
+
+## Page-Specific Hooks
+
+For complex data fetching logic, create hooks in a `hooks/` subfolder:
+
+```typescript
+// app/learn/[courseSlug]/[lessonId]/hooks/use-lesson-data.ts
+'use client';
+
+import { useSession } from '@/lib/auth/client';
+import { useLessonQueries, useCourseQueries } from '@/lib/hooks/use-models';
+
+type UseLessonDataProps = {
+  courseSlug: string;
+  lessonId: string;
+};
+
+export function useLessonData({ courseSlug, lessonId }: UseLessonDataProps) {
+  const { data: session, isPending: isSessionPending } = useSession();
+  const lessonQueries = useLessonQueries();
+  const courseQueries = useCourseQueries();
+
+  const { data: lesson, isLoading: isLessonLoading } = lessonQueries.useFindUnique({
+    where: { id: lessonId },
+  });
+
+  return {
+    isLoading: isSessionPending || isLessonLoading,
+    lesson,
+    session,
+  };
+}
+```

@@ -1,0 +1,152 @@
+---
+description: Core TypeScript and project conventions for the Learn Something platform
+globs:
+alwaysApply: true
+---
+
+# Project Conventions
+
+This is a Next.js 16 learning platform built with React 19, TypeScript (strict mode), and the App Router.
+
+## Tech Stack
+
+- **Framework**: Next.js 16 (App Router), React 19
+- **Language**: TypeScript with strict mode enabled
+- **Styling**: Tailwind CSS 4, shadcn/ui (new-york style)
+- **ORM**: ZenStack with access control policies
+- **Auth**: better-auth with ZenStack adapter
+- **Data Fetching**: TanStack Query + ZenStack hooks
+- **Forms**: React Hook Form + Zod
+- **Payments**: Stripe
+- **Email**: Resend + @react-email/components
+
+## Import Aliases
+
+Always use the `@/` path alias for imports:
+
+```typescript
+// Good
+import { Button } from '@/components/ui/button';
+import { db } from '@/lib/database/client';
+import { cn } from '@/lib/utils/cn';
+
+// Bad - never use relative paths for deep imports
+import { Button } from '../../../components/ui/button';
+```
+
+## File Naming
+
+- Use **kebab-case** for all file names: `course-form.tsx`, `use-lesson-data.ts`
+- Component files use `.tsx` extension
+- Non-component TypeScript files use `.ts` extension
+- Test files: `*.test.ts` or `*.test.tsx`
+
+## TypeScript Conventions
+
+### Props Types
+
+Always use `readonly` modifier for component props:
+
+```typescript
+type CourseCardProps = {
+  readonly course: Course;
+  readonly onSelect?: (id: string) => void;
+};
+```
+
+### Explicit Return Types
+
+Prefer explicit return types for exported functions:
+
+```typescript
+export function getCourseById(id: string): Promise<Course | null> {
+  return db.course.findUnique({ where: { id } });
+}
+```
+
+### Type Inference
+
+Use `z.infer` for Zod schema types:
+
+```typescript
+import { z } from 'zod';
+
+export const courseSchema = z.object({
+  title: z.string().min(3),
+  slug: z.string().min(3),
+});
+
+export type CourseFormData = z.infer<typeof courseSchema>;
+```
+
+## ESLint Configuration
+
+This project uses `eslint-config-canonical`. Key rules:
+
+- Properties must be sorted alphabetically in objects and JSX
+- Imports are auto-organized
+- No `console.log` without eslint-disable comment:
+
+```typescript
+// eslint-disable-next-line no-console -- logging for debugging
+console.log('Debug info:', data);
+```
+
+## Component Patterns
+
+### Function Components
+
+Use function declarations for components:
+
+```typescript
+export function CourseCard({ course }: CourseCardProps) {
+  return <div>{course.title}</div>;
+}
+```
+
+### Client vs Server Components
+
+- Components are **Server Components by default**
+- Only add `'use client'` when you need:
+  - React hooks (useState, useEffect, etc.)
+  - Event handlers (onClick, onChange, etc.)
+  - Browser APIs
+
+```typescript
+'use client';
+
+import { useState } from 'react';
+
+export function InteractiveComponent() {
+  const [count, setCount] = useState(0);
+  return <button onClick={() => setCount(c => c + 1)}>{count}</button>;
+}
+```
+
+## Async Patterns
+
+### Next.js 16 Dynamic Params
+
+Route params are now Promises in Next.js 16:
+
+```typescript
+type Props = {
+  readonly params: Promise<{ slug: string }>;
+};
+
+export default async function Page({ params }: Props) {
+  const { slug } = await params;
+  // ...
+}
+```
+
+### Headers and Cookies
+
+Headers and cookies are async in Next.js 16:
+
+```typescript
+import { headers, cookies } from 'next/headers';
+
+const headersList = await headers();
+const cookieStore = await cookies();
+```

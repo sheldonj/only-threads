@@ -1,0 +1,325 @@
+---
+description: API route patterns for Next.js App Router including error handling, webhooks, and authentication
+globs: app/api/**/*.ts
+alwaysApply: false
+---
+
+# API Routes
+
+This project uses Next.js App Router API routes with proper error handling and authentication patterns.
+
+## Basic Route Structure
+
+```typescript
+// app/api/example/route.ts
+import { type NextRequest, NextResponse } from 'next/server';
+
+export async function GET(request: NextRequest) {
+  try {
+    // Handle request
+    return NextResponse.json({ data: 'success' });
+  } catch (error) {
+    // eslint-disable-next-line no-console -- logging API errors
+    console.error('API error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 },
+    );
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    // Handle request
+    return NextResponse.json({ data: 'created' }, { status: 201 });
+  } catch (error) {
+    // eslint-disable-next-line no-console -- logging API errors
+    console.error('API error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 },
+    );
+  }
+}
+```
+
+## Dynamic Routes
+
+```typescript
+// app/api/courses/[id]/route.ts
+import { type NextRequest, NextResponse } from 'next/server';
+
+type RouteParams = {
+  params: Promise<{ id: string }>;
+};
+
+export async function GET(request: NextRequest, { params }: RouteParams) {
+  const { id } = await params;
+
+  // Fetch and return data
+  return NextResponse.json({ courseId: id });
+}
+```
+
+## Headers and Cookies
+
+Headers and cookies are async in Next.js 16:
+
+```typescript
+import { cookies, headers } from 'next/headers';
+import { type NextRequest, NextResponse } from 'next/server';
+
+export async function GET(request: NextRequest) {
+  const headersList = await headers();
+  const cookieStore = await cookies();
+
+  const authHeader = headersList.get('authorization');
+  const sessionCookie = cookieStore.get('session');
+
+  // ...
+}
+```
+
+## Authentication
+
+Use better-auth for API authentication:
+
+```typescript
+import { auth } from '@/lib/auth/server';
+import { type NextRequest, NextResponse } from 'next/server';
+
+export async function GET(request: NextRequest) {
+  const session = await auth.api.getSession({
+    headers: request.headers,
+  });
+
+  if (!session) {
+    return NextResponse.json(
+      { error: 'Unauthorized' },
+      { status: 401 },
+    );
+  }
+
+  // Check admin role
+  if (session.user.role !== 'admin') {
+    return NextResponse.json(
+      { error: 'Forbidden' },
+      { status: 403 },
+    );
+  }
+
+  // Handle authorized request
+  return NextResponse.json({ user: session.user });
+}
+```
+
+## Stripe Webhook Handler
+
+Pattern for handling Stripe webhooks:
+
+```typescript
+// app/api/stripe/webhook/route.ts
+import { db } from '@/lib/database/client';
+import { stripe } from '@/lib/stripe/client';
+import { headers } from 'next/headers';
+import { type NextRequest, NextResponse } from 'next/server';
+import { type Stripe } from 'stripe';
+
+export async function POST(request: NextRequest) {
+  const body = await request.text();
+  const headersList = await headers();
+  const signature = headersList.get('stripe-signature');
+
+  if (!signature) {
+    return NextResponse.json(
+      { error: 'Missing stripe-signature header' },
+      { status: 400 },
+    );
+  }
+
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+  if (!webhookSecret) {
+    // eslint-disable-next-line no-console -- logging configuration errors
+    console.error('STRIPE_WEBHOOK_SECRET is not set');
+    return NextResponse.json(
+      { error: 'Webhook secret not configured' },
+      { status: 500 },
+    );
+  }
+
+  let event: Stripe.Event;
+
+  try {
+    event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+  } catch (error) {
+    // eslint-disable-next-line no-console -- logging webhook errors
+    console.error('Webhook signature verification failed:', error);
+    return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
+  }
+
+  // Handle specific event types
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object as Stripe.Checkout.Session;
+
+    const userId = session.metadata?.userId;
+    const courseId = session.metadata?.courseId;
+
+    if (!userId || !courseId) {
+      // eslint-disable-next-line no-console -- logging webhook errors
+      console.error('Missing metadata in checkout session:', session.id);
+      return NextResponse.json({ error: 'Missing metadata' }, { status: 400 });
+    }
+
+    // Idempotency check
+    const existingPurchase = await db.purchase.findFirst({
+      where: { courseId, userId },
+    });
+
+    if (!existingPurchase) {
+      await db.purchase.create({
+        data: {
+          amount: session.amount_total ?? 0,
+          courseId,
+          stripePaymentId: session.payment_intent as string,
+          userId,
+        },
+      });
+
+      // eslint-disable-next-line no-console -- logging successful operations
+      console.log(`Purchase created for user ${userId}, course ${courseId}`);
+    }
+  }
+
+  return NextResponse.json({ received: true });
+}
+```
+
+## Error Response Patterns
+
+### Standard Error Responses
+
+```typescript
+// 400 Bad Request - Invalid input
+return NextResponse.json(
+  { error: 'Invalid request body' },
+  { status: 400 },
+);
+
+// 401 Unauthorized - Not authenticated
+return NextResponse.json(
+  { error: 'Unauthorized' },
+  { status: 401 },
+);
+
+// 403 Forbidden - Not authorized
+return NextResponse.json(
+  { error: 'Forbidden' },
+  { status: 403 },
+);
+
+// 404 Not Found
+return NextResponse.json(
+  { error: 'Resource not found' },
+  { status: 404 },
+);
+
+// 500 Internal Server Error
+return NextResponse.json(
+  { error: 'Internal server error' },
+  { status: 500 },
+);
+```
+
+### Error with Details
+
+```typescript
+return NextResponse.json(
+  {
+    error: 'Validation failed',
+    details: {
+      field: 'email',
+      message: 'Invalid email format',
+    },
+  },
+  { status: 400 },
+);
+```
+
+## ZenStack Model API
+
+The project uses ZenStack's auto-generated API at `/api/model`:
+
+```typescript
+// app/api/model/[...path]/route.ts
+import { db } from '@/lib/database/client';
+import { createRouteHandler } from '@zenstackhq/server/next';
+
+export const { GET, POST, PUT, DELETE } = createRouteHandler({
+  db,
+});
+```
+
+This provides automatic CRUD endpoints for all models with access control.
+
+## Console Logging
+
+Always add ESLint disable comment for console statements:
+
+```typescript
+// eslint-disable-next-line no-console -- logging for debugging
+console.log('Debug:', data);
+
+// eslint-disable-next-line no-console -- logging API errors
+console.error('Error:', error);
+
+// eslint-disable-next-line no-console -- logging webhook processing
+console.log('Webhook received:', event.type);
+```
+
+## Request Validation
+
+Validate request bodies with Zod:
+
+```typescript
+import { z } from 'zod';
+import { type NextRequest, NextResponse } from 'next/server';
+
+const createCourseSchema = z.object({
+  title: z.string().min(1),
+  slug: z.string().min(1),
+  price: z.number().min(0),
+});
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const validated = createCourseSchema.parse(body);
+
+    // Use validated data
+    return NextResponse.json({ data: validated });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Validation failed', details: error.errors },
+        { status: 400 },
+      );
+    }
+    throw error;
+  }
+}
+```
+
+## Redirect Responses
+
+```typescript
+import { redirect } from 'next/navigation';
+import { NextResponse } from 'next/server';
+
+// Redirect to another page
+return NextResponse.redirect(new URL('/dashboard', request.url));
+
+// Or use redirect() in server actions
+redirect('/dashboard');
+```

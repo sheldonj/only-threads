@@ -1,0 +1,390 @@
+---
+description: Form handling patterns with React Hook Form, Zod validation, and shadcn/ui form components
+globs: 
+  - "**/*form*.tsx"
+  - "**/lib/validations/**"
+alwaysApply: false
+---
+
+# Forms & Validation
+
+This project uses React Hook Form with Zod for form handling and validation.
+
+## Validation Schemas
+
+Define validation schemas in `lib/validations/`:
+
+```typescript
+// lib/validations/course.ts
+import { z } from 'zod';
+
+export const courseSchema = z.object({
+  coverImage: z
+    .string()
+    .url('Must be a valid URL')
+    .optional()
+    .or(z.literal('')),
+  description: z
+    .string()
+    .max(2_000, 'Description must be less than 2000 characters')
+    .optional()
+    .or(z.literal('')),
+  price: z
+    .number()
+    .min(0, 'Price cannot be negative')
+    .max(1_000_000, 'Price is too high'),
+  published: z.boolean(),
+  slug: z
+    .string()
+    .min(1, 'Slug is required')
+    .min(3, 'Slug must be at least 3 characters')
+    .max(100, 'Slug must be less than 100 characters')
+    .regex(
+      /^[\da-z]+(?:-[\da-z]+)*$/u,
+      'Slug must be lowercase with hyphens only (e.g., my-course-title)',
+    ),
+  title: z
+    .string()
+    .min(1, 'Title is required')
+    .min(3, 'Title must be at least 3 characters')
+    .max(100, 'Title must be less than 100 characters'),
+});
+
+export type CourseFormData = z.infer<typeof courseSchema>;
+```
+
+### Schema Patterns
+
+```typescript
+// Required string
+title: z.string().min(1, 'Required')
+
+// Optional string (allows empty)
+description: z.string().optional().or(z.literal(''))
+
+// Optional URL
+imageUrl: z.string().url('Must be a valid URL').optional().or(z.literal(''))
+
+// Number with range
+price: z.number().min(0).max(1_000_000)
+
+// Boolean
+published: z.boolean()
+
+// Enum
+status: z.enum(['draft', 'published', 'archived'])
+
+// Regex validation
+slug: z.string().regex(/^[\da-z-]+$/u, 'Invalid format')
+```
+
+## Form Component Structure
+
+```typescript
+'use client';
+
+import { Button } from '@/components/ui/button';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { type CourseFormData, courseSchema } from '@/lib/validations/course';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader2 } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+
+type CourseFormProps = {
+  readonly initialData?: Partial<CourseFormData>;
+  readonly isSubmitting?: boolean;
+  readonly onSubmit: (data: CourseFormData) => Promise<void>;
+  readonly submitLabel?: string;
+};
+
+export function CourseForm({
+  initialData,
+  isSubmitting = false,
+  onSubmit,
+  submitLabel = 'Save',
+}: CourseFormProps) {
+  const form = useForm<CourseFormData>({
+    defaultValues: {
+      description: initialData?.description ?? '',
+      price: initialData?.price ?? 0,
+      published: initialData?.published ?? false,
+      slug: initialData?.slug ?? '',
+      title: initialData?.title ?? '',
+    },
+    resolver: zodResolver(courseSchema),
+  });
+
+  const handleSubmit = async (data: CourseFormData) => {
+    await onSubmit(data);
+  };
+
+  return (
+    <Form {...form}>
+      <form
+        className="space-y-6"
+        onSubmit={form.handleSubmit(handleSubmit)}
+      >
+        {/* Form fields */}
+        
+        <Button
+          className="w-full"
+          disabled={isSubmitting}
+          type="submit"
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Saving...
+            </>
+          ) : (
+            submitLabel
+          )}
+        </Button>
+      </form>
+    </Form>
+  );
+}
+```
+
+## Form Field Patterns
+
+### Text Input
+
+```typescript
+<FormField
+  control={form.control}
+  name="title"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Title</FormLabel>
+      <FormControl>
+        <Input placeholder="Enter title" {...field} />
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+```
+
+### Textarea
+
+```typescript
+<FormField
+  control={form.control}
+  name="description"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Description</FormLabel>
+      <FormControl>
+        <Textarea
+          placeholder="Enter description..."
+          rows={4}
+          {...field}
+        />
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+```
+
+### Number Input
+
+```typescript
+<FormField
+  control={form.control}
+  name="price"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Price (in cents)</FormLabel>
+      <FormControl>
+        <Input
+          min="0"
+          placeholder="4999"
+          type="number"
+          {...field}
+          onChange={(e) =>
+            field.onChange(Number.parseInt(e.target.value, 10) || 0)
+          }
+        />
+      </FormControl>
+      <FormDescription>
+        Display price: ${(form.watch('price') / 100).toFixed(2)}
+      </FormDescription>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+```
+
+### Switch/Toggle
+
+```typescript
+<FormField
+  control={form.control}
+  name="published"
+  render={({ field }) => (
+    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+      <div className="space-y-0.5">
+        <FormLabel>Published</FormLabel>
+        <FormDescription>
+          Make this visible to users
+        </FormDescription>
+      </div>
+      <FormControl>
+        <Switch
+          checked={field.value}
+          onCheckedChange={(checked) => field.onChange(checked)}
+        />
+      </FormControl>
+    </FormItem>
+  )}
+/>
+```
+
+### Select
+
+```typescript
+<FormField
+  control={form.control}
+  name="category"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Category</FormLabel>
+      <Select
+        defaultValue={field.value}
+        onValueChange={field.onChange}
+      >
+        <FormControl>
+          <SelectTrigger>
+            <SelectValue placeholder="Select a category" />
+          </SelectTrigger>
+        </FormControl>
+        <SelectContent>
+          <SelectItem value="frontend">Frontend</SelectItem>
+          <SelectItem value="backend">Backend</SelectItem>
+        </SelectContent>
+      </Select>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+```
+
+## Form Usage in Pages
+
+```typescript
+'use client';
+
+import { CourseForm } from '@/components/courses/course-form';
+import { useCourseQueries } from '@/lib/hooks/use-models';
+import { type CourseFormData } from '@/lib/validations/course';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { toast } from 'sonner';
+
+export default function EditCoursePage() {
+  const router = useRouter();
+  const courseQueries = useCourseQueries();
+  const [error, setError] = useState<string | null>(null);
+  
+  const updateCourse = courseQueries.useUpdate();
+
+  const handleSubmit = async (data: CourseFormData) => {
+    setError(null);
+    try {
+      await updateCourse.mutateAsync({
+        data: {
+          coverImage: data.coverImage || null,
+          description: data.description || null,
+          price: data.price,
+          published: data.published,
+          slug: data.slug,
+          title: data.title,
+        },
+        where: { id: courseId },
+      });
+      toast.success('Course updated!');
+      router.push('/admin/courses');
+    } catch (caughtError) {
+      const message = caughtError instanceof Error 
+        ? caughtError.message 
+        : 'An error occurred';
+      setError(message);
+      toast.error('Failed to update course');
+    }
+  };
+
+  return (
+    <CourseForm
+      initialData={course}
+      isSubmitting={updateCourse.isPending}
+      onSubmit={handleSubmit}
+      submitLabel="Update Course"
+    />
+  );
+}
+```
+
+## Error Display
+
+Display form-level errors above the form:
+
+```typescript
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertTriangle } from 'lucide-react';
+
+{error && (
+  <Alert className="mb-4" variant="destructive">
+    <AlertTriangle className="h-4 w-4" />
+    <AlertTitle>Error</AlertTitle>
+    <AlertDescription>{error}</AlertDescription>
+  </Alert>
+)}
+```
+
+## Custom Field Handlers
+
+For fields that need special handling (e.g., auto-generating slugs):
+
+```typescript
+const slugManuallyEdited = useRef(Boolean(initialData?.slug));
+
+const handleTitleChange = (
+  value: string,
+  onChange: (value: string) => void,
+) => {
+  onChange(value);
+
+  // Auto-generate slug if not manually edited
+  if (!slugManuallyEdited.current && value) {
+    form.setValue('slug', generateSlug(value), { shouldValidate: false });
+  }
+};
+
+<FormField
+  control={form.control}
+  name="title"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Title</FormLabel>
+      <FormControl>
+        <Input
+          {...field}
+          onChange={(e) => handleTitleChange(e.target.value, field.onChange)}
+        />
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+```

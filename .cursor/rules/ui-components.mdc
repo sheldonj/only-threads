@@ -1,0 +1,357 @@
+---
+description: UI component patterns with shadcn/ui, Tailwind CSS, Class Variance Authority, and design tokens
+globs: components/**/*.tsx
+alwaysApply: false
+---
+
+# UI Components
+
+This project uses shadcn/ui (new-york style) with Tailwind CSS 4 for UI components.
+
+## Component Library
+
+UI components are in `components/ui/`. These are based on shadcn/ui and should not be modified unless necessary.
+
+### Importing Components
+
+```typescript
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+```
+
+## Class Merging
+
+Always use `cn()` from `@/lib/utils/cn` for conditional classes:
+
+```typescript
+import { cn } from '@/lib/utils/cn';
+
+<div className={cn(
+  'rounded-lg border p-4',
+  isActive && 'border-primary bg-primary/10',
+  className
+)}>
+```
+
+## Class Variance Authority (CVA)
+
+Use CVA for component variants:
+
+```typescript
+import { cn } from '@/lib/utils/cn';
+import { cva, type VariantProps } from 'class-variance-authority';
+
+const buttonVariants = cva(
+  // Base styles
+  'inline-flex items-center justify-center rounded-md text-sm font-medium transition-all',
+  {
+    defaultVariants: {
+      size: 'default',
+      variant: 'default',
+    },
+    variants: {
+      size: {
+        default: 'h-9 px-4 py-2',
+        icon: 'size-9',
+        lg: 'h-10 px-6',
+        sm: 'h-8 px-3',
+      },
+      variant: {
+        default: 'bg-primary text-primary-foreground hover:bg-primary/90',
+        destructive: 'bg-destructive text-white hover:bg-destructive/90',
+        ghost: 'hover:bg-accent hover:text-accent-foreground',
+        link: 'text-primary underline-offset-4 hover:underline',
+        outline: 'border bg-background hover:bg-accent',
+        secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+      },
+    },
+  },
+);
+
+type ButtonProps = React.ComponentProps<'button'> &
+  VariantProps<typeof buttonVariants> & {
+    readonly asChild?: boolean;
+  };
+
+const Button = ({ className, size, variant, ...props }: ButtonProps) => (
+  <button
+    className={cn(buttonVariants({ className, size, variant }))}
+    {...props}
+  />
+);
+```
+
+## Design Tokens
+
+Use CSS variables for theming. Available tokens:
+
+### Colors
+
+```typescript
+// Semantic colors - use these
+className="bg-background text-foreground"
+className="bg-card text-card-foreground"
+className="bg-primary text-primary-foreground"
+className="bg-secondary text-secondary-foreground"
+className="bg-muted text-muted-foreground"
+className="bg-accent text-accent-foreground"
+className="bg-destructive text-destructive-foreground"
+className="border-border"
+className="ring-ring"
+
+// With opacity
+className="bg-primary/10"
+className="text-muted-foreground/80"
+```
+
+### Radius
+
+```typescript
+className="rounded-sm"   // calc(var(--radius) - 4px)
+className="rounded-md"   // calc(var(--radius) - 2px)
+className="rounded-lg"   // var(--radius)
+className="rounded-xl"   // calc(var(--radius) + 4px)
+```
+
+### Shadows
+
+The project uses custom neo-brutalist shadows:
+
+```typescript
+className="shadow-sm"
+className="shadow"
+className="shadow-md"
+className="shadow-lg"
+```
+
+## Icons
+
+Use Lucide React for icons:
+
+```typescript
+import {
+  ArrowLeft,
+  BookOpen,
+  Check,
+  Loader2,
+  LogOut,
+  Settings,
+  User,
+} from 'lucide-react';
+
+// Standard sizing
+<ArrowLeft className="h-4 w-4" />
+<Loader2 className="h-4 w-4 animate-spin" />
+
+// With margin for text
+<ArrowLeft className="mr-2 h-4 w-4" />
+```
+
+## Common Patterns
+
+### Cards
+
+```typescript
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+
+<Card>
+  <CardHeader>
+    <CardTitle>Course Title</CardTitle>
+    <CardDescription>Course description here</CardDescription>
+  </CardHeader>
+  <CardContent>
+    {/* Card content */}
+  </CardContent>
+</Card>
+```
+
+### Alerts
+
+```typescript
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertTriangle, ShieldAlert } from 'lucide-react';
+
+// Destructive alert
+<Alert variant="destructive">
+  <AlertTriangle className="h-4 w-4" />
+  <AlertTitle>Error</AlertTitle>
+  <AlertDescription>Something went wrong.</AlertDescription>
+</Alert>
+
+// Default alert
+<Alert>
+  <ShieldAlert className="h-4 w-4" />
+  <AlertTitle>Notice</AlertTitle>
+  <AlertDescription>Information here.</AlertDescription>
+</Alert>
+```
+
+### Dropdowns
+
+```typescript
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
+<DropdownMenu>
+  <DropdownMenuTrigger asChild>
+    <Button variant="ghost" size="sm">
+      <User className="h-4 w-4" />
+    </Button>
+  </DropdownMenuTrigger>
+  <DropdownMenuContent align="end">
+    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+    <DropdownMenuSeparator />
+    <DropdownMenuItem>
+      <Settings className="mr-2 h-4 w-4" />
+      Settings
+    </DropdownMenuItem>
+    <DropdownMenuItem onClick={handleSignOut}>
+      <LogOut className="mr-2 h-4 w-4" />
+      Sign Out
+    </DropdownMenuItem>
+  </DropdownMenuContent>
+</DropdownMenu>
+```
+
+### Loading States
+
+```typescript
+import { Loader2 } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+
+// Button loading
+<Button disabled={isLoading}>
+  {isLoading ? (
+    <>
+      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+      Loading...
+    </>
+  ) : (
+    'Submit'
+  )}
+</Button>
+
+// Content loading
+<div className="flex justify-center items-center p-8">
+  <Loader2 className="h-8 w-8 animate-spin" />
+</div>
+
+// Skeleton loading
+<div className="space-y-2">
+  <Skeleton className="h-4 w-[250px]" />
+  <Skeleton className="h-4 w-[200px]" />
+</div>
+```
+
+### Badges
+
+```typescript
+import { Badge } from '@/components/ui/badge';
+
+<Badge>Default</Badge>
+<Badge variant="secondary">Secondary</Badge>
+<Badge variant="destructive">Destructive</Badge>
+<Badge variant="outline">Outline</Badge>
+```
+
+## Framer Motion
+
+Use Framer Motion for animations:
+
+```typescript
+import { motion } from 'framer-motion';
+
+<motion.div
+  animate={{ opacity: 1, y: 0 }}
+  initial={{ opacity: 0, y: 20 }}
+  transition={{ duration: 0.3 }}
+>
+  Content
+</motion.div>
+```
+
+## Layout Patterns
+
+### Container
+
+```typescript
+<div className="container mx-auto px-4 py-8">
+  {/* Content */}
+</div>
+
+// Narrower container
+<div className="container mx-auto p-4 max-w-2xl">
+  {/* Form content */}
+</div>
+```
+
+### Grid
+
+```typescript
+// Responsive grid
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  {items.map(item => <Card key={item.id} />)}
+</div>
+
+// Sidebar layout
+<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+  <div className="lg:col-span-2">{/* Main content */}</div>
+  <div className="lg:col-span-1">{/* Sidebar */}</div>
+</div>
+```
+
+### Flex
+
+```typescript
+// Centered content
+<div className="flex justify-center items-center">
+
+// Space between
+<div className="flex justify-between items-center">
+
+// Gap between items
+<div className="flex items-center gap-2">
+```
+
+## Toast Notifications
+
+Use Sonner for toasts:
+
+```typescript
+import { toast } from 'sonner';
+
+toast.success('Operation successful!');
+toast.error('Something went wrong');
+toast.info('Information message');
+```
+
+## Responsive Design
+
+Mobile-first approach:
+
+```typescript
+// Base (mobile) -> md (tablet) -> lg (desktop)
+<div className="px-4 md:px-6 lg:px-8">
+<div className="text-sm md:text-base lg:text-lg">
+<div className="hidden md:block">  {/* Hidden on mobile */}
+<div className="md:hidden">        {/* Only on mobile */}
+```

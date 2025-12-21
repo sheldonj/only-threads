@@ -1,0 +1,278 @@
+---
+description: ZenStack ORM patterns for data access, access control policies, and TanStack Query integration
+globs:
+alwaysApply: false
+---
+
+# ZenStack Data Access
+
+This project uses ZenStack ORM with better-auth integration for data access with built-in access control policies.
+
+## Database Client
+
+Import the database client from `@/lib/database/client`:
+
+```typescript
+import { db } from '@/lib/database/client';
+```
+
+## Server-Side Data Fetching
+
+Use `db` directly in Server Components and API routes:
+
+```typescript
+// In a Server Component
+export default async function CoursePage({ params }: Props) {
+  const { slug } = await params;
+  
+  const course = await db.course.findFirst({
+    include: {
+      lessons: {
+        orderBy: { order: 'asc' },
+        select: { id: true, title: true, order: true },
+      },
+    },
+    where: { published: true, slug },
+  });
+
+  if (!course) return <NotFound />;
+  
+  return <CourseContent course={course} />;
+}
+```
+
+## Client-Side Data Fetching
+
+Use the typed hooks from `@/lib/hooks/use-models`:
+
+```typescript
+'use client';
+
+import { useCourseQueries, useLessonQueries } from '@/lib/hooks/use-models';
+
+export function CourseList() {
+  const courseQueries = useCourseQueries();
+  
+  const { data: courses, isLoading } = courseQueries.useFindMany({
+    where: { published: true },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  if (isLoading) return <LoadingSkeleton />;
+  
+  return (
+    <div>
+      {courses?.map(course => (
+        <CourseCard key={course.id} course={course} />
+      ))}
+    </div>
+  );
+}
+```
+
+### Available Query Hooks
+
+Each model has these query hooks:
+
+```typescript
+const courseQueries = useCourseQueries();
+
+// Find operations
+courseQueries.useFindMany({ where, include, orderBy });
+courseQueries.useFindUnique({ where });
+courseQueries.useFindFirst({ where });
+courseQueries.useCount({ where });
+
+// Mutations
+courseQueries.useCreate();
+courseQueries.useUpdate();
+courseQueries.useDelete();
+```
+
+### Mutation Example
+
+```typescript
+'use client';
+
+import { useCourseQueries } from '@/lib/hooks/use-models';
+import { toast } from 'sonner';
+
+export function CreateCourseButton() {
+  const courseQueries = useCourseQueries();
+  const createCourse = courseQueries.useCreate();
+
+  const handleCreate = async () => {
+    try {
+      await createCourse.mutateAsync({
+        data: {
+          title: 'New Course',
+          slug: 'new-course',
+          price: 4999,
+          published: false,
+        },
+      });
+      toast.success('Course created!');
+    } catch (error) {
+      toast.error('Failed to create course');
+    }
+  };
+
+  return (
+    <Button onClick={handleCreate} disabled={createCourse.isPending}>
+      {createCourse.isPending ? 'Creating...' : 'Create Course'}
+    </Button>
+  );
+}
+```
+
+## Generated Types
+
+Import types from `@/lib/zenstack/generated/models`:
+
+```typescript
+import { type Course, type Lesson, type Purchase } from '@/lib/zenstack/generated/models';
+
+type CourseWithLessons = Course & {
+  lessons: Lesson[];
+};
+```
+
+## ZenStack Schema Patterns
+
+Schema files are in `lib/zenstack/schema/`:
+
+### Model Definition
+
+```zmodel
+model Course {
+  id          String    @id @default(cuid())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  title       String
+  slug        String    @unique
+  description String?
+  price       Float     // in cents for Stripe
+  published   Boolean   @default(false)
+  lessons     Lesson[]
+
+  @@map('course')
+
+  // Access control policies
+  @@allow('read', published == true)
+  @@allow('all', auth() != null && auth().role == 'admin')
+}
+```
+
+### Access Control Policies
+
+Use `@@allow` for access control:
+
+```zmodel
+// Anyone can read published items
+@@allow('read', published == true)
+
+// Only authenticated users
+@@allow('read', auth() != null)
+
+// Only the owner
+@@allow('all', auth() != null && auth().userId == userId)
+
+// Only admins
+@@allow('all', auth() != null && auth().role == 'admin')
+
+// Relational checks - users who purchased the course
+@@allow('read', auth() != null && course.purchases?[userId == auth().userId])
+```
+
+### Common Patterns
+
+```zmodel
+// User ownership
+model LessonProgress {
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@allow('all', auth() != null && auth().userId == userId)
+  @@allow('read', auth() != null && auth().role == 'admin')
+}
+
+// Cascade deletes
+model Lesson {
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+}
+
+// Unique constraints
+@@unique([userId, courseId])
+@@unique([userId, lessonId])
+```
+
+## Generating Schema
+
+After modifying `.zmodel` files, regenerate:
+
+```bash
+pnpm db:generate   # Generate TypeScript types
+pnpm db:push       # Push schema to database
+```
+
+## Error Handling
+
+Handle ZenStack access control errors:
+
+```typescript
+try {
+  await courseQueries.mutateAsync({
+    data: { title: 'New Course' },
+  });
+} catch (error) {
+  const message = error instanceof Error ? error.message : 'Unknown error';
+  
+  if (message.includes('denied') || message.includes('permission')) {
+    toast.error('You do not have permission for this action');
+  } else if (message.includes('unique')) {
+    toast.error('A record with this value already exists');
+  } else {
+    toast.error(message);
+  }
+}
+```
+
+## Query Patterns
+
+### Include Related Data
+
+```typescript
+const course = await db.course.findFirst({
+  include: {
+    lessons: {
+      orderBy: { order: 'asc' },
+      select: { id: true, title: true, description: true },
+    },
+    purchases: {
+      where: { userId: session.user.id },
+    },
+  },
+  where: { slug },
+});
+```
+
+### Counting
+
+```typescript
+const purchaseCount = await db.purchase.count({
+  where: { courseId: course.id },
+});
+```
+
+### Checking Existence
+
+```typescript
+const hasPurchased = await db.purchase.findFirst({
+  where: { userId: session.user.id, courseId: course.id },
+});
+
+if (hasPurchased) {
+  // User has access
+}
+```
