@@ -15,14 +15,16 @@ import {
   type LessonProgress,
 } from '@/lib/zenstack/generated/models';
 import {
+  ArrowLeft,
   BookOpen,
   Check,
   CheckCircle2,
-  Circle,
   Loader2,
   Lock,
   PlayCircle,
   RotateCcw,
+  Sparkles,
+  Trophy,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -125,7 +127,7 @@ export default function LearnCoursePage() {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -152,160 +154,212 @@ export default function LearnCoursePage() {
   const firstLesson = course.lessons?.[0];
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
+    <div className="min-h-screen">
+      {/* Header */}
+      <div className="mb-8 space-y-4">
         <Link
-          className="text-primary hover:underline text-sm"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors group"
           href="/library"
         >
-          ← Back to Library
+          <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
+          Back to Library
         </Link>
-        <h1 className="text-3xl font-bold mt-4">{course.title}</h1>
-        <p className="text-muted-foreground mt-2">
-          {course.lessons?.length ?? 0} lessons
-        </p>
+        <div className="space-y-2">
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
+            {course.title}
+          </h1>
+          <p className="text-muted-foreground text-lg">
+            {course.lessons?.length ?? 0} lessons
+          </p>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* Main Layout */}
+      <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
         {/* Welcome Card */}
-        <div className="lg:col-span-2">
-          <Card className="bg-gradient-to-br from-primary/10 to-primary/5">
-            <CardContent className="py-12 text-center">
+        <div className="flex-1 min-w-0">
+          <Card className="overflow-hidden border-border/50 shadow-xl">
+            <CardContent className="p-0">
               {isComplete ? (
-                <>
-                  <CheckCircle2 className="h-16 w-16 mx-auto text-green-600 mb-6" />
-                  <h2 className="text-2xl font-semibold mb-4">
-                    Course Completed!
-                  </h2>
-                  <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-                    Congratulations! You&apos;ve completed all lessons in{' '}
-                    {course.title}. Feel free to revisit any lesson or explore
-                    other courses.
-                  </p>
-                  {firstLesson && (
-                    <Link href={`/learn/${course.slug}/${firstLesson.id}`}>
-                      <Button
-                        size="lg"
-                        variant="outline"
-                      >
-                        <RotateCcw className="mr-2 h-5 w-5" />
-                        Review Course
-                      </Button>
-                    </Link>
-                  )}
-                </>
-              ) : hasStarted ? (
-                <>
-                  <BookOpen className="h-16 w-16 mx-auto text-primary mb-6" />
-                  <h2 className="text-2xl font-semibold mb-4">
-                    Continue Learning
-                  </h2>
-                  <p className="text-muted-foreground mb-4 max-w-md mx-auto">
-                    You&apos;re making great progress! Keep going to complete{' '}
-                    {course.title}.
-                  </p>
-                  <div className="max-w-xs mx-auto mb-8">
-                    <CourseProgressBar
-                      completedCount={completedCount}
-                      totalCount={totalLessons}
-                    />
+                <div className="relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 via-emerald-500/5 to-teal-500/10" />
+                  <div className="relative p-8 md:p-12 text-center">
+                    <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-500/20 mb-6">
+                      <Trophy className="h-10 w-10 text-green-500" />
+                    </div>
+                    <h2 className="text-2xl md:text-3xl font-bold mb-4">
+                      Course Completed!
+                    </h2>
+                    <p className="text-muted-foreground mb-8 max-w-md mx-auto text-lg leading-relaxed">
+                      Congratulations! You&apos;ve completed all lessons in{' '}
+                      <span className="font-semibold text-foreground">
+                        {course.title}
+                      </span>
+                      . Feel free to revisit any lesson or explore other
+                      courses.
+                    </p>
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                      {firstLesson && (
+                        <Link href={`/learn/${course.slug}/${firstLesson.id}`}>
+                          <Button
+                            className="group"
+                            size="lg"
+                            variant="outline"
+                          >
+                            <RotateCcw className="mr-2 h-5 w-5 group-hover:-rotate-45 transition-transform" />
+                            Review Course
+                          </Button>
+                        </Link>
+                      )}
+                      <Link href="/library">
+                        <Button
+                          className="group"
+                          size="lg"
+                        >
+                          <Sparkles className="mr-2 h-5 w-5" />
+                          Explore More Courses
+                        </Button>
+                      </Link>
+                    </div>
                   </div>
-                  {resumeLesson && (
-                    <Link href={`/learn/${course.slug}/${resumeLesson.id}`}>
-                      <Button size="lg">
-                        <PlayCircle className="mr-2 h-5 w-5" />
-                        Resume: {resumeLesson.title}
-                      </Button>
-                    </Link>
-                  )}
-                </>
+                </div>
+              ) : hasStarted ? (
+                <div className="relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-accent/10" />
+                  <div className="relative p-8 md:p-12 text-center">
+                    <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/20 mb-6">
+                      <BookOpen className="h-10 w-10 text-primary" />
+                    </div>
+                    <h2 className="text-2xl md:text-3xl font-bold mb-4">
+                      Continue Learning
+                    </h2>
+                    <p className="text-muted-foreground mb-6 max-w-md mx-auto text-lg leading-relaxed">
+                      You&apos;re making great progress! Keep going to complete{' '}
+                      <span className="font-semibold text-foreground">
+                        {course.title}
+                      </span>
+                      .
+                    </p>
+                    <div className="max-w-sm mx-auto mb-8">
+                      <CourseProgressBar
+                        completedCount={completedCount}
+                        totalCount={totalLessons}
+                      />
+                    </div>
+                    {resumeLesson && (
+                      <Link href={`/learn/${course.slug}/${resumeLesson.id}`}>
+                        <Button
+                          className="group shadow-lg"
+                          size="lg"
+                        >
+                          <PlayCircle className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform" />
+                          Resume: {resumeLesson.title}
+                        </Button>
+                      </Link>
+                    )}
+                  </div>
+                </div>
               ) : (
-                <>
-                  <BookOpen className="h-16 w-16 mx-auto text-primary mb-6" />
-                  <h2 className="text-2xl font-semibold mb-4">
-                    Welcome to {course.title}
-                  </h2>
-                  <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-                    {course.description ||
-                      'Start learning by selecting a lesson from the sidebar.'}
-                  </p>
-                  {firstLesson && (
-                    <Link href={`/learn/${course.slug}/${firstLesson.id}`}>
-                      <Button size="lg">
-                        <PlayCircle className="mr-2 h-5 w-5" />
-                        Start First Lesson
-                      </Button>
-                    </Link>
-                  )}
-                </>
+                <div className="relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-accent/5 to-secondary/10" />
+                  <div className="relative p-8 md:p-12 text-center">
+                    <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/20 mb-6">
+                      <BookOpen className="h-10 w-10 text-primary" />
+                    </div>
+                    <h2 className="text-2xl md:text-3xl font-bold mb-4">
+                      Welcome to {course.title}
+                    </h2>
+                    <p className="text-muted-foreground mb-8 max-w-md mx-auto text-lg leading-relaxed">
+                      {course.description ||
+                        'Start learning by selecting a lesson from the sidebar.'}
+                    </p>
+                    {firstLesson && (
+                      <Link href={`/learn/${course.slug}/${firstLesson.id}`}>
+                        <Button
+                          className="group shadow-lg"
+                          size="lg"
+                        >
+                          <PlayCircle className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform" />
+                          Start First Lesson
+                        </Button>
+                      </Link>
+                    )}
+                  </div>
+                </div>
               )}
             </CardContent>
           </Card>
         </div>
 
-        {/* Lesson List */}
-        <div className="lg:col-span-1">
-          <Card>
-            <CardContent className="p-0">
-              <div className="p-4 border-b space-y-3">
-                <h3 className="font-semibold">Course Content</h3>
-                {totalLessons > 0 && (
-                  <CourseProgressBar
-                    completedCount={completedCount}
-                    size="sm"
-                    totalCount={totalLessons}
-                  />
-                )}
-              </div>
-              <ScrollArea className="h-[400px]">
-                <div className="p-2">
-                  {course.lessons && course.lessons.length > 0 ? (
-                    course.lessons.map((lesson: Lesson, index: number) => {
-                      const isCompleted = completedLessonIds.has(lesson.id);
-
-                      return (
-                        <Link
-                          href={`/learn/${course.slug}/${lesson.id}`}
-                          key={lesson.id}
-                        >
-                          <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors">
-                            <div
-                              className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                                isCompleted
-                                  ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400'
-                                  : 'bg-primary/10'
-                              }`}
-                            >
-                              {isCompleted ? (
-                                <Check className="h-4 w-4" />
-                              ) : (
-                                index + 1
-                              )}
-                            </div>
-                            <div className="flex-grow min-w-0">
-                              <p className="font-medium truncate">
-                                {lesson.title}
-                              </p>
-                            </div>
-                            {isCompleted ? (
-                              <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400 shrink-0" />
-                            ) : (
-                              <Circle className="h-4 w-4 text-muted-foreground/40 shrink-0" />
-                            )}
-                          </div>
-                        </Link>
-                      );
-                    })
-                  ) : (
-                    <p className="p-4 text-muted-foreground text-center">
-                      No lessons available yet.
-                    </p>
+        {/* Lesson List Sidebar */}
+        <aside className="w-full lg:w-80 xl:w-96 shrink-0">
+          <div className="lg:sticky lg:top-20">
+            <Card className="overflow-hidden bg-sidebar border-sidebar-border shadow-xl">
+              <CardContent className="p-0">
+                {/* Header */}
+                <div className="p-5 border-b border-sidebar-border bg-gradient-to-r from-sidebar to-sidebar/80">
+                  <h3 className="font-bold text-sidebar-foreground text-lg mb-1">
+                    Course Content
+                  </h3>
+                  {totalLessons > 0 && (
+                    <CourseProgressBar
+                      className="mt-3"
+                      completedCount={completedCount}
+                      size="sm"
+                      totalCount={totalLessons}
+                    />
                   )}
                 </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
-        </div>
+
+                {/* Lesson List */}
+                <ScrollArea className="max-h-[60vh] lg:max-h-[calc(100vh-14rem)]">
+                  <div className="p-3 space-y-1">
+                    {course.lessons && course.lessons.length > 0 ? (
+                      course.lessons.map((lesson: Lesson, index: number) => {
+                        const isCompleted = completedLessonIds.has(lesson.id);
+
+                        return (
+                          <Link
+                            href={`/learn/${course.slug}/${lesson.id}`}
+                            key={lesson.id}
+                          >
+                            <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-sidebar-accent/50 transition-all duration-200 text-sidebar-foreground">
+                              <div
+                                className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
+                                  isCompleted
+                                    ? 'bg-green-500/20 text-green-500 dark:bg-green-500/30 dark:text-green-400'
+                                    : 'bg-sidebar-accent/50 text-sidebar-foreground/70'
+                                }`}
+                              >
+                                {isCompleted ? (
+                                  <Check className="h-4 w-4" />
+                                ) : (
+                                  index + 1
+                                )}
+                              </div>
+                              <div className="flex-grow min-w-0">
+                                <p className="font-medium truncate">
+                                  {lesson.title}
+                                </p>
+                              </div>
+                              {isCompleted && (
+                                <CheckCircle2 className="h-4 w-4 text-green-500 dark:text-green-400 shrink-0" />
+                              )}
+                            </div>
+                          </Link>
+                        );
+                      })
+                    ) : (
+                      <p className="p-4 text-sidebar-foreground/60 text-center">
+                        No lessons available yet.
+                      </p>
+                    )}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          </div>
+        </aside>
       </div>
     </div>
   );

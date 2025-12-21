@@ -24,9 +24,9 @@ import {
   Check,
   CheckCircle2,
   ChevronRight,
-  Circle,
   Loader2,
   Lock,
+  Sparkles,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -181,7 +181,7 @@ export default function LessonPage() {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -225,61 +225,72 @@ export default function LessonPage() {
       : null;
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+    <div className="min-h-screen">
+      {/* Main Layout */}
+      <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
         {/* Main Content */}
-        <div className="lg:col-span-3 space-y-6">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="flex-1 min-w-0 space-y-8">
+          {/* Breadcrumb */}
+          <nav className="flex items-center gap-2 text-sm">
             <Link
-              className="hover:text-foreground"
+              className="text-muted-foreground hover:text-primary transition-colors"
               href="/library"
             >
               Library
             </Link>
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
             <Link
-              className="hover:text-foreground"
+              className="text-muted-foreground hover:text-primary transition-colors"
               href={`/learn/${course.slug}`}
             >
               {course.title}
             </Link>
-            <ChevronRight className="h-4 w-4" />
-            <span className="text-foreground">{lesson.title}</span>
-          </div>
+            <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
+            <span className="text-foreground font-medium truncate max-w-[200px]">
+              {lesson.title}
+            </span>
+          </nav>
 
-          <div className="flex items-start justify-between gap-4">
-            <h1 className="text-3xl font-bold">{lesson.title}</h1>
-            {isCurrentLessonComplete ? (
-              <div className="flex items-center gap-2 text-green-600 shrink-0">
-                <CheckCircle2 className="h-5 w-5" />
-                <span className="text-sm font-medium">Completed</span>
-              </div>
-            ) : (
-              <Button
-                disabled={isMarkingComplete}
-                onClick={handleMarkComplete}
-                size="sm"
-                variant="outline"
-              >
-                {isMarkingComplete ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Check className="mr-2 h-4 w-4" />
+          {/* Lesson Header */}
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+              <div className="space-y-2">
+                <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
+                  {lesson.title}
+                </h1>
+                {lesson.description && (
+                  <p className="text-lg text-muted-foreground leading-relaxed">
+                    {lesson.description}
+                  </p>
                 )}
-                Mark Complete
-              </Button>
-            )}
+              </div>
+              {isCurrentLessonComplete ? (
+                <div className="flex items-center gap-2 px-4 py-2 bg-green-500/10 text-green-600 dark:text-green-400 rounded-full shrink-0">
+                  <CheckCircle2 className="h-5 w-5" />
+                  <span className="text-sm font-semibold">Completed</span>
+                </div>
+              ) : (
+                <Button
+                  className="shrink-0 group"
+                  disabled={isMarkingComplete}
+                  onClick={handleMarkComplete}
+                  size="lg"
+                  variant="outline"
+                >
+                  {isMarkingComplete ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Check className="mr-2 h-4 w-4 group-hover:scale-110 transition-transform" />
+                  )}
+                  Mark Complete
+                </Button>
+              )}
+            </div>
           </div>
 
-          {lesson.description && (
-            <p className="text-lg text-muted-foreground">
-              {lesson.description}
-            </p>
-          )}
-
-          {/* Video Player Placeholder */}
+          {/* Video Player */}
           {lesson.videoUrl && (
-            <div className="aspect-video bg-black rounded-lg overflow-hidden">
+            <div className="aspect-video bg-black/90 rounded-xl overflow-hidden shadow-xl ring-1 ring-white/10">
               {/* eslint-disable-next-line react/iframe-missing-sandbox -- video embeds require scripts and same-origin */}
               <iframe
                 allowFullScreen
@@ -292,8 +303,8 @@ export default function LessonPage() {
 
           {/* Lesson Content */}
           {lesson.content && (
-            <Card>
-              <CardContent className="py-6 prose dark:prose-invert max-w-none">
+            <Card className="overflow-hidden border-border/50 shadow-lg">
+              <CardContent className="p-6 md:p-8 prose prose-lg dark:prose-invert max-w-none prose-headings:font-bold prose-a:text-primary prose-code:text-primary">
                 <div
                   dangerouslySetInnerHTML={{
                     __html: lesson.content.replaceAll('\n', '<br />'),
@@ -304,97 +315,134 @@ export default function LessonPage() {
           )}
 
           {/* Navigation */}
-          <div className="flex items-center justify-between pt-6 border-t">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-8 border-t border-border/50">
             {previousLesson ? (
-              <Link href={`/learn/${course.slug}/${previousLesson.id}`}>
-                <Button variant="outline">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Previous: {previousLesson.title}
+              <Link
+                className="flex-1 sm:flex-initial"
+                href={`/learn/${course.slug}/${previousLesson.id}`}
+              >
+                <Button
+                  className="w-full sm:w-auto group"
+                  size="lg"
+                  variant="outline"
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4 group-hover:-translate-x-1 transition-transform" />
+                  <span className="truncate max-w-[150px] md:max-w-[200px]">
+                    {previousLesson.title}
+                  </span>
                 </Button>
               </Link>
             ) : (
-              <div />
+              <div className="hidden sm:block" />
             )}
             {nextLesson ? (
-              <Link href={`/learn/${course.slug}/${nextLesson.id}`}>
-                <Button>
-                  Next: {nextLesson.title}
-                  <ArrowRight className="ml-2 h-4 w-4" />
+              <Link
+                className="flex-1 sm:flex-initial"
+                href={`/learn/${course.slug}/${nextLesson.id}`}
+              >
+                <Button
+                  className="w-full sm:w-auto group bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg"
+                  size="lg"
+                >
+                  <span className="mr-2">Next:</span>
+                  <span className="truncate max-w-[150px] md:max-w-[200px]">
+                    {nextLesson.title}
+                  </span>
+                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
             ) : (
-              <Link href={`/learn/${course.slug}`}>
-                <Button variant="secondary">Complete Course</Button>
+              <Link
+                className="flex-1 sm:flex-initial"
+                href={`/learn/${course.slug}`}
+              >
+                <Button
+                  className="w-full sm:w-auto group"
+                  size="lg"
+                  variant="secondary"
+                >
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Complete Course
+                </Button>
               </Link>
             )}
           </div>
         </div>
 
-        {/* Sidebar - Lesson List */}
-        <div className="lg:col-span-1">
-          <Card className="sticky top-24">
-            <CardContent className="p-0">
-              <div className="p-4 border-b space-y-3">
-                <h3 className="font-semibold">Course Content</h3>
-                <CourseProgressBar
-                  completedCount={completedCount}
-                  size="sm"
-                  totalCount={totalLessons}
-                />
-              </div>
-              <ScrollArea className="h-[500px]">
-                <div className="p-2">
-                  {course.lessons?.map((lessonItem: Lesson, index: number) => {
-                    const isCompleted = completedLessonIds.has(lessonItem.id);
-                    const isCurrent = lessonItem.id === lesson.id;
+        {/* Sidebar - Course Content */}
+        <aside className="w-full lg:w-80 xl:w-96 shrink-0 order-first lg:order-last">
+          <div className="lg:sticky lg:top-20">
+            <Card className="overflow-hidden bg-sidebar border-sidebar-border shadow-xl">
+              <CardContent className="p-0">
+                {/* Header */}
+                <div className="p-5 border-b border-sidebar-border bg-gradient-to-r from-sidebar to-sidebar/80">
+                  <h3 className="font-bold text-sidebar-foreground text-lg mb-1">
+                    Course Content
+                  </h3>
+                  <CourseProgressBar
+                    className="mt-3"
+                    completedCount={completedCount}
+                    size="sm"
+                    totalCount={totalLessons}
+                  />
+                </div>
 
-                    return (
-                      <Link
-                        href={`/learn/${course.slug}/${lessonItem.id}`}
-                        key={lessonItem.id}
-                      >
-                        <div
-                          className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
-                            isCurrent
-                              ? 'bg-primary/10 text-primary'
-                              : 'hover:bg-muted'
-                          }`}
+                {/* Lesson List */}
+                <ScrollArea className="max-h-[60vh] lg:max-h-[calc(100vh-14rem)]">
+                  <div className="p-3 space-y-1">
+                    {course.lessons?.map((lessonItem: Lesson, index: number) => {
+                      const isCompleted = completedLessonIds.has(lessonItem.id);
+                      const isCurrent = lessonItem.id === lesson.id;
+
+                      return (
+                        <Link
+                          href={`/learn/${course.slug}/${lessonItem.id}`}
+                          key={lessonItem.id}
                         >
                           <div
-                            className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                              isCompleted
-                                ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400'
-                                : isCurrent
-                                  ? 'bg-primary text-primary-foreground'
-                                  : 'bg-muted'
+                            className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 ${
+                              isCurrent
+                                ? 'bg-sidebar-accent text-sidebar-accent-foreground shadow-md ring-1 ring-sidebar-primary/20'
+                                : 'hover:bg-sidebar-accent/50 text-sidebar-foreground'
                             }`}
                           >
-                            {isCompleted ? (
-                              <Check className="h-4 w-4" />
-                            ) : (
-                              index + 1
+                            <div
+                              className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
+                                isCompleted
+                                  ? 'bg-green-500/20 text-green-500 dark:bg-green-500/30 dark:text-green-400'
+                                  : isCurrent
+                                    ? 'bg-sidebar-primary text-sidebar-primary-foreground shadow-sm'
+                                    : 'bg-sidebar-accent/50 text-sidebar-foreground/70'
+                              }`}
+                            >
+                              {isCompleted ? (
+                                <Check className="h-4 w-4" />
+                              ) : (
+                                index + 1
+                              )}
+                            </div>
+                            <div className="flex-grow min-w-0">
+                              <p
+                                className={`font-medium truncate text-sm ${
+                                  isCurrent ? 'text-sidebar-accent-foreground' : ''
+                                }`}
+                              >
+                                {lessonItem.title}
+                              </p>
+                            </div>
+                            {isCompleted && (
+                              <CheckCircle2 className="h-4 w-4 text-green-500 dark:text-green-400 shrink-0" />
                             )}
                           </div>
-                          <div className="flex-grow min-w-0">
-                            <p className="font-medium truncate text-sm">
-                              {lessonItem.title}
-                            </p>
-                          </div>
-                          {isCompleted && !isCurrent && (
-                            <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400 shrink-0" />
-                          )}
-                          {!isCompleted && !isCurrent && (
-                            <Circle className="h-4 w-4 text-muted-foreground/40 shrink-0" />
-                          )}
-                        </div>
-                      </Link>
-                    );
-                  })}
-                </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
-        </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          </div>
+        </aside>
       </div>
     </div>
   );
