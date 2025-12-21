@@ -1,5 +1,6 @@
-import { CourseLessonList, CoursePurchaseCard } from './course-client';
-import { Button } from '@/components/ui/button';
+import { CourseLessonList } from './components/course-lesson-list';
+import { CourseNotFound } from './components/course-not-found';
+import { CoursePurchaseCard } from './components/course-purchase-card';
 import { Separator } from '@/components/ui/separator';
 import { db } from '@/lib/database/client';
 import { CourseJsonLd } from '@/lib/seo/json-ld';
@@ -78,21 +79,6 @@ export default async function CourseDetailPage({ params }: Props) {
         </div>
       </div>
     </>
-  );
-}
-
-export function CourseNotFound() {
-  return (
-    <div className="container mx-auto px-4 py-16 text-center">
-      <h1 className="text-2xl font-bold mb-4">Course Not Found</h1>
-      <p className="text-muted-foreground mb-8">
-        The course you&apos;re looking for doesn&apos;t exist or isn&apos;t
-        published yet.
-      </p>
-      <Button asChild>
-        <a href="/courses">Browse Courses</a>
-      </Button>
-    </div>
   );
 }
 

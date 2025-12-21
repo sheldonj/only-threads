@@ -82,7 +82,7 @@ export default function LearnCoursePage() {
   // Create a Set of completed lesson IDs for quick lookup
   const completedLessonIds = useMemo(
     () =>
-      new Set(
+      new Set<string>(
         allProgress?.map((progress: LessonProgress) => progress.lessonId) ?? [],
       ),
     [allProgress],
