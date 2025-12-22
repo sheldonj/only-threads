@@ -44,14 +44,15 @@ model Lesson {
 }
 
 model Purchase {
-  id              String   @id @default(cuid())
-  createdAt       DateTime @default(now())
+  id              String    @id @default(cuid())
+  createdAt       DateTime  @default(now())
   userId          String
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   courseId        String
-  course          Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course          Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
   stripePaymentId String?
   amount          Float
+  refundedAt      DateTime?
 
   @@unique([userId, courseId])
   @@map('purchase')

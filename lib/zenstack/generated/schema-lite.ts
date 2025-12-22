@@ -469,6 +469,11 @@ const _schema = {
                 amount: {
                     name: "amount",
                     type: "Float"
+                },
+                refundedAt: {
+                    name: "refundedAt",
+                    type: "DateTime",
+                    optional: true
                 }
             },
             idFields: ["id"],
