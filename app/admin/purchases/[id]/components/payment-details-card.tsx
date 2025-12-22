@@ -48,7 +48,13 @@ export function PaymentDetailsCard({
             </span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Amount</span>
+            <span className="text-muted-foreground">List Price</span>
+            <span className="font-medium">
+              {formatCurrency(purchase.coursePrice?.price ?? purchase.amount)}
+            </span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Amount Paid</span>
             <span className="font-medium">
               {formatCurrency(purchase.amount)}
             </span>

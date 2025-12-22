@@ -25,8 +25,14 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get course from database
+    // Get course from database with current active price
     const course = await db.course.findUnique({
+      include: {
+        prices: {
+          take: 1,
+          where: { validTo: null },
+        },
+      },
       where: { id: courseId },
     });
 
@@ -37,6 +43,15 @@ export async function GET(request: NextRequest) {
     if (!course.published) {
       return NextResponse.json(
         { error: 'Course is not available for purchase' },
+        { status: 400 },
+      );
+    }
+
+    // Get current active price
+    const currentPrice = course.prices[0];
+    if (!currentPrice) {
+      return NextResponse.json(
+        { error: 'Course has no active price' },
         { status: 400 },
       );
     }
@@ -61,6 +76,7 @@ export async function GET(request: NextRequest) {
         data: {
           amount: 0,
           courseId,
+          coursePriceId: currentPrice.id,
           stripePaymentId: 'free',
           userId: sessionResult.session.userId,
         },
@@ -92,6 +108,7 @@ export async function GET(request: NextRequest) {
       ],
       metadata: {
         courseId: course.id,
+        coursePriceId: currentPrice.id,
         userId: sessionResult.session.userId,
       },
       mode: 'payment',

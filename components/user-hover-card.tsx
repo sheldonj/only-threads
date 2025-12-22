@@ -26,11 +26,14 @@ function getInitials(name?: null | string, email?: null | string): string {
     if (parts.length >= 2) {
       return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
     }
+
     return name.slice(0, 2).toUpperCase();
   }
+
   if (email) {
     return email.slice(0, 2).toUpperCase();
   }
+
   return '??';
 }
 
@@ -77,9 +80,7 @@ export function UserHoverCard({
               {initials}
             </AvatarFallback>
           </Avatar>
-          {showEmail && (
-            <span className="text-sm">{email || 'Unknown'}</span>
-          )}
+          {showEmail && <span className="text-sm">{email || 'Unknown'}</span>}
         </button>
       </HoverCardTrigger>
       <HoverCardContent
@@ -136,4 +137,3 @@ export function UserHoverCard({
     </HoverCard>
   );
 }
-

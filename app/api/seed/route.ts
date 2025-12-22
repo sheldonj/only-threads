@@ -152,6 +152,15 @@ export async function POST() {
         },
       });
 
+      // Create active price for this course
+      await db.coursePrice.create({
+        data: {
+          courseId: course.id,
+          price: courseData.price,
+          validTo: null, // null means current/active price
+        },
+      });
+
       // Create lessons for this course
       for (const lessonData of courseData.lessons) {
         await db.lesson.create({
@@ -185,6 +194,3 @@ export async function POST() {
     );
   }
 }
-
-
-

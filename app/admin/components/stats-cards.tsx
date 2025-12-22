@@ -2,21 +2,15 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { client } from '@/lib/auth/client';
 import {
   useCourseQueries,
   useLessonProgressQueries,
   usePurchaseQueries,
 } from '@/lib/hooks/use-models';
-import { client } from '@/lib/auth/client';
+import { type Purchase } from '@/lib/zenstack/generated/models';
 import { useQuery } from '@tanstack/react-query';
 import { BookOpen, CheckCircle, DollarSign, Users } from 'lucide-react';
-
-function formatCurrency(cents: number): string {
-  return new Intl.NumberFormat('en-US', {
-    currency: 'USD',
-    style: 'currency',
-  }).format(cents / 100);
-}
 
 export function StatsCards() {
   const { data: users, isLoading: isUsersLoading } = useQuery({
@@ -44,7 +38,11 @@ export function StatsCards() {
       where: { completed: true },
     });
 
-  const totalRevenue = purchases?.reduce((sum, p) => sum + p.amount, 0) ?? 0;
+  const totalRevenue =
+    purchases?.reduce(
+      (sum: number, purchase: Purchase) => sum + purchase.amount,
+      0,
+    ) ?? 0;
 
   const stats = [
     {
@@ -94,3 +92,9 @@ export function StatsCards() {
   );
 }
 
+function formatCurrency(cents: number): string {
+  return new Intl.NumberFormat('en-US', {
+    currency: 'USD',
+    style: 'currency',
+  }).format(cents / 100);
+}

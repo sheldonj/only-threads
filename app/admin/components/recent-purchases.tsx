@@ -13,9 +13,19 @@ import {
 } from '@/components/ui/table';
 import { UserHoverCard } from '@/components/user-hover-card';
 import { usePurchaseQueries } from '@/lib/hooks/use-models';
+import {
+  type Course,
+  type Purchase,
+  type User,
+} from '@/lib/zenstack/generated/models';
 import { format } from 'date-fns';
 import { ArrowRight, Eye } from 'lucide-react';
 import Link from 'next/link';
+
+type PurchaseWithRelations = Purchase & {
+  course?: Pick<Course, 'title'>;
+  user?: Pick<User, 'email' | 'image' | 'name' | 'role'>;
+};
 
 export function RecentPurchases() {
   const purchaseQueries = usePurchaseQueries();
@@ -68,7 +78,7 @@ export function RecentPurchases() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {purchases.map((purchase) => (
+              {(purchases as PurchaseWithRelations[]).map((purchase) => (
                 <TableRow key={purchase.id}>
                   <TableCell>
                     <UserHoverCard

@@ -31,6 +31,7 @@ const config: KnipConfig = {
     'tsconfig.tsbuildinfo',
     // Generated files from zenstack
     'lib/zenstack/generated/**',
+    'lib/zenstack/schema/*.ts',
     'data/**',
   ],
 

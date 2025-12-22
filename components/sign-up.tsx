@@ -20,8 +20,8 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 
 export function SignUp() {
-  const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
+  const searchParameters = useSearchParams();
+  const callbackUrl = searchParameters.get('callbackUrl') || '/dashboard';
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -196,7 +196,7 @@ export function SignUp() {
       </CardFooter>
     </Card>
   );
-};
+}
 
 async function convertImageToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {

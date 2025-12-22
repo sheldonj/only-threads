@@ -17,6 +17,7 @@ import { useSession } from '@/lib/auth/client';
 import { useCourseQueries, usePurchaseQueries } from '@/lib/hooks/use-models';
 import {
   type Course,
+  type CoursePrice,
   type Purchase,
   type User,
 } from '@/lib/zenstack/generated/models';
@@ -26,6 +27,7 @@ import { useMemo, useState } from 'react';
 
 export type PurchaseWithRelations = Purchase & {
   course?: Course;
+  coursePrice?: CoursePrice;
   user?: User;
 };
 
@@ -58,6 +60,7 @@ export function AdminPurchasesClient() {
   } = purchaseQueries.useFindMany({
     include: {
       course: true,
+      coursePrice: true,
       user: {
         select: { email: true, id: true, image: true, name: true, role: true },
       },
@@ -76,7 +79,7 @@ export function AdminPurchasesClient() {
   const filteredPurchases = useMemo(() => {
     if (!purchases) return [];
 
-    return purchases.filter((purchase) => {
+    return (purchases as PurchaseWithRelations[]).filter((purchase) => {
       // Course filter
       if (filters.courseId && purchase.courseId !== filters.courseId) {
         return false;
@@ -121,7 +124,8 @@ export function AdminPurchasesClient() {
       'User Email',
       'User Name',
       'Course',
-      'Amount',
+      'List Price',
+      'Amount Paid',
       'Date',
       'Payment ID',
       'Refunded',
@@ -131,6 +135,7 @@ export function AdminPurchasesClient() {
       purchase.user?.email || '',
       purchase.user?.name || '',
       purchase.course?.title || '',
+      ((purchase.coursePrice?.price ?? purchase.amount) / 100).toFixed(2),
       (purchase.amount / 100).toFixed(2),
       new Date(purchase.createdAt).toISOString(),
       purchase.stripePaymentId || '',

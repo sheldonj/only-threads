@@ -34,7 +34,8 @@ export function AdminPurchasesTable({
           <TableRow>
             <TableHead>User</TableHead>
             <TableHead>Course</TableHead>
-            <TableHead>Amount</TableHead>
+            <TableHead>List Price</TableHead>
+            <TableHead>Paid</TableHead>
             <TableHead>Date</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Payment ID</TableHead>
@@ -55,6 +56,9 @@ export function AdminPurchasesTable({
               </TableCell>
               <TableCell className="font-medium">
                 {purchase.course?.title || 'Unknown Course'}
+              </TableCell>
+              <TableCell>
+                {formatCurrency(purchase.coursePrice?.price ?? purchase.amount)}
               </TableCell>
               <TableCell>{formatCurrency(purchase.amount)}</TableCell>
               <TableCell>

@@ -10,7 +10,10 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { useSession } from '@/lib/auth/client';
-import { useCourseQueries } from '@/lib/hooks/use-models';
+import {
+  useCoursePriceQueries,
+  useCourseQueries,
+} from '@/lib/hooks/use-models';
 import { type CourseFormData } from '@/lib/validations/course';
 import { AlertTriangle, ArrowLeft, Loader2, ShieldAlert } from 'lucide-react';
 import Link from 'next/link';
@@ -23,19 +26,55 @@ export default function EditCoursePage() {
   const router = useRouter();
   const { data: session, isPending: isSessionPending } = useSession();
   const courseQueries = useCourseQueries();
+  const coursePriceQueries = useCoursePriceQueries();
   const [error, setError] = useState<null | string>(null);
 
+  // Fetch course with current active price
   const { data: course, isLoading } = courseQueries.useFindUnique({
+    include: {
+      prices: {
+        take: 1,
+        where: { validTo: null },
+      },
+    },
     where: { id: parameters.id },
   });
 
   const updateCourse = courseQueries.useUpdate();
+  const updateCoursePrice = coursePriceQueries.useUpdate();
+  const createCoursePrice = coursePriceQueries.useCreate();
 
   const isAdmin = session?.user?.role === 'admin';
+
+  // Get the current active price record
+  const currentPriceRecord = course?.prices?.[0];
 
   const handleSubmit = async (data: CourseFormData) => {
     setError(null);
     try {
+      const priceChanged = course && data.price !== course.price;
+      const now = new Date();
+
+      // If price changed, close the old price and create a new one
+      if (priceChanged && currentPriceRecord) {
+        // Close the current price record
+        await updateCoursePrice.mutateAsync({
+          data: { validTo: now },
+          where: { id: currentPriceRecord.id },
+        });
+
+        // Create new price record
+        await createCoursePrice.mutateAsync({
+          data: {
+            courseId: parameters.id,
+            price: data.price,
+            validFrom: now,
+            validTo: null,
+          },
+        });
+      }
+
+      // Update the course
       await updateCourse.mutateAsync({
         data: {
           coverImage: data.coverImage || null,

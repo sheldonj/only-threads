@@ -8,9 +8,10 @@ model Course {
   slug        String        @unique
   description String?
   coverImage  String?
-  price       Float         // in cents for Stripe
+  price       Float         // in cents for Stripe (denormalized current price)
   published   Boolean       @default(false)
   lessons     Lesson[]
+  prices      CoursePrice[]
   purchases   Purchase[]
   events      CourseEvent[]
 
@@ -18,6 +19,24 @@ model Course {
 
   // Anyone can read published courses
   @@allow('read', published == true)
+  // Admins can do everything
+  @@allow('all', auth() != null && auth().role == 'admin')
+}
+
+model CoursePrice {
+  id        String     @id @default(cuid())
+  createdAt DateTime   @default(now())
+  courseId  String
+  course    Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  price     Float     // price in cents
+  validFrom DateTime   @default(now())
+  validTo   DateTime? // null means current/active price
+  purchases Purchase[]
+
+  @@map('course_price')
+
+  // Same access as Course - anyone can read prices for published courses
+  @@allow('read', course.published == true)
   // Admins can do everything
   @@allow('all', auth() != null && auth().role == 'admin')
 }
@@ -44,14 +63,16 @@ model Lesson {
 }
 
 model Purchase {
-  id              String    @id @default(cuid())
-  createdAt       DateTime  @default(now())
+  id              String      @id @default(cuid())
+  createdAt       DateTime    @default(now())
   userId          String
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   courseId        String
-  course          Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course          Course      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  coursePriceId   String
+  coursePrice     CoursePrice @relation(fields: [coursePriceId], references: [id])
   stripePaymentId String?
-  amount          Float
+  amount          Float       // actual amount paid via Stripe
   refundedAt      DateTime?
 
   @@unique([userId, courseId])

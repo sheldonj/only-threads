@@ -8,6 +8,7 @@ import { useSession } from '@/lib/auth/client';
 import { usePurchaseQueries } from '@/lib/hooks/use-models';
 import { type Course, type Lesson } from '@/lib/zenstack/generated/models';
 import {
+  AlertTriangle,
   BookOpen,
   CheckCircle,
   Clock,
@@ -17,15 +18,19 @@ import {
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
+type CoursePurchaseCardProps = {
+  readonly course: CourseWithLessons;
+  readonly hasActivePrice: boolean;
+};
+
 type CourseWithLessons = Course & {
   lessons?: Array<Pick<Lesson, 'description' | 'id' | 'order' | 'title'>>;
 };
 
 export function CoursePurchaseCard({
   course,
-}: {
-  readonly course: CourseWithLessons;
-}) {
+  hasActivePrice,
+}: CoursePurchaseCardProps) {
   const router = useRouter();
   const { data: session, isPending: isSessionPending } = useSession();
   const purchaseQueries = usePurchaseQueries();
@@ -98,7 +103,7 @@ export function CoursePurchaseCard({
               </Button>
             </Link>
           </>
-        ) : (
+        ) : hasActivePrice ? (
           <Button
             className="w-full"
             onClick={handlePurchase}
@@ -106,6 +111,21 @@ export function CoursePurchaseCard({
           >
             {course.price > 0 ? 'Purchase Course' : 'Enroll for Free'}
           </Button>
+        ) : (
+          <>
+            <div className="flex items-center gap-2 text-amber-600">
+              <AlertTriangle className="h-5 w-5" />
+              <span className="font-medium">Currently unavailable</span>
+            </div>
+            <Button
+              className="w-full"
+              disabled
+              size="lg"
+              variant="secondary"
+            >
+              Purchase Unavailable
+            </Button>
+          </>
         )}
 
         <Separator />

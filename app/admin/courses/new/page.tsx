@@ -35,6 +35,14 @@ export default function NewCoursePage() {
           coverImage: data.coverImage || null,
           description: data.description || null,
           price: data.price,
+          // Create initial CoursePrice record
+          prices: {
+            create: {
+              price: data.price,
+              validFrom: new Date(),
+              validTo: null,
+            },
+          },
           published: data.published,
           slug: data.slug,
           title: data.title,

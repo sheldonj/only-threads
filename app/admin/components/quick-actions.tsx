@@ -7,7 +7,7 @@ import { BookOpen, Plus } from 'lucide-react';
 import Link from 'next/link';
 
 export function QuickActions() {
-  const isDev = process.env.NODE_ENV === 'development';
+  const isDevelopment = process.env.NODE_ENV === 'development';
 
   return (
     <Card>
@@ -30,9 +30,8 @@ export function QuickActions() {
             Manage Courses
           </Link>
         </Button>
-        {isDev && <SeedButton />}
+        {isDevelopment && <SeedButton />}
       </CardContent>
     </Card>
   );
 }
-

@@ -112,6 +112,12 @@ export const Wrapper = (props: { readonly children: React.ReactNode }) => {
                         User Management
                       </DropdownMenuItem>
                     </Link>
+                    <Link href="/admin/purchases">
+                      <DropdownMenuItem>
+                        <Receipt className="h-4 w-4 mr-2" />
+                        Purchase Management
+                      </DropdownMenuItem>
+                    </Link>
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}

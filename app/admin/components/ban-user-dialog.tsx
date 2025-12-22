@@ -1,5 +1,6 @@
 'use client';
 
+import { type BanFormState } from '../types';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import {
@@ -16,7 +17,6 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { cn } from '@/lib/utils/cn';
-import { type BanFormState } from '../types';
 import { format } from 'date-fns';
 import { Calendar as CalendarIcon, Loader2 } from 'lucide-react';
 
@@ -118,4 +118,3 @@ export function BanUserDialog({
     </Dialog>
   );
 }
-

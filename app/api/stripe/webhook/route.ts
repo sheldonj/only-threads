@@ -51,8 +51,9 @@ export async function POST(request: NextRequest) {
 
     const userId = session.metadata?.userId;
     const courseId = session.metadata?.courseId;
+    const coursePriceId = session.metadata?.coursePriceId;
 
-    if (!userId || !courseId) {
+    if (!userId || !courseId || !coursePriceId) {
       // eslint-disable-next-line no-console -- logging webhook errors for debugging
       console.error('Missing metadata in checkout session:', session.id);
       return NextResponse.json({ error: 'Missing metadata' }, { status: 400 });
@@ -69,6 +70,7 @@ export async function POST(request: NextRequest) {
         data: {
           amount: session.amount_total ?? 0,
           courseId,
+          coursePriceId,
           stripePaymentId: session.payment_intent as string,
           userId,
         },

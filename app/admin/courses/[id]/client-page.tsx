@@ -1,6 +1,7 @@
 'use client';
 
 import { EnrolledUsersTable } from './components/enrolled-users-table';
+import { PriceHistoryTable } from './components/price-history-table';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -18,11 +19,18 @@ import {
   useLessonProgressQueries,
 } from '@/lib/hooks/use-models';
 import {
+  type CoursePrice,
+  type Lesson,
+  type LessonProgress,
+  type Purchase,
+} from '@/lib/zenstack/generated/models';
+import {
   AlertTriangle,
   ArrowLeft,
   BookOpen,
   DollarSign,
   ExternalLink,
+  History,
   Loader2,
   Pencil,
   ShieldAlert,
@@ -33,7 +41,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 
 export function ClientPage() {
-  const params = useParams<{ id: string }>();
+  const parameters = useParams<{ id: string }>();
   const { data: session, isPending: isSessionPending } = useSession();
   const courseQueries = useCourseQueries();
   const lessonProgressQueries = useLessonProgressQueries();
@@ -44,18 +52,25 @@ export function ClientPage() {
     courseQueries.useFindUnique({
       include: {
         lessons: { select: { id: true } },
+        prices: {
+          orderBy: { validFrom: 'desc' },
+        },
         purchases: {
           include: {
-            user: { select: { email: true, id: true, image: true, name: true } },
+            user: {
+              select: { email: true, id: true, image: true, name: true },
+            },
           },
           orderBy: { createdAt: 'desc' },
         },
       },
-      where: { id: params.id },
+      where: { id: parameters.id },
     });
 
-  const lessonIds = course?.lessons.map((l) => l.id) ?? [];
-  const userIds = course?.purchases.map((p) => p.userId) ?? [];
+  const lessonIds =
+    course?.lessons.map((lesson: Pick<Lesson, 'id'>) => lesson.id) ?? [];
+  const userIds =
+    course?.purchases.map((purchase: Purchase) => purchase.userId) ?? [];
 
   const { data: progress, isLoading: isProgressLoading } =
     lessonProgressQueries.useFindMany({
@@ -73,8 +88,8 @@ export function ClientPage() {
       <div className="container mx-auto p-4 space-y-6">
         <Skeleton className="h-8 w-48" />
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Card key={i}>
+          {['lessons', 'enrolled', 'revenue', 'price'].map((stat) => (
+            <Card key={stat}>
               <CardContent className="p-6">
                 <Skeleton className="h-16 w-full" />
               </CardContent>
@@ -133,22 +148,32 @@ export function ClientPage() {
     );
   }
 
-  const totalRevenue = course.purchases.reduce((sum, p) => sum + p.amount, 0);
+  const totalRevenue = course.purchases.reduce(
+    (sum: number, purchase: Purchase) => sum + purchase.amount,
+    0,
+  );
   const lessonCount = course.lessons.length;
   const enrolledCount = course.purchases.length;
 
   // Aggregate progress by user
-  const progressByUser = new Map<string, { completed: number; lastActivity: Date | null }>();
-  
+  const progressByUser = new Map<
+    string,
+    { completed: number; lastActivity: Date | null }
+  >();
+
   if (progress) {
-    for (const p of progress) {
-      const existing = progressByUser.get(p.userId) ?? { completed: 0, lastActivity: null };
+    for (const progressItem of progress as LessonProgress[]) {
+      const existing = progressByUser.get(progressItem.userId) ?? {
+        completed: 0,
+        lastActivity: null,
+      };
       existing.completed += 1;
-      const updatedAt = new Date(p.updatedAt);
+      const updatedAt = new Date(progressItem.updatedAt);
       if (!existing.lastActivity || updatedAt > existing.lastActivity) {
         existing.lastActivity = updatedAt;
       }
-      progressByUser.set(p.userId, existing);
+
+      progressByUser.set(progressItem.userId, existing);
     }
   }
 
@@ -196,7 +221,9 @@ export function ClientPage() {
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h1 className="text-2xl font-bold">{course.title}</h1>
-                  <p className="text-muted-foreground text-sm">/{course.slug}</p>
+                  <p className="text-muted-foreground text-sm">
+                    /{course.slug}
+                  </p>
                 </div>
                 <Badge variant={course.published ? 'default' : 'secondary'}>
                   {course.published ? 'Published' : 'Draft'}
@@ -211,7 +238,7 @@ export function ClientPage() {
 
               {/* Action Buttons */}
               <div className="flex flex-wrap gap-2 pt-2">
-                <Link href={`/admin/courses/${params.id}/edit`}>
+                <Link href={`/admin/courses/${parameters.id}/edit`}>
                   <Button
                     disabled={!isAdmin}
                     size="sm"
@@ -221,7 +248,7 @@ export function ClientPage() {
                     Edit Course
                   </Button>
                 </Link>
-                <Link href={`/admin/courses/${params.id}/lessons`}>
+                <Link href={`/admin/courses/${parameters.id}/lessons`}>
                   <Button
                     disabled={!isAdmin}
                     size="sm"
@@ -289,7 +316,8 @@ export function ClientPage() {
               ${(totalRevenue / 100).toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground">
-              total from {enrolledCount} {enrolledCount === 1 ? 'sale' : 'sales'}
+              total from {enrolledCount}{' '}
+              {enrolledCount === 1 ? 'sale' : 'sales'}
             </p>
           </CardContent>
         </Card>
@@ -307,6 +335,24 @@ export function ClientPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Price History Section */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <History className="h-5 w-5 text-muted-foreground" />
+            <div>
+              <CardTitle>Price History</CardTitle>
+              <CardDescription>
+                Historical record of price changes for this course
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <PriceHistoryTable prices={(course.prices ?? []) as CoursePrice[]} />
+        </CardContent>
+      </Card>
 
       {/* Enrolled Users Section */}
       <Card>
@@ -333,4 +379,3 @@ export function ClientPage() {
     </div>
   );
 }
-

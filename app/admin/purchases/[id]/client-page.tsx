@@ -13,6 +13,7 @@ import { useSession } from '@/lib/auth/client';
 import { usePurchaseQueries } from '@/lib/hooks/use-models';
 import {
   type Course,
+  type CoursePrice,
   type Purchase,
   type User,
 } from '@/lib/zenstack/generated/models';
@@ -23,6 +24,7 @@ import { useState } from 'react';
 
 export type PurchaseWithRelations = Purchase & {
   course?: Course;
+  coursePrice?: CoursePrice;
   user?: User;
 };
 
@@ -42,6 +44,7 @@ export function PurchaseDetailClient() {
   } = purchaseQueries.useFindUnique({
     include: {
       course: true,
+      coursePrice: true,
       user: {
         select: { email: true, id: true, image: true, name: true, role: true },
       },

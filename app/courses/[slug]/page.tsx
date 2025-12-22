@@ -19,6 +19,10 @@ const getCourse = (slug: string) =>
         orderBy: { order: 'asc' },
         select: { description: true, id: true, order: true, title: true },
       },
+      prices: {
+        take: 1,
+        where: { validTo: null },
+      },
     },
     where: { published: true, slug },
   });
@@ -74,7 +78,10 @@ export default async function CourseDetailPage({ params }: Props) {
 
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            <CoursePurchaseCard course={course} />
+            <CoursePurchaseCard
+              course={course}
+              hasActivePrice={course.prices.length > 0}
+            />
           </div>
         </div>
       </div>

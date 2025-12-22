@@ -13,49 +13,18 @@ import {
 import { type Purchase, type User } from '@/lib/zenstack/generated/models';
 import { Users } from 'lucide-react';
 
-type PurchaseWithUser = Purchase & {
-  user: Pick<User, 'email' | 'id' | 'image' | 'name'>;
-};
-
 type EnrolledUsersTableProps = {
   readonly lessonCount: number;
-  readonly progressByUser: Map<string, { completed: number; lastActivity: Date | null }>;
+  readonly progressByUser: Map<
+    string,
+    { completed: number; lastActivity: Date | null }
+  >;
   readonly purchases: PurchaseWithUser[];
 };
 
-function getInitials(name: string | null, email: string): string {
-  if (name) {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  }
-  return email.slice(0, 2).toUpperCase();
-}
-
-function formatDate(date: Date | string): string {
-  return new Date(date).toLocaleDateString('en-US', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
-}
-
-function formatRelativeDate(date: Date | null): string {
-  if (!date) return '—';
-
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-  if (diffDays === 0) return 'Today';
-  if (diffDays === 1) return 'Yesterday';
-  if (diffDays < 7) return `${diffDays} days ago`;
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-  return formatDate(date);
-}
+type PurchaseWithUser = Purchase & {
+  user: Pick<User, 'email' | 'id' | 'image' | 'name'>;
+};
 
 export function EnrolledUsersTable({
   lessonCount,
@@ -150,3 +119,37 @@ export function EnrolledUsersTable({
   );
 }
 
+function formatDate(date: Date | string): string {
+  return new Date(date).toLocaleDateString('en-US', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+}
+
+function formatRelativeDate(date: Date | null): string {
+  if (!date) return '—';
+
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffDays = Math.floor(diffMs / (1_000 * 60 * 60 * 24));
+
+  if (diffDays === 0) return 'Today';
+  if (diffDays === 1) return 'Yesterday';
+  if (diffDays < 7) return `${diffDays} days ago`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+  return formatDate(date);
+}
+
+function getInitials(name: null | string, email: string): string {
+  if (name) {
+    return name
+      .split(' ')
+      .map((part) => part[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  }
+
+  return email.slice(0, 2).toUpperCase();
+}

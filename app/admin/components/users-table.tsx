@@ -1,5 +1,7 @@
 'use client';
 
+import { type AdminUser } from '../types';
+import { UserActionButtons } from './user-action-buttons';
 import { Badge } from '@/components/ui/badge';
 import {
   Table,
@@ -10,8 +12,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { UserHoverCard } from '@/components/user-hover-card';
-import { type AdminUser } from '../types';
-import { UserActionButtons } from './user-action-buttons';
 
 type UsersTableProps = {
   readonly isLoading: string | undefined;
@@ -78,4 +78,3 @@ export function UsersTable({
     </Table>
   );
 }
-

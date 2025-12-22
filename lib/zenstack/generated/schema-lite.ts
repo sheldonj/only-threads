@@ -337,6 +337,12 @@ const _schema = {
                     array: true,
                     relation: { opposite: "course" }
                 },
+                prices: {
+                    name: "prices",
+                    type: "CoursePrice",
+                    array: true,
+                    relation: { opposite: "course" }
+                },
                 purchases: {
                     name: "purchases",
                     type: "Purchase",
@@ -354,6 +360,58 @@ const _schema = {
             uniqueFields: {
                 id: { type: "String" },
                 slug: { type: "String" }
+            }
+        },
+        CoursePrice: {
+            name: "CoursePrice",
+            fields: {
+                id: {
+                    name: "id",
+                    type: "String",
+                    id: true,
+                    default: ExpressionUtils.call("cuid")
+                },
+                createdAt: {
+                    name: "createdAt",
+                    type: "DateTime",
+                    default: ExpressionUtils.call("now")
+                },
+                courseId: {
+                    name: "courseId",
+                    type: "String",
+                    foreignKeyFor: [
+                        "course"
+                    ]
+                },
+                course: {
+                    name: "course",
+                    type: "Course",
+                    relation: { opposite: "prices", fields: ["courseId"], references: ["id"], onDelete: "Cascade" }
+                },
+                price: {
+                    name: "price",
+                    type: "Float"
+                },
+                validFrom: {
+                    name: "validFrom",
+                    type: "DateTime",
+                    default: ExpressionUtils.call("now")
+                },
+                validTo: {
+                    name: "validTo",
+                    type: "DateTime",
+                    optional: true
+                },
+                purchases: {
+                    name: "purchases",
+                    type: "Purchase",
+                    array: true,
+                    relation: { opposite: "coursePrice" }
+                }
+            },
+            idFields: ["id"],
+            uniqueFields: {
+                id: { type: "String" }
             }
         },
         Lesson: {
@@ -460,6 +518,18 @@ const _schema = {
                     name: "course",
                     type: "Course",
                     relation: { opposite: "purchases", fields: ["courseId"], references: ["id"], onDelete: "Cascade" }
+                },
+                coursePriceId: {
+                    name: "coursePriceId",
+                    type: "String",
+                    foreignKeyFor: [
+                        "coursePrice"
+                    ]
+                },
+                coursePrice: {
+                    name: "coursePrice",
+                    type: "CoursePrice",
+                    relation: { opposite: "purchases", fields: ["coursePriceId"], references: ["id"] }
                 },
                 stripePaymentId: {
                     name: "stripePaymentId",

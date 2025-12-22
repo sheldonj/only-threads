@@ -1,7 +1,7 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
 import { type AdminUser } from '../types';
+import { Button } from '@/components/ui/button';
 import { Loader2, RefreshCw, Trash, UserCircle } from 'lucide-react';
 
 type UserActionButtonsProps = {
@@ -79,4 +79,3 @@ export function UserActionButtons({
     </div>
   );
 }
-

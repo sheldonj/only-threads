@@ -38,6 +38,7 @@ const eslintConfig = defineConfig([
     'next-env.d.ts',
     'lib/zenstack/generated/**/*.ts',
     'lib/zenstack/generated/**/*.js',
+    'lib/zenstack/schema/*.ts',
     'data/**/*.db',
     'pnpm-lock.yaml',
     '!.github',

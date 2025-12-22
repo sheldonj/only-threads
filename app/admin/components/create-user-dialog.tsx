@@ -1,5 +1,6 @@
 'use client';
 
+import { type NewUserFormState } from '../types';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -17,7 +18,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { type NewUserFormState } from '../types';
 import { Loader2, Plus } from 'lucide-react';
 
 type CreateUserDialogProps = {
@@ -138,4 +138,3 @@ export function CreateUserDialog({
     </Dialog>
   );
 }
-

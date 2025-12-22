@@ -20,4 +20,3 @@ export type NewUserFormState = {
   password: string;
   role: 'admin' | 'user';
 };
-

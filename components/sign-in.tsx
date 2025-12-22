@@ -37,14 +37,14 @@ const TEST_USERS = [
 ];
 
 export default function SignIn() {
-  const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
+  const searchParameters = useSearchParams();
+  const callbackUrl = searchParameters.get('callbackUrl') || '/dashboard';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const isDev = process.env.NODE_ENV === 'development';
+  const isDevelopment = process.env.NODE_ENV === 'development';
 
   const fillTestUser = (testEmail: string, testPassword: string) => {
     setEmail(testEmail);
@@ -58,7 +58,7 @@ export default function SignIn() {
         <CardDescription className="text-xs md:text-sm">
           Enter your email below to login to your account
         </CardDescription>
-        {isDev && (
+        {isDevelopment && (
           <div className="flex items-center gap-2 pt-2">
             <span className="text-xs text-muted-foreground">Quick fill:</span>
             {TEST_USERS.map((user) => (

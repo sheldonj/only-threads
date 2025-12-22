@@ -1,6 +1,6 @@
+import { AdminDashboardClient } from './client-page';
 import { createMetadata } from '@/lib/utils/metadata';
 import { type Metadata } from 'next';
-import { AdminDashboardClient } from './client-page';
 
 export const metadata: Metadata = createMetadata({
   description: 'Manage users, courses, and view platform statistics.',
