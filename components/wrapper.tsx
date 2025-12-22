@@ -94,7 +94,11 @@ export const Wrapper = (props: { readonly children: React.ReactNode }) => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Admin Panel</DropdownMenuLabel>
+                    <Link href="/admin">
+                      <DropdownMenuLabel className="cursor-pointer hover:bg-accent rounded-sm">
+                        Admin Panel
+                      </DropdownMenuLabel>
+                    </Link>
                     <DropdownMenuSeparator />
                     <Link href="/admin/courses">
                       <DropdownMenuItem>
@@ -102,7 +106,7 @@ export const Wrapper = (props: { readonly children: React.ReactNode }) => {
                         Course Management
                       </DropdownMenuItem>
                     </Link>
-                    <Link href="/admin">
+                    <Link href="/admin/users">
                       <DropdownMenuItem>
                         <Users className="h-4 w-4 mr-2" />
                         User Management

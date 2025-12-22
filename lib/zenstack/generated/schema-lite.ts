@@ -107,7 +107,6 @@ const _schema = {
                 email: { type: "String" }
             }
         },
-
         Session: {
             name: "Session",
             fields: {

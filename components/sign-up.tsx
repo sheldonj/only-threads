@@ -15,11 +15,13 @@ import { PasswordInput } from '@/components/ui/password-input';
 import { signUp } from '@/lib/auth/client';
 import { Loader2, X } from 'lucide-react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-export const SignUp = () => {
+export function SignUp() {
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -151,7 +153,7 @@ export const SignUp = () => {
             disabled={loading}
             onClick={async () => {
               await signUp.email({
-                callbackURL: '/dashboard',
+                callbackURL: callbackUrl,
                 email,
                 fetchOptions: {
                   onError: (context) => {
@@ -164,7 +166,7 @@ export const SignUp = () => {
                     setLoading(false);
                   },
                   onSuccess: async () => {
-                    router.push('/dashboard');
+                    router.push(callbackUrl);
                   },
                 },
                 image: image ? await convertImageToBase64(image) : '',

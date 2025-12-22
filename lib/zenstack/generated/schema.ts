@@ -108,7 +108,9 @@ const _schema = {
                 }
             },
             attributes: [
-                { name: "@@map", args: [{ name: "name", value: ExpressionUtils.literal("user") }] }
+                { name: "@@map", args: [{ name: "name", value: ExpressionUtils.literal("user") }] },
+                { name: "@@allow", args: [{ name: "operation", value: ExpressionUtils.literal("read") }, { name: "condition", value: ExpressionUtils.binary(ExpressionUtils.binary(ExpressionUtils.call("auth"), "!=", ExpressionUtils._null()), "&&", ExpressionUtils.binary(ExpressionUtils.member(ExpressionUtils.call("auth"), ["userId"]), "==", ExpressionUtils.field("id"))) }] },
+                { name: "@@allow", args: [{ name: "operation", value: ExpressionUtils.literal("read") }, { name: "condition", value: ExpressionUtils.binary(ExpressionUtils.binary(ExpressionUtils.call("auth"), "!=", ExpressionUtils._null()), "&&", ExpressionUtils.binary(ExpressionUtils.member(ExpressionUtils.call("auth"), ["role"]), "==", ExpressionUtils.literal("admin"))) }] }
             ],
             idFields: ["id"],
             uniqueFields: {

@@ -38,15 +38,17 @@ export function SeedButton() {
     <Button
       disabled={isLoading}
       onClick={handleSeed}
-      size="lg"
       variant="outline"
     >
       {isLoading ? (
-        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
       ) : (
-        <Database className="mr-2 h-5 w-5" />
+        <Database className="mr-2 h-4 w-4" />
       )}
       Seed Database
     </Button>
   );
 }
+
+
+

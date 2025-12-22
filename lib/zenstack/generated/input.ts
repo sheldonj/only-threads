@@ -188,4 +188,3 @@ export type CourseEventSelect = $SelectInput<$Schema, "CourseEvent">;
 export type CourseEventInclude = $IncludeInput<$Schema, "CourseEvent">;
 export type CourseEventOmit = $OmitInput<$Schema, "CourseEvent">;
 export type CourseEventGetPayload<Args extends $SelectIncludeOmit<$Schema, "CourseEvent", true>, Options extends $ClientOptions<$Schema> = $ClientOptions<$Schema>> = $SimplifiedModelResult<$Schema, "CourseEvent", Options, Args>;
-

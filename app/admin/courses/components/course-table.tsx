@@ -15,7 +15,8 @@ import {
   type Lesson,
   type Purchase,
 } from '@/lib/zenstack/generated/models';
-import { BookOpen, Loader2, Pencil, Trash } from 'lucide-react';
+import { BookOpen, Eye, Loader2, Pencil, Trash } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 type CourseTableProps = {
@@ -52,7 +53,14 @@ export function CourseTable({
       <TableBody>
         {courses.map((courseRow) => (
           <TableRow key={courseRow.id}>
-            <TableCell className="font-medium">{courseRow.title}</TableCell>
+            <TableCell className="font-medium">
+              <Link
+                className="hover:underline hover:text-primary transition-colors"
+                href={`/admin/courses/${courseRow.id}`}
+              >
+                {courseRow.title}
+              </Link>
+            </TableCell>
             <TableCell className="text-muted-foreground">
               {courseRow.slug}
             </TableCell>
@@ -68,6 +76,14 @@ export function CourseTable({
             </TableCell>
             <TableCell>
               <div className="flex space-x-2">
+                <Button
+                  onClick={() => router.push(`/admin/courses/${courseRow.id}`)}
+                  size="sm"
+                  title="View Details"
+                  variant="outline"
+                >
+                  <Eye className="h-4 w-4" />
+                </Button>
                 <Button
                   onClick={() =>
                     router.push(`/admin/courses/${courseRow.id}/lessons`)

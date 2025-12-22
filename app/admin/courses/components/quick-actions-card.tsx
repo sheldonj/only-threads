@@ -36,14 +36,6 @@ export function QuickActionsCard() {
               <BookOpen className="mr-2 h-4 w-4" /> View Public Catalog
             </Button>
           </Link>
-          <Link href="/dashboard">
-            <Button
-              size="sm"
-              variant="outline"
-            >
-              Account Settings
-            </Button>
-          </Link>
         </div>
       </CardContent>
     </Card>

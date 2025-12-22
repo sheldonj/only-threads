@@ -80,3 +80,6 @@ export const CourseCompletedEmail = ({
 export function reactCourseCompletedEmail(props: CourseCompletedEmailProps) {
   return <CourseCompletedEmail {...props} />;
 }
+
+
+
