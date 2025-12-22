@@ -351,45 +351,47 @@ export default function UserCard(props: {
         {session?.user.emailVerified ? null : (
           <Alert>
             <AlertTitle>Verify Your Email Address</AlertTitle>
-            <AlertDescription className="text-muted-foreground">
-              Please verify your email address. Check your inbox for the
-              verification email. If you haven&apos;t received the email, click
-              the button below to resend.
+            <AlertDescription>
+              <p>
+                Please verify your email address. Check your inbox for the
+                verification email. If you haven&apos;t received the email,
+                click the button below to resend.
+              </p>
+              <Button
+                className="mt-2"
+                onClick={async () => {
+                  await client.sendVerificationEmail(
+                    {
+                      email: session?.user.email || '',
+                    },
+                    {
+                      onError(context) {
+                        toast.error(context.error.message);
+                        setEmailVerificationPending(false);
+                      },
+                      onRequest() {
+                        setEmailVerificationPending(true);
+                      },
+                      onSuccess() {
+                        toast.success('Verification email sent successfully');
+                        setEmailVerificationPending(false);
+                      },
+                    },
+                  );
+                }}
+                size="sm"
+                variant="secondary"
+              >
+                {emailVerificationPending ? (
+                  <Loader2
+                    className="animate-spin"
+                    size={15}
+                  />
+                ) : (
+                  'Resend Verification Email'
+                )}
+              </Button>
             </AlertDescription>
-            <Button
-              className="mt-2"
-              onClick={async () => {
-                await client.sendVerificationEmail(
-                  {
-                    email: session?.user.email || '',
-                  },
-                  {
-                    onError(context) {
-                      toast.error(context.error.message);
-                      setEmailVerificationPending(false);
-                    },
-                    onRequest() {
-                      setEmailVerificationPending(true);
-                    },
-                    onSuccess() {
-                      toast.success('Verification email sent successfully');
-                      setEmailVerificationPending(false);
-                    },
-                  },
-                );
-              }}
-              size="sm"
-              variant="secondary"
-            >
-              {emailVerificationPending ? (
-                <Loader2
-                  className="animate-spin"
-                  size={15}
-                />
-              ) : (
-                'Resend Verification Email'
-              )}
-            </Button>
           </Alert>
         )}
 

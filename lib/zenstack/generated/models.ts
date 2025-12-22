@@ -17,6 +17,7 @@ export type Lesson = $ModelResult<$Schema, "Lesson">;
 export type Purchase = $ModelResult<$Schema, "Purchase">;
 export type LessonProgress = $ModelResult<$Schema, "LessonProgress">;
 export type CourseEvent = $ModelResult<$Schema, "CourseEvent">;
+export type RefundRequest = $ModelResult<$Schema, "RefundRequest">;
 /**
  * Shape of the `auth()` function
  */

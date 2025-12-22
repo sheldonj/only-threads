@@ -544,6 +544,12 @@ const _schema = {
                     name: "refundedAt",
                     type: "DateTime",
                     optional: true
+                },
+                refundRequest: {
+                    name: "refundRequest",
+                    type: "RefundRequest",
+                    optional: true,
+                    relation: { opposite: "purchase" }
                 }
             },
             idFields: ["id"],
@@ -663,6 +669,74 @@ const _schema = {
             idFields: ["id"],
             uniqueFields: {
                 id: { type: "String" }
+            }
+        },
+        RefundRequest: {
+            name: "RefundRequest",
+            fields: {
+                id: {
+                    name: "id",
+                    type: "String",
+                    id: true,
+                    default: ExpressionUtils.call("cuid")
+                },
+                createdAt: {
+                    name: "createdAt",
+                    type: "DateTime",
+                    default: ExpressionUtils.call("now")
+                },
+                updatedAt: {
+                    name: "updatedAt",
+                    type: "DateTime",
+                    updatedAt: true
+                },
+                purchaseId: {
+                    name: "purchaseId",
+                    type: "String",
+                    unique: true,
+                    foreignKeyFor: [
+                        "purchase"
+                    ]
+                },
+                purchase: {
+                    name: "purchase",
+                    type: "Purchase",
+                    relation: { opposite: "refundRequest", fields: ["purchaseId"], references: ["id"], onDelete: "Cascade" }
+                },
+                reason: {
+                    name: "reason",
+                    type: "String"
+                },
+                note: {
+                    name: "note",
+                    type: "String",
+                    optional: true
+                },
+                status: {
+                    name: "status",
+                    type: "String",
+                    default: "pending"
+                },
+                adminNote: {
+                    name: "adminNote",
+                    type: "String",
+                    optional: true
+                },
+                processedAt: {
+                    name: "processedAt",
+                    type: "DateTime",
+                    optional: true
+                },
+                processedBy: {
+                    name: "processedBy",
+                    type: "String",
+                    optional: true
+                }
+            },
+            idFields: ["id"],
+            uniqueFields: {
+                id: { type: "String" },
+                purchaseId: { type: "String" }
             }
         }
     },

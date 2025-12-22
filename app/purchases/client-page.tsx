@@ -13,16 +13,20 @@ export function PurchasesPageClient() {
   const { data: session, isPending: isSessionPending } = useSession();
   const purchaseQueries = usePurchaseQueries();
 
-  const { data: purchases, isLoading: isPurchasesLoading } =
-    purchaseQueries.useFindMany(
-      {
-        include: {
-          course: true,
-        },
-        orderBy: { createdAt: 'desc' },
+  const {
+    data: purchases,
+    isLoading: isPurchasesLoading,
+    refetch,
+  } = purchaseQueries.useFindMany(
+    {
+      include: {
+        course: true,
+        refundRequest: true,
       },
-      { enabled: Boolean(session) },
-    );
+      orderBy: { createdAt: 'desc' },
+    },
+    { enabled: Boolean(session) },
+  );
 
   useEffect(() => {
     if (!isSessionPending && !session) {
@@ -54,7 +58,10 @@ export function PurchasesPageClient() {
       </div>
 
       {purchases && purchases.length > 0 ? (
-        <PurchasesTable purchases={purchases} />
+        <PurchasesTable
+          onRefresh={refetch}
+          purchases={purchases}
+        />
       ) : (
         <EmptyPurchases />
       )}

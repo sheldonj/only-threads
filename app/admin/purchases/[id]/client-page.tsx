@@ -1,20 +1,27 @@
 'use client';
 
 import { RefundDialog } from '../components/refund-dialog';
+import { ContentConsumptionCard } from './components/content-consumption-card';
 import { CourseDetailsCard } from './components/course-details-card';
 import { CustomerDetailsCard } from './components/customer-details-card';
 import { PaymentDetailsCard } from './components/payment-details-card';
 import { PurchaseSummaryCards } from './components/purchase-summary-cards';
+import { RefundRequestCard } from './components/refund-request-card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSession } from '@/lib/auth/client';
-import { usePurchaseQueries } from '@/lib/hooks/use-models';
+import {
+  useLessonProgressQueries,
+  useLessonQueries,
+  usePurchaseQueries,
+} from '@/lib/hooks/use-models';
 import {
   type Course,
   type CoursePrice,
   type Purchase,
+  type RefundRequest,
   type User,
 } from '@/lib/zenstack/generated/models';
 import { AlertTriangle, ArrowLeft, ShieldAlert } from 'lucide-react';
@@ -25,6 +32,7 @@ import { useState } from 'react';
 export type PurchaseWithRelations = Purchase & {
   course?: Course;
   coursePrice?: CoursePrice;
+  refundRequest?: RefundRequest | null;
   user?: User;
 };
 
@@ -32,6 +40,8 @@ export function PurchaseDetailClient() {
   const parameters = useParams<{ id: string }>();
   const { data: session, isPending: isSessionPending } = useSession();
   const purchaseQueries = usePurchaseQueries();
+  const lessonQueries = useLessonQueries();
+  const lessonProgressQueries = useLessonProgressQueries();
 
   const [showRefundDialog, setShowRefundDialog] = useState(false);
 
@@ -45,12 +55,32 @@ export function PurchaseDetailClient() {
     include: {
       course: true,
       coursePrice: true,
+      refundRequest: true,
       user: {
         select: { email: true, id: true, image: true, name: true, role: true },
       },
     },
     where: { id: parameters.id },
   });
+
+  // Fetch lessons for the course to get total count
+  const { data: lessons } = lessonQueries.useFindMany(
+    {
+      where: { courseId: purchase?.courseId },
+    },
+    { enabled: Boolean(purchase?.courseId) },
+  );
+
+  // Fetch lesson progress for the user
+  const { data: lessonProgress } = lessonProgressQueries.useFindMany(
+    {
+      where: {
+        lesson: { courseId: purchase?.courseId },
+        userId: purchase?.userId,
+      },
+    },
+    { enabled: Boolean(purchase?.courseId) && Boolean(purchase?.userId) },
+  );
 
   const isLoading = isPurchaseLoading || isSessionPending;
 
@@ -74,8 +104,11 @@ export function PurchaseDetailClient() {
   const canRefund =
     isAdmin &&
     !purchase.refundedAt &&
+    !purchase.refundRequest?.status &&
     purchase.stripePaymentId &&
     purchase.stripePaymentId !== 'free';
+
+  const hasRefundRequest = Boolean(purchase.refundRequest);
 
   return (
     <div className="container mx-auto p-4 space-y-6">
@@ -105,12 +138,29 @@ export function PurchaseDetailClient() {
             Order #{purchase.id.slice(-8).toUpperCase()}
           </p>
         </div>
-        <Badge variant={purchase.refundedAt ? 'destructive' : 'default'}>
-          {purchase.refundedAt ? 'Refunded' : 'Completed'}
-        </Badge>
+        <PurchaseStatusBadge purchase={purchase as PurchaseWithRelations} />
       </div>
 
       <PurchaseSummaryCards purchase={purchase} />
+
+      {/* Refund Request Card - show if there's a request */}
+      {hasRefundRequest && purchase.refundRequest && (
+        <RefundRequestCard
+          onProcessed={refetch}
+          refundRequest={purchase.refundRequest}
+          stripePaymentId={purchase.stripePaymentId}
+        />
+      )}
+
+      {/* Content Consumption Card - show for refund requests */}
+      {hasRefundRequest && purchase.course && (
+        <ContentConsumptionCard
+          amount={purchase.amount}
+          lessonProgress={lessonProgress || []}
+          purchaseDate={purchase.createdAt}
+          totalLessons={lessons?.length || 0}
+        />
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <CustomerDetailsCard purchase={purchase} />
@@ -130,6 +180,40 @@ export function PurchaseDetailClient() {
       />
     </div>
   );
+}
+
+function PurchaseStatusBadge({
+  purchase,
+}: {
+  readonly purchase: PurchaseWithRelations;
+}) {
+  if (purchase.refundedAt) {
+    return <Badge variant="destructive">Refunded</Badge>;
+  }
+
+  const refundRequest = purchase.refundRequest;
+
+  if (refundRequest) {
+    switch (refundRequest.status) {
+      case 'pending':
+        return (
+          <Badge
+            className="bg-amber-500 hover:bg-amber-600"
+            variant="default"
+          >
+            Refund Pending
+          </Badge>
+        );
+      case 'rejected':
+        return <Badge variant="secondary">Refund Denied</Badge>;
+      case 'cancelled':
+        return <Badge variant="outline">Request Cancelled</Badge>;
+      default:
+        return <Badge variant="default">Completed</Badge>;
+    }
+  }
+
+  return <Badge variant="default">Completed</Badge>;
 }
 
 function LoadingSkeleton() {

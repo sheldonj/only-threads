@@ -610,6 +610,12 @@ const _schema = {
                     name: "refundedAt",
                     type: "DateTime",
                     optional: true
+                },
+                refundRequest: {
+                    name: "refundRequest",
+                    type: "RefundRequest",
+                    optional: true,
+                    relation: { opposite: "purchase" }
                 }
             },
             attributes: [
@@ -759,6 +765,87 @@ const _schema = {
             idFields: ["id"],
             uniqueFields: {
                 id: { type: "String" }
+            }
+        },
+        RefundRequest: {
+            name: "RefundRequest",
+            fields: {
+                id: {
+                    name: "id",
+                    type: "String",
+                    id: true,
+                    attributes: [{ name: "@id" }, { name: "@default", args: [{ name: "value", value: ExpressionUtils.call("cuid") }] }],
+                    default: ExpressionUtils.call("cuid")
+                },
+                createdAt: {
+                    name: "createdAt",
+                    type: "DateTime",
+                    attributes: [{ name: "@default", args: [{ name: "value", value: ExpressionUtils.call("now") }] }],
+                    default: ExpressionUtils.call("now")
+                },
+                updatedAt: {
+                    name: "updatedAt",
+                    type: "DateTime",
+                    updatedAt: true,
+                    attributes: [{ name: "@updatedAt" }]
+                },
+                purchaseId: {
+                    name: "purchaseId",
+                    type: "String",
+                    unique: true,
+                    attributes: [{ name: "@unique" }],
+                    foreignKeyFor: [
+                        "purchase"
+                    ]
+                },
+                purchase: {
+                    name: "purchase",
+                    type: "Purchase",
+                    attributes: [{ name: "@relation", args: [{ name: "fields", value: ExpressionUtils.array([ExpressionUtils.field("purchaseId")]) }, { name: "references", value: ExpressionUtils.array([ExpressionUtils.field("id")]) }, { name: "onDelete", value: ExpressionUtils.literal("Cascade") }] }],
+                    relation: { opposite: "refundRequest", fields: ["purchaseId"], references: ["id"], onDelete: "Cascade" }
+                },
+                reason: {
+                    name: "reason",
+                    type: "String"
+                },
+                note: {
+                    name: "note",
+                    type: "String",
+                    optional: true
+                },
+                status: {
+                    name: "status",
+                    type: "String",
+                    attributes: [{ name: "@default", args: [{ name: "value", value: ExpressionUtils.literal("pending") }] }],
+                    default: "pending"
+                },
+                adminNote: {
+                    name: "adminNote",
+                    type: "String",
+                    optional: true
+                },
+                processedAt: {
+                    name: "processedAt",
+                    type: "DateTime",
+                    optional: true
+                },
+                processedBy: {
+                    name: "processedBy",
+                    type: "String",
+                    optional: true
+                }
+            },
+            attributes: [
+                { name: "@@map", args: [{ name: "name", value: ExpressionUtils.literal("refund_request") }] },
+                { name: "@@allow", args: [{ name: "operation", value: ExpressionUtils.literal("read") }, { name: "condition", value: ExpressionUtils.binary(ExpressionUtils.binary(ExpressionUtils.call("auth"), "!=", ExpressionUtils._null()), "&&", ExpressionUtils.binary(ExpressionUtils.member(ExpressionUtils.field("purchase"), ["userId"]), "==", ExpressionUtils.member(ExpressionUtils.call("auth"), ["userId"]))) }] },
+                { name: "@@allow", args: [{ name: "operation", value: ExpressionUtils.literal("create") }, { name: "condition", value: ExpressionUtils.binary(ExpressionUtils.binary(ExpressionUtils.call("auth"), "!=", ExpressionUtils._null()), "&&", ExpressionUtils.binary(ExpressionUtils.member(ExpressionUtils.field("purchase"), ["userId"]), "==", ExpressionUtils.member(ExpressionUtils.call("auth"), ["userId"]))) }] },
+                { name: "@@allow", args: [{ name: "operation", value: ExpressionUtils.literal("update") }, { name: "condition", value: ExpressionUtils.binary(ExpressionUtils.binary(ExpressionUtils.binary(ExpressionUtils.call("auth"), "!=", ExpressionUtils._null()), "&&", ExpressionUtils.binary(ExpressionUtils.member(ExpressionUtils.field("purchase"), ["userId"]), "==", ExpressionUtils.member(ExpressionUtils.call("auth"), ["userId"]))), "&&", ExpressionUtils.binary(ExpressionUtils.field("status"), "==", ExpressionUtils.literal("pending"))) }] },
+                { name: "@@allow", args: [{ name: "operation", value: ExpressionUtils.literal("read,update") }, { name: "condition", value: ExpressionUtils.binary(ExpressionUtils.binary(ExpressionUtils.call("auth"), "!=", ExpressionUtils._null()), "&&", ExpressionUtils.binary(ExpressionUtils.member(ExpressionUtils.call("auth"), ["role"]), "==", ExpressionUtils.literal("admin"))) }] }
+            ],
+            idFields: ["id"],
+            uniqueFields: {
+                id: { type: "String" },
+                purchaseId: { type: "String" }
             }
         }
     },

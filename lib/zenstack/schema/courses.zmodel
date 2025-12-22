@@ -63,17 +63,18 @@ model Lesson {
 }
 
 model Purchase {
-  id              String      @id @default(cuid())
-  createdAt       DateTime    @default(now())
+  id              String         @id @default(cuid())
+  createdAt       DateTime       @default(now())
   userId          String
-  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   courseId        String
-  course          Course      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course          Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
   coursePriceId   String
-  coursePrice     CoursePrice @relation(fields: [coursePriceId], references: [id])
+  coursePrice     CoursePrice    @relation(fields: [coursePriceId], references: [id])
   stripePaymentId String?
-  amount          Float       // actual amount paid via Stripe
+  amount          Float          // actual amount paid via Stripe
   refundedAt      DateTime?
+  refundRequest   RefundRequest?
 
   @@unique([userId, courseId])
   @@map('purchase')
@@ -124,5 +125,30 @@ model CourseEvent {
   @@allow('read', auth() != null && (auth().userId == userId || auth().role == 'admin'))
   // Admins can update (e.g., mark emailSent)
   @@allow('update', auth() != null && auth().role == 'admin')
+}
+
+model RefundRequest {
+  id          String    @id @default(cuid())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  purchaseId  String    @unique
+  purchase    Purchase  @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  reason      String    // e.g., "not_as_described", "changed_mind", "technical_issues", "other"
+  note        String?   // customer's explanation
+  status      String    @default("pending") // pending | approved | rejected | cancelled
+  adminNote   String?   // admin's response note
+  processedAt DateTime?
+  processedBy String?   // admin user id
+
+  @@map('refund_request')
+
+  // Users can read their own refund requests
+  @@allow('read', auth() != null && purchase.userId == auth().userId)
+  // Users can create refund requests for their own purchases
+  @@allow('create', auth() != null && purchase.userId == auth().userId)
+  // Users can cancel their own pending requests
+  @@allow('update', auth() != null && purchase.userId == auth().userId && status == 'pending')
+  // Admins can read and update all
+  @@allow('read,update', auth() != null && auth().role == 'admin')
 }
 
