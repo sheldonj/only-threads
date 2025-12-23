@@ -1,5 +1,6 @@
 'use client';
 
+import { PendingRefunds } from './components/pending-refunds';
 import { QuickActions } from './components/quick-actions';
 import { RecentPurchases } from './components/recent-purchases';
 import { StatsCards } from './components/stats-cards';
@@ -13,6 +14,7 @@ export function AdminDashboardClient() {
       <h1 className="text-3xl font-bold">Admin Dashboard</h1>
       <StatsCards />
       <QuickActions />
+      <PendingRefunds />
       <RecentPurchases />
       <UsersSection />
     </div>

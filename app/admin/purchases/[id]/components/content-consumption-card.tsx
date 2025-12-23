@@ -1,6 +1,5 @@
 'use client';
 
-import { Progress } from '@/components/ui/progress';
 import {
   Card,
   CardContent,
@@ -9,8 +8,15 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress';
 import { type LessonProgress } from '@/lib/zenstack/generated/models';
-import { BookOpen, Calendar, Clock, DollarSign, TrendingUp } from 'lucide-react';
+import {
+  BookOpen,
+  Calendar,
+  Clock,
+  DollarSign,
+  TrendingUp,
+} from 'lucide-react';
 
 type ContentConsumptionCardProps = {
   readonly amount: number;
@@ -90,6 +96,56 @@ export function ContentConsumptionCard({
   );
 }
 
+function formatCurrency(cents: number): string {
+  return new Intl.NumberFormat('en-US', {
+    currency: 'USD',
+    style: 'currency',
+  }).format(cents / 100);
+}
+
+function formatDate(date: Date | string): string {
+  return new Date(date).toLocaleDateString('en-US', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+}
+
+function getAssessmentText(
+  progressPercentage: number,
+  daysSincePurchase: number,
+): string {
+  if (progressPercentage === 0) {
+    if (daysSincePurchase <= 7) {
+      return 'Customer has not started the course. Recent purchase - standard refund policy may apply.';
+    }
+
+    return 'Customer has not started the course despite having access for some time.';
+  }
+
+  if (progressPercentage < 25) {
+    return 'Customer has begun the course but completed less than a quarter of the content.';
+  }
+
+  if (progressPercentage < 50) {
+    return 'Customer has completed a significant portion of the course (25-50%). Consider the refund reason carefully.';
+  }
+
+  if (progressPercentage < 75) {
+    return 'Customer has completed over half the course. Substantial content has been consumed.';
+  }
+
+  return 'Customer has completed most or all of the course content. High consumption before refund request.';
+}
+
+function getDaysSincePurchase(purchaseDate: Date | string): number {
+  const purchase = new Date(purchaseDate);
+  const now = new Date();
+  const diffTime = Math.abs(now.getTime() - purchase.getTime());
+  const diffDays = Math.floor(diffTime / (1_000 * 60 * 60 * 24));
+  return diffDays;
+}
+
 function StatItem({
   icon,
   label,
@@ -109,53 +165,3 @@ function StatItem({
     </div>
   );
 }
-
-function getDaysSincePurchase(purchaseDate: Date | string): number {
-  const purchase = new Date(purchaseDate);
-  const now = new Date();
-  const diffTime = Math.abs(now.getTime() - purchase.getTime());
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-  return diffDays;
-}
-
-function getAssessmentText(
-  progressPercentage: number,
-  daysSincePurchase: number,
-): string {
-  if (progressPercentage === 0) {
-    if (daysSincePurchase <= 7) {
-      return 'Customer has not started the course. Recent purchase - standard refund policy may apply.';
-    }
-    return 'Customer has not started the course despite having access for some time.';
-  }
-
-  if (progressPercentage < 25) {
-    return 'Customer has begun the course but completed less than a quarter of the content.';
-  }
-
-  if (progressPercentage < 50) {
-    return 'Customer has completed a significant portion of the course (25-50%). Consider the refund reason carefully.';
-  }
-
-  if (progressPercentage < 75) {
-    return 'Customer has completed over half the course. Substantial content has been consumed.';
-  }
-
-  return 'Customer has completed most or all of the course content. High consumption before refund request.';
-}
-
-function formatCurrency(cents: number): string {
-  return new Intl.NumberFormat('en-US', {
-    currency: 'USD',
-    style: 'currency',
-  }).format(cents / 100);
-}
-
-function formatDate(date: Date | string): string {
-  return new Date(date).toLocaleDateString('en-US', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
-}
-

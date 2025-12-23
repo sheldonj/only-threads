@@ -101,9 +101,7 @@ export default function ReceiptPage() {
 
       {/* Refund Request Status Card - shown if there's a refund request */}
       {purchase.refundRequest && (
-        <RefundRequestStatusCard
-          refundRequest={purchase.refundRequest}
-        />
+        <RefundRequestStatusCard refundRequest={purchase.refundRequest} />
       )}
 
       {/* Receipt Card */}
@@ -180,7 +178,9 @@ export default function ReceiptPage() {
           {/* Total */}
           <div className="flex justify-between items-center text-lg">
             <span className="font-semibold">Total</span>
-            <span className={`font-bold ${purchase.refundedAt ? 'line-through text-muted-foreground' : ''}`}>
+            <span
+              className={`font-bold ${purchase.refundedAt ? 'line-through text-muted-foreground' : ''}`}
+            >
               {formatAmount(purchase.amount)}
             </span>
           </div>
@@ -188,7 +188,9 @@ export default function ReceiptPage() {
           {purchase.refundedAt && (
             <div className="flex justify-between items-center text-lg text-destructive">
               <span className="font-semibold">Refunded</span>
-              <span className="font-bold">-{formatAmount(purchase.amount)}</span>
+              <span className="font-bold">
+                -{formatAmount(purchase.amount)}
+              </span>
             </div>
           )}
 
@@ -236,6 +238,25 @@ export default function ReceiptPage() {
   );
 }
 
+function formatAmount(cents: number) {
+  return new Intl.NumberFormat('en-US', {
+    currency: 'USD',
+    style: 'currency',
+  }).format(cents / 100);
+}
+
+function formatDate(date: Date | string) {
+  return new Date(date).toLocaleDateString('en-US', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+}
+
+function handlePrint() {
+  globalThis.print();
+}
+
 function RefundRequestStatusCard({
   refundRequest,
 }: {
@@ -243,37 +264,41 @@ function RefundRequestStatusCard({
 }) {
   const getStatusConfig = () => {
     switch (refundRequest.status) {
-      case 'pending':
-        return {
-          bgColor: 'bg-amber-50 border-amber-200 dark:bg-amber-950/20 dark:border-amber-900',
-          description:
-            'Your refund request is being reviewed by our team. We\'ll notify you once a decision has been made.',
-          icon: <Clock className="h-5 w-5 text-amber-600" />,
-          title: 'Refund Request Pending',
-        };
       case 'approved':
         return {
-          bgColor: 'bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-900',
+          bgColor:
+            'bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-900',
           description:
             'Your refund has been approved and processed. The funds should appear in your account within 5-10 business days.',
           icon: <Check className="h-5 w-5 text-green-600" />,
           title: 'Refund Approved',
         };
-      case 'rejected':
-        return {
-          bgColor: 'bg-red-50 border-red-200 dark:bg-red-950/20 dark:border-red-900',
-          description:
-            'Unfortunately, your refund request was not approved. You still have access to the course content.',
-          icon: <X className="h-5 w-5 text-red-600" />,
-          title: 'Refund Request Denied',
-        };
       case 'cancelled':
         return {
-          bgColor: 'bg-gray-50 border-gray-200 dark:bg-gray-950/20 dark:border-gray-800',
+          bgColor:
+            'bg-gray-50 border-gray-200 dark:bg-gray-950/20 dark:border-gray-800',
           description:
             'You cancelled your refund request. You still have full access to the course content.',
           icon: <AlertCircle className="h-5 w-5 text-gray-600" />,
           title: 'Refund Request Cancelled',
+        };
+      case 'pending':
+        return {
+          bgColor:
+            'bg-amber-50 border-amber-200 dark:bg-amber-950/20 dark:border-amber-900',
+          description:
+            "Your refund request is being reviewed by our team. We'll notify you once a decision has been made.",
+          icon: <Clock className="h-5 w-5 text-amber-600" />,
+          title: 'Refund Request Pending',
+        };
+      case 'rejected':
+        return {
+          bgColor:
+            'bg-red-50 border-red-200 dark:bg-red-950/20 dark:border-red-900',
+          description:
+            'Unfortunately, your refund request was not approved. You still have access to the course content.',
+          icon: <X className="h-5 w-5 text-red-600" />,
+          title: 'Refund Request Denied',
         };
       default:
         return null;
@@ -295,7 +320,9 @@ function RefundRequestStatusCard({
             </p>
             {refundRequest.adminNote && (
               <div className="mt-3 p-3 bg-background/50 rounded-lg">
-                <p className="text-xs text-muted-foreground">Note from our team:</p>
+                <p className="text-xs text-muted-foreground">
+                  Note from our team:
+                </p>
                 <p className="text-sm mt-1">{refundRequest.adminNote}</p>
               </div>
             )}
@@ -310,25 +337,6 @@ function RefundRequestStatusCard({
       </CardContent>
     </Card>
   );
-}
-
-function formatAmount(cents: number) {
-  return new Intl.NumberFormat('en-US', {
-    currency: 'USD',
-    style: 'currency',
-  }).format(cents / 100);
-}
-
-function formatDate(date: Date | string) {
-  return new Date(date).toLocaleDateString('en-US', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
-}
-
-function handlePrint() {
-  globalThis.print();
 }
 
 /* eslint-enable react/no-unknown-property */

@@ -7,11 +7,11 @@ import { type NextRequest, NextResponse } from 'next/server';
 const from = process.env.BETTER_AUTH_EMAIL || 'delivered@resend.dev';
 const testEmailOverride = process.env.TEST_EMAIL;
 
-type RouteParams = {
+type RouteParameters = {
   params: Promise<{ id: string }>;
 };
 
-export async function POST(request: NextRequest, { params }: RouteParams) {
+export async function POST(request: NextRequest, { params }: RouteParameters) {
   try {
     const { id } = await params;
 
@@ -89,10 +89,15 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
           to: customerEmailRecipient,
         });
         // eslint-disable-next-line no-console -- logging email success
-        console.log(`Refund request cancellation email sent to ${customerEmailRecipient}`);
+        console.log(
+          `Refund request cancellation email sent to ${customerEmailRecipient}`,
+        );
       } catch (emailError) {
         // eslint-disable-next-line no-console -- logging email failures
-        console.error('Failed to send refund request cancellation email:', emailError);
+        console.error(
+          'Failed to send refund request cancellation email:',
+          emailError,
+        );
       }
     }
 
@@ -115,4 +120,3 @@ function formatCurrency(amountInCents: number): string {
     style: 'currency',
   }).format(amountInCents / 100);
 }
-

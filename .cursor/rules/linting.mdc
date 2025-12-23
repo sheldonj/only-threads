@@ -1,0 +1,140 @@
+---
+alwaysApply: true
+---
+
+# Linting Rules
+
+This project uses `eslint-config-canonical` with strict rules. Follow these patterns to avoid common linting errors.
+
+## Cyclomatic Complexity (max: 30)
+
+Components with too many conditionals, hooks, or logic branches will exceed the complexity limit.
+
+**Prevention Strategies:**
+
+1. **Extract data fetching into custom hooks** - Move `useQuery`, `useFindMany`, and related logic into dedicated hooks:
+
+```typescript
+// ❌ Bad: All logic in one component
+export function MyComponent() {
+  const { data: session } = useSession();
+  const { data: items, isLoading } = useItemQueries().useFindMany({...});
+  const { data: related } = useRelatedQueries().useFindMany({...});
+  // ... more queries and derived state
+}
+
+// ✅ Good: Extract to a hook
+export function MyComponent() {
+  const { items, related, isLoading, session } = useMyComponentData(id);
+  // ... cleaner component
+}
+```
+
+2. **Extract content into separate components** - When the main component has many conditional renders, extract the content:
+
+```typescript
+// ❌ Bad: Conditionals increase complexity
+export function MyPage() {
+  // ... many hooks and state
+  if (loading) return <Loading />;
+  if (!data) return <NotFound />;
+
+  return (
+    <div>
+      {/* 100 lines of JSX with more conditionals */}
+    </div>
+  );
+}
+
+// ✅ Good: Extract the content
+export function MyPage() {
+  const { data, isLoading } = useData();
+
+  if (isLoading) return <Loading />;
+  if (!data) return <NotFound />;
+
+  return <MyPageContent data={data} />;
+}
+```
+
+3. **Use early returns** - Handle error states early to reduce nesting and conditionals.
+
+## Non-null Assertions (`!`)
+
+The `@typescript-eslint/no-non-null-assertion` rule forbids using `!` to assert non-null.
+
+**Prevention Strategies:**
+
+1. **Use optional chaining with truthiness checks:**
+
+```typescript
+// ❌ Bad: Non-null assertion
+onClick={() => handleAction(item.nested!.id)}
+
+// ✅ Good: Check exists before using
+{item.nested?.id && (
+  <Button onClick={() => handleAction(item.nested.id)}>
+    Action
+  </Button>
+)}
+```
+
+2. **Narrow the type with a guard condition:**
+
+```typescript
+// ❌ Bad
+const value = obj.optional!.property;
+
+// ✅ Good
+if (obj.optional) {
+  const value = obj.optional.property;
+}
+```
+
+3. **Destructure after checking:**
+
+```typescript
+// ✅ Good
+const { nested } = item;
+if (!nested) return null;
+// Now `nested` is safely narrowed
+```
+
+## Identifier Length (min: 2 characters)
+
+The `id-length` rule requires identifiers to be at least 2 characters.
+
+**Common Violations:**
+
+```typescript
+// ❌ Bad: Single letter identifiers
+items.map((i) => <Item key={i.id} item={i} />)
+data.filter((d) => d.active)
+reasons.map((r) => r.value)
+
+// ✅ Good: Descriptive names
+items.map((item) => <Item key={item.id} item={item} />)
+data.filter((record) => record.active)
+reasons.map((reason) => reason.value)
+```
+
+**Exceptions:** Loop indices (`i`, `j`) are sometimes acceptable in traditional for loops, but prefer descriptive names in callbacks.
+
+## Console Statements
+
+Use `console.log` sparingly and with an eslint-disable comment:
+
+```typescript
+// eslint-disable-next-line no-console -- debugging purchase flow
+console.log('Purchase data:', purchase);
+```
+
+## Summary Checklist
+
+Before submitting code:
+
+- [ ] Component complexity < 30 (extract hooks/components if needed)
+- [ ] No `!` non-null assertions (use optional chaining + truthiness checks)
+- [ ] All identifiers ≥ 2 characters (use descriptive names in callbacks)
+- [ ] Properties sorted alphabetically in objects and JSX
+- [ ] No console.log without eslint-disable comment

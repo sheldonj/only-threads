@@ -59,8 +59,8 @@ export const RefundRequestCancelledEmail = ({
             </Section>
             <Text className="text-black text-[14px] leading-[24px]">
               You still have full access to the course content. If you change
-              your mind, you can submit a new refund request at any time from your
-              purchases page.
+              your mind, you can submit a new refund request at any time from
+              your purchases page.
             </Text>
             <Section className="text-center mt-[32px] mb-[32px]">
               <Button
@@ -87,4 +87,3 @@ export function reactRefundRequestCancelledEmail(
 ) {
   return <RefundRequestCancelledEmail {...props} />;
 }
-

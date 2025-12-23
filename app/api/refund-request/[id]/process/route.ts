@@ -10,7 +10,7 @@ import { z } from 'zod';
 const from = process.env.BETTER_AUTH_EMAIL || 'delivered@resend.dev';
 const testEmailOverride = process.env.TEST_EMAIL;
 
-type RouteParams = {
+type RouteParameters = {
   params: Promise<{ id: string }>;
 };
 
@@ -19,7 +19,7 @@ const processRequestSchema = z.object({
   adminNote: z.string().optional(),
 });
 
-export async function POST(request: NextRequest, { params }: RouteParams) {
+export async function POST(request: NextRequest, { params }: RouteParameters) {
   try {
     const { id } = await params;
 
@@ -146,7 +146,9 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
             to: customerEmailRecipient,
           });
           // eslint-disable-next-line no-console -- logging email success
-          console.log(`Refund approval email sent to ${customerEmailRecipient}`);
+          console.log(
+            `Refund approval email sent to ${customerEmailRecipient}`,
+          );
         } catch (emailError) {
           // eslint-disable-next-line no-console -- logging email failures
           console.error('Failed to send refund approval email:', emailError);
@@ -188,7 +190,9 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
             to: customerEmailRecipient,
           });
           // eslint-disable-next-line no-console -- logging email success
-          console.log(`Refund rejection email sent to ${customerEmailRecipient}`);
+          console.log(
+            `Refund rejection email sent to ${customerEmailRecipient}`,
+          );
         } catch (emailError) {
           // eslint-disable-next-line no-console -- logging email failures
           console.error('Failed to send refund rejection email:', emailError);
@@ -221,4 +225,3 @@ function formatDate(date: Date): string {
     dateStyle: 'long',
   }).format(date);
 }
-

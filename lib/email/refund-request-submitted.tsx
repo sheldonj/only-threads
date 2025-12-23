@@ -48,7 +48,9 @@ export const RefundRequestSubmittedEmail = ({
             </Heading>
             <Text className="text-black text-[14px] leading-[24px]">
               {isAdminCopy ? (
-                <>A refund request has been submitted and requires your review.</>
+                <>
+                  A refund request has been submitted and requires your review.
+                </>
               ) : (
                 <>
                   Hi {customerName},
@@ -127,4 +129,3 @@ export function reactRefundRequestSubmittedEmail(
 ) {
   return <RefundRequestSubmittedEmail {...props} />;
 }
-

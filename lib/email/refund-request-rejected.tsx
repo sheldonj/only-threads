@@ -43,8 +43,8 @@ export const RefundRequestRejectedEmail = ({
             </Text>
             <Text className="text-black text-[14px] leading-[24px]">
               We&apos;ve reviewed your refund request for{' '}
-              <strong>{courseTitle}</strong>. Unfortunately, we&apos;re unable to
-              approve this request at this time.
+              <strong>{courseTitle}</strong>. Unfortunately, we&apos;re unable
+              to approve this request at this time.
             </Text>
             <Section className="bg-[#fef2f2] border border-solid border-[#fecaca] rounded p-[16px] my-[24px]">
               <Text className="text-black text-[16px] font-semibold leading-[24px] m-0">
@@ -77,8 +77,8 @@ export const RefundRequestRejectedEmail = ({
             </Text>
             <Hr className="border border-solid border-[#eaeaea] my-[26px] mx-0 w-full" />
             <Text className="text-[#666666] text-[12px] leading-[24px]">
-              This is an automated notification from Learn Something. If you have
-              questions about this decision, please{' '}
+              This is an automated notification from Learn Something. If you
+              have questions about this decision, please{' '}
               <Link
                 className="text-blue-600 no-underline"
                 href="mailto:support@learnsomething.com"
@@ -99,4 +99,3 @@ export function reactRefundRequestRejectedEmail(
 ) {
   return <RefundRequestRejectedEmail {...props} />;
 }
-

@@ -7,19 +7,16 @@ import { CustomerDetailsCard } from './components/customer-details-card';
 import { PaymentDetailsCard } from './components/payment-details-card';
 import { PurchaseSummaryCards } from './components/purchase-summary-cards';
 import { RefundRequestCard } from './components/refund-request-card';
+import { usePurchaseDetail } from './hooks/use-purchase-detail';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useSession } from '@/lib/auth/client';
-import {
-  useLessonProgressQueries,
-  useLessonQueries,
-  usePurchaseQueries,
-} from '@/lib/hooks/use-models';
 import {
   type Course,
   type CoursePrice,
+  type Lesson,
+  type LessonProgress,
   type Purchase,
   type RefundRequest,
   type User,
@@ -32,57 +29,39 @@ import { useState } from 'react';
 export type PurchaseWithRelations = Purchase & {
   course?: Course;
   coursePrice?: CoursePrice;
-  refundRequest?: RefundRequest | null;
+  refundRequest?: null | RefundRequest;
   user?: User;
+};
+
+type PurchaseDetailContentProps = {
+  readonly canRefund: boolean;
+  readonly handleRefundComplete: () => void;
+  readonly hasRefundRequest: boolean;
+  readonly isAdmin: boolean;
+  readonly lessonProgress: LessonProgress[];
+  readonly lessons: Lesson[] | undefined;
+  readonly purchase: PurchaseWithRelations;
+  readonly refetch: () => void;
+  readonly session: { user?: { role?: null | string } };
+  readonly setShowRefundDialog: (show: boolean) => void;
+  readonly showRefundDialog: boolean;
 };
 
 export function PurchaseDetailClient() {
   const parameters = useParams<{ id: string }>();
-  const { data: session, isPending: isSessionPending } = useSession();
-  const purchaseQueries = usePurchaseQueries();
-  const lessonQueries = useLessonQueries();
-  const lessonProgressQueries = useLessonProgressQueries();
-
   const [showRefundDialog, setShowRefundDialog] = useState(false);
 
-  const isAdmin = session?.user?.role === 'admin';
-
   const {
-    data: purchase,
-    isLoading: isPurchaseLoading,
+    canRefund,
+    hasRefundRequest,
+    isAdmin,
+    isLoading,
+    lessonProgress,
+    lessons,
+    purchase,
     refetch,
-  } = purchaseQueries.useFindUnique({
-    include: {
-      course: true,
-      coursePrice: true,
-      refundRequest: true,
-      user: {
-        select: { email: true, id: true, image: true, name: true, role: true },
-      },
-    },
-    where: { id: parameters.id },
-  });
-
-  // Fetch lessons for the course to get total count
-  const { data: lessons } = lessonQueries.useFindMany(
-    {
-      where: { courseId: purchase?.courseId },
-    },
-    { enabled: Boolean(purchase?.courseId) },
-  );
-
-  // Fetch lesson progress for the user
-  const { data: lessonProgress } = lessonProgressQueries.useFindMany(
-    {
-      where: {
-        lesson: { courseId: purchase?.courseId },
-        userId: purchase?.userId,
-      },
-    },
-    { enabled: Boolean(purchase?.courseId) && Boolean(purchase?.userId) },
-  );
-
-  const isLoading = isPurchaseLoading || isSessionPending;
+    session,
+  } = usePurchaseDetail(parameters.id);
 
   const handleRefundComplete = () => {
     setShowRefundDialog(false);
@@ -101,119 +80,21 @@ export function PurchaseDetailClient() {
     return <PurchaseNotFoundAlert />;
   }
 
-  const canRefund =
-    isAdmin &&
-    !purchase.refundedAt &&
-    !purchase.refundRequest?.status &&
-    purchase.stripePaymentId &&
-    purchase.stripePaymentId !== 'free';
-
-  const hasRefundRequest = Boolean(purchase.refundRequest);
-
   return (
-    <div className="container mx-auto p-4 space-y-6">
-      <Link
-        className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
-        href="/admin/purchases"
-      >
-        <ArrowLeft className="mr-2 h-4 w-4" />
-        Back to Purchases
-      </Link>
-
-      {!isAdmin && (
-        <Alert variant="destructive">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Admin Access Required</AlertTitle>
-          <AlertDescription>
-            You need admin privileges to manage purchases. Your current role is:{' '}
-            <strong>{session.user?.role || 'user'}</strong>.
-          </AlertDescription>
-        </Alert>
-      )}
-
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Purchase Details</h1>
-          <p className="text-muted-foreground">
-            Order #{purchase.id.slice(-8).toUpperCase()}
-          </p>
-        </div>
-        <PurchaseStatusBadge purchase={purchase as PurchaseWithRelations} />
-      </div>
-
-      <PurchaseSummaryCards purchase={purchase} />
-
-      {/* Refund Request Card - show if there's a request */}
-      {hasRefundRequest && purchase.refundRequest && (
-        <RefundRequestCard
-          onProcessed={refetch}
-          refundRequest={purchase.refundRequest}
-          stripePaymentId={purchase.stripePaymentId}
-        />
-      )}
-
-      {/* Content Consumption Card - show for refund requests */}
-      {hasRefundRequest && purchase.course && (
-        <ContentConsumptionCard
-          amount={purchase.amount}
-          lessonProgress={lessonProgress || []}
-          purchaseDate={purchase.createdAt}
-          totalLessons={lessons?.length || 0}
-        />
-      )}
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <CustomerDetailsCard purchase={purchase} />
-        <PaymentDetailsCard
-          canRefund={canRefund}
-          onRefundClick={() => setShowRefundDialog(true)}
-          purchase={purchase}
-        />
-      </div>
-
-      {purchase.course && <CourseDetailsCard course={purchase.course} />}
-
-      <RefundDialog
-        onClose={() => setShowRefundDialog(false)}
-        onRefundComplete={handleRefundComplete}
-        purchase={showRefundDialog ? (purchase as PurchaseWithRelations) : null}
-      />
-    </div>
+    <PurchaseDetailContent
+      canRefund={canRefund}
+      handleRefundComplete={handleRefundComplete}
+      hasRefundRequest={hasRefundRequest}
+      isAdmin={isAdmin}
+      lessonProgress={lessonProgress}
+      lessons={lessons}
+      purchase={purchase}
+      refetch={refetch}
+      session={session}
+      setShowRefundDialog={setShowRefundDialog}
+      showRefundDialog={showRefundDialog}
+    />
   );
-}
-
-function PurchaseStatusBadge({
-  purchase,
-}: {
-  readonly purchase: PurchaseWithRelations;
-}) {
-  if (purchase.refundedAt) {
-    return <Badge variant="destructive">Refunded</Badge>;
-  }
-
-  const refundRequest = purchase.refundRequest;
-
-  if (refundRequest) {
-    switch (refundRequest.status) {
-      case 'pending':
-        return (
-          <Badge
-            className="bg-amber-500 hover:bg-amber-600"
-            variant="default"
-          >
-            Refund Pending
-          </Badge>
-        );
-      case 'rejected':
-        return <Badge variant="secondary">Refund Denied</Badge>;
-      case 'cancelled':
-        return <Badge variant="outline">Request Cancelled</Badge>;
-      default:
-        return <Badge variant="default">Completed</Badge>;
-    }
-  }
-
-  return <Badge variant="default">Completed</Badge>;
 }
 
 function LoadingSkeleton() {
@@ -267,6 +148,89 @@ function NotAuthenticatedAlert() {
   );
 }
 
+function PurchaseDetailContent({
+  canRefund,
+  handleRefundComplete,
+  hasRefundRequest,
+  isAdmin,
+  lessonProgress,
+  lessons,
+  purchase,
+  refetch,
+  session,
+  setShowRefundDialog,
+  showRefundDialog,
+}: PurchaseDetailContentProps) {
+  return (
+    <div className="container mx-auto p-4 space-y-6">
+      <Link
+        className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+        href="/admin/purchases"
+      >
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back to Purchases
+      </Link>
+
+      {!isAdmin && (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Admin Access Required</AlertTitle>
+          <AlertDescription>
+            You need admin privileges to manage purchases. Your current role is:{' '}
+            <strong>{session.user?.role || 'user'}</strong>.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Purchase Details</h1>
+          <p className="text-muted-foreground">
+            Order #{purchase.id.slice(-8).toUpperCase()}
+          </p>
+        </div>
+        <PurchaseStatusBadge purchase={purchase} />
+      </div>
+
+      <PurchaseSummaryCards purchase={purchase} />
+
+      {hasRefundRequest && purchase.refundRequest && (
+        <RefundRequestCard
+          onProcessed={refetch}
+          refundRequest={purchase.refundRequest}
+          stripePaymentId={purchase.stripePaymentId}
+        />
+      )}
+
+      {hasRefundRequest && purchase.course && (
+        <ContentConsumptionCard
+          amount={purchase.amount}
+          lessonProgress={lessonProgress}
+          purchaseDate={purchase.createdAt}
+          totalLessons={lessons?.length || 0}
+        />
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <CustomerDetailsCard purchase={purchase} />
+        <PaymentDetailsCard
+          canRefund={canRefund}
+          onRefundClick={() => setShowRefundDialog(true)}
+          purchase={purchase}
+        />
+      </div>
+
+      {purchase.course && <CourseDetailsCard course={purchase.course} />}
+
+      <RefundDialog
+        onClose={() => setShowRefundDialog(false)}
+        onRefundComplete={handleRefundComplete}
+        purchase={showRefundDialog ? purchase : null}
+      />
+    </div>
+  );
+}
+
 function PurchaseNotFoundAlert() {
   return (
     <div className="container mx-auto p-4 max-w-2xl">
@@ -287,4 +251,38 @@ function PurchaseNotFoundAlert() {
       </Alert>
     </div>
   );
+}
+
+function PurchaseStatusBadge({
+  purchase,
+}: {
+  readonly purchase: PurchaseWithRelations;
+}) {
+  if (purchase.refundedAt) {
+    return <Badge variant="destructive">Refunded</Badge>;
+  }
+
+  const refundRequest = purchase.refundRequest;
+
+  if (refundRequest) {
+    switch (refundRequest.status) {
+      case 'cancelled':
+        return <Badge variant="outline">Request Cancelled</Badge>;
+      case 'pending':
+        return (
+          <Badge
+            className="bg-amber-500 hover:bg-amber-600"
+            variant="default"
+          >
+            Refund Pending
+          </Badge>
+        );
+      case 'rejected':
+        return <Badge variant="secondary">Refund Denied</Badge>;
+      default:
+        return <Badge variant="default">Completed</Badge>;
+    }
+  }
+
+  return <Badge variant="default">Completed</Badge>;
 }

@@ -28,28 +28,31 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-type PurchaseWithRelations = Purchase & {
-  course?: Course;
-  refundRequest?: RefundRequest | null;
-};
-
 type PurchasesTableProps = {
   readonly onRefresh: () => void;
-  readonly purchases: Array<PurchaseWithRelations>;
+  readonly purchases: PurchaseWithRelations[];
+};
+
+type PurchaseWithRelations = Purchase & {
+  course?: Course;
+  refundRequest?: null | RefundRequest;
 };
 
 export function PurchasesTable({ onRefresh, purchases }: PurchasesTableProps) {
   const [selectedPurchase, setSelectedPurchase] =
-    useState<PurchaseWithRelations | null>(null);
-  const [cancellingId, setCancellingId] = useState<string | null>(null);
+    useState<null | PurchaseWithRelations>(null);
+  const [cancellingId, setCancellingId] = useState<null | string>(null);
 
   const handleCancelRequest = async (refundRequestId: string) => {
     setCancellingId(refundRequestId);
 
     try {
-      const response = await fetch(`/api/refund-request/${refundRequestId}/cancel`, {
-        method: 'POST',
-      });
+      const response = await fetch(
+        `/api/refund-request/${refundRequestId}/cancel`,
+        {
+          method: 'POST',
+        },
+      );
 
       if (!response.ok) {
         const data = await response.json();
@@ -60,7 +63,9 @@ export function PurchasesTable({ onRefresh, purchases }: PurchasesTableProps) {
       onRefresh();
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : 'Failed to cancel refund request';
+        error instanceof Error
+          ? error.message
+          : 'Failed to cancel refund request';
       toast.error(message);
     } finally {
       setCancellingId(null);
@@ -131,32 +136,33 @@ export function PurchasesTable({ onRefresh, purchases }: PurchasesTableProps) {
                           </DropdownMenuItem>
                         </>
                       )}
-                      {purchase.refundRequest?.status === 'pending' && (
-                        <>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            className="text-destructive focus:text-destructive"
-                            disabled={
-                              cancellingId === purchase.refundRequest.id
-                            }
-                            onClick={() =>
-                              handleCancelRequest(purchase.refundRequest!.id)
-                            }
-                          >
-                            {cancellingId === purchase.refundRequest.id ? (
-                              <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Cancelling...
-                              </>
-                            ) : (
-                              <>
-                                <X className="mr-2 h-4 w-4" />
-                                Cancel Refund Request
-                              </>
-                            )}
-                          </DropdownMenuItem>
-                        </>
-                      )}
+                      {purchase.refundRequest?.status === 'pending' &&
+                        purchase.refundRequest.id && (
+                          <>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              className="text-destructive focus:text-destructive"
+                              disabled={
+                                cancellingId === purchase.refundRequest.id
+                              }
+                              onClick={() =>
+                                handleCancelRequest(purchase.refundRequest.id)
+                              }
+                            >
+                              {cancellingId === purchase.refundRequest.id ? (
+                                <>
+                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                  Cancelling...
+                                </>
+                              ) : (
+                                <>
+                                  <X className="mr-2 h-4 w-4" />
+                                  Cancel Refund Request
+                                </>
+                              )}
+                            </DropdownMenuItem>
+                          </>
+                        )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
@@ -178,40 +184,6 @@ export function PurchasesTable({ onRefresh, purchases }: PurchasesTableProps) {
   );
 }
 
-function PurchaseStatusBadge({
-  purchase,
-}: {
-  readonly purchase: PurchaseWithRelations;
-}) {
-  if (purchase.refundedAt) {
-    return <Badge variant="destructive">Refunded</Badge>;
-  }
-
-  const refundRequest = purchase.refundRequest;
-
-  if (refundRequest) {
-    switch (refundRequest.status) {
-      case 'pending':
-        return (
-          <Badge
-            className="bg-amber-500 hover:bg-amber-600"
-            variant="default"
-          >
-            Refund Pending
-          </Badge>
-        );
-      case 'rejected':
-        return <Badge variant="secondary">Refund Denied</Badge>;
-      case 'cancelled':
-        return <Badge variant="outline">Request Cancelled</Badge>;
-      default:
-        return <Badge variant="default">Completed</Badge>;
-    }
-  }
-
-  return <Badge variant="default">Completed</Badge>;
-}
-
 function formatAmount(cents: number) {
   return new Intl.NumberFormat('en-US', {
     currency: 'USD',
@@ -225,4 +197,38 @@ function formatDate(date: Date | string) {
     month: 'long',
     year: 'numeric',
   });
+}
+
+function PurchaseStatusBadge({
+  purchase,
+}: {
+  readonly purchase: PurchaseWithRelations;
+}) {
+  if (purchase.refundedAt) {
+    return <Badge variant="destructive">Refunded</Badge>;
+  }
+
+  const refundRequest = purchase.refundRequest;
+
+  if (refundRequest) {
+    switch (refundRequest.status) {
+      case 'cancelled':
+        return <Badge variant="outline">Request Cancelled</Badge>;
+      case 'pending':
+        return (
+          <Badge
+            className="bg-amber-500 hover:bg-amber-600"
+            variant="default"
+          >
+            Refund Pending
+          </Badge>
+        );
+      case 'rejected':
+        return <Badge variant="secondary">Refund Denied</Badge>;
+      default:
+        return <Badge variant="default">Completed</Badge>;
+    }
+  }
+
+  return <Badge variant="default">Completed</Badge>;
 }

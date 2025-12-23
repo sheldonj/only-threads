@@ -26,7 +26,7 @@ import { toast } from 'sonner';
 type RefundRequestDialogProps = {
   readonly onClose: () => void;
   readonly onSuccess: () => void;
-  readonly purchase: (Purchase & { course?: Course }) | null;
+  readonly purchase: null | (Purchase & { course?: Course });
 };
 
 const REFUND_REASONS = [
@@ -72,7 +72,9 @@ export function RefundRequestDialog({
       onSuccess();
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : 'Failed to submit refund request';
+        error instanceof Error
+          ? error.message
+          : 'Failed to submit refund request';
       toast.error(message);
     } finally {
       setIsSubmitting(false);
@@ -96,8 +98,8 @@ export function RefundRequestDialog({
         <DialogHeader>
           <DialogTitle>Request a Refund</DialogTitle>
           <DialogDescription>
-            Please let us know why you&apos;d like a refund. Our team will review
-            your request and get back to you.
+            Please let us know why you&apos;d like a refund. Our team will
+            review your request and get back to you.
           </DialogDescription>
         </DialogHeader>
 
@@ -112,7 +114,9 @@ export function RefundRequestDialog({
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Amount</span>
-                <span className="font-medium">{formatCurrency(purchase.amount)}</span>
+                <span className="font-medium">
+                  {formatCurrency(purchase.amount)}
+                </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Purchase Date</span>
@@ -133,12 +137,12 @@ export function RefundRequestDialog({
                   <SelectValue placeholder="Select a reason" />
                 </SelectTrigger>
                 <SelectContent>
-                  {REFUND_REASONS.map((r) => (
+                  {REFUND_REASONS.map((refundReason) => (
                     <SelectItem
-                      key={r.value}
-                      value={r.value}
+                      key={refundReason.value}
+                      value={refundReason.value}
                     >
-                      {r.label}
+                      {refundReason.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -200,4 +204,3 @@ function formatDate(date: Date | string): string {
     year: 'numeric',
   });
 }
-

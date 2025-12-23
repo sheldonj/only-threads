@@ -21,7 +21,7 @@ import { toast } from 'sonner';
 type RefundRequestCardProps = {
   readonly onProcessed: () => void;
   readonly refundRequest: RefundRequest;
-  readonly stripePaymentId?: string | null;
+  readonly stripePaymentId?: null | string;
 };
 
 const REASON_LABELS: Record<string, string> = {
@@ -73,7 +73,9 @@ export function RefundRequestCard({
       onProcessed();
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : 'Failed to process refund request';
+        error instanceof Error
+          ? error.message
+          : 'Failed to process refund request';
       toast.error(message);
     } finally {
       setIsProcessing(false);
@@ -114,7 +116,9 @@ export function RefundRequestCard({
 
         {refundRequest.note && (
           <div>
-            <Label className="text-muted-foreground text-xs">Customer Note</Label>
+            <Label className="text-muted-foreground text-xs">
+              Customer Note
+            </Label>
             <div className="bg-muted/50 rounded-lg p-3 mt-1">
               <p className="text-sm">{refundRequest.note}</p>
             </div>
@@ -123,7 +127,9 @@ export function RefundRequestCard({
 
         {refundRequest.adminNote && (
           <div>
-            <Label className="text-muted-foreground text-xs">Admin Response</Label>
+            <Label className="text-muted-foreground text-xs">
+              Admin Response
+            </Label>
             <div className="bg-muted/50 rounded-lg p-3 mt-1">
               <p className="text-sm">{refundRequest.adminNote}</p>
             </div>
@@ -133,28 +139,30 @@ export function RefundRequestCard({
         {refundRequest.processedAt && (
           <div>
             <Label className="text-muted-foreground text-xs">Processed</Label>
-            <p className="text-sm">
-              {formatDate(refundRequest.processedAt)}
-            </p>
+            <p className="text-sm">{formatDate(refundRequest.processedAt)}</p>
           </div>
         )}
 
-        {refundRequest.status === 'approved' && stripePaymentId && stripePaymentId !== 'free' && (
-          <div>
-            <Label className="text-muted-foreground text-xs">Stripe Dashboard</Label>
-            <div className="mt-1">
-              <Link
-                className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-                href={`https://dashboard.stripe.com/payments/${stripePaymentId}`}
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                View payment in Stripe
-                <ExternalLink className="h-3 w-3" />
-              </Link>
+        {refundRequest.status === 'approved' &&
+          stripePaymentId &&
+          stripePaymentId !== 'free' && (
+            <div>
+              <Label className="text-muted-foreground text-xs">
+                Stripe Dashboard
+              </Label>
+              <div className="mt-1">
+                <Link
+                  className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                  href={`https://dashboard.stripe.com/payments/${stripePaymentId}`}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  View payment in Stripe
+                  <ExternalLink className="h-3 w-3" />
+                </Link>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
         {isPending && (
           <>
@@ -215,42 +223,6 @@ export function RefundRequestCard({
   );
 }
 
-function StatusBadge({ status }: { readonly status: string }) {
-  switch (status) {
-    case 'pending':
-      return (
-        <Badge
-          className="bg-amber-500 hover:bg-amber-600"
-          variant="default"
-        >
-          <Clock className="mr-1 h-3 w-3" />
-          Pending Review
-        </Badge>
-      );
-    case 'approved':
-      return (
-        <Badge
-          className="bg-green-600 hover:bg-green-700"
-          variant="default"
-        >
-          <Check className="mr-1 h-3 w-3" />
-          Approved
-        </Badge>
-      );
-    case 'rejected':
-      return (
-        <Badge variant="destructive">
-          <X className="mr-1 h-3 w-3" />
-          Rejected
-        </Badge>
-      );
-    case 'cancelled':
-      return <Badge variant="secondary">Cancelled</Badge>;
-    default:
-      return <Badge variant="outline">{status}</Badge>;
-  }
-}
-
 function formatDate(date: Date | string): string {
   return new Date(date).toLocaleDateString('en-US', {
     day: 'numeric',
@@ -261,3 +233,38 @@ function formatDate(date: Date | string): string {
   });
 }
 
+function StatusBadge({ status }: { readonly status: string }) {
+  switch (status) {
+    case 'approved':
+      return (
+        <Badge
+          className="bg-green-600 hover:bg-green-700"
+          variant="default"
+        >
+          <Check className="mr-1 h-3 w-3" />
+          Approved
+        </Badge>
+      );
+    case 'cancelled':
+      return <Badge variant="secondary">Cancelled</Badge>;
+    case 'pending':
+      return (
+        <Badge
+          className="bg-amber-500 hover:bg-amber-600"
+          variant="default"
+        >
+          <Clock className="mr-1 h-3 w-3" />
+          Pending Review
+        </Badge>
+      );
+    case 'rejected':
+      return (
+        <Badge variant="destructive">
+          <X className="mr-1 h-3 w-3" />
+          Rejected
+        </Badge>
+      );
+    default:
+      return <Badge variant="outline">{status}</Badge>;
+  }
+}

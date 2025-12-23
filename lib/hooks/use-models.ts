@@ -28,3 +28,8 @@ export function usePurchaseQueries() {
   const { purchase } = useClientQueries(schema);
   return purchase;
 }
+
+export function useRefundRequestQueries() {
+  const { refundRequest } = useClientQueries(schema);
+  return refundRequest;
+}

@@ -12,7 +12,12 @@ const testEmailOverride = process.env.TEST_EMAIL;
 const refundRequestSchema = z.object({
   note: z.string().optional(),
   purchaseId: z.string().min(1),
-  reason: z.enum(['not_as_described', 'changed_mind', 'technical_issues', 'other']),
+  reason: z.enum([
+    'not_as_described',
+    'changed_mind',
+    'technical_issues',
+    'other',
+  ]),
 });
 
 export async function POST(request: NextRequest) {
@@ -97,7 +102,9 @@ export async function POST(request: NextRequest) {
     });
 
     // eslint-disable-next-line no-console -- logging refund request creation
-    console.log(`Refund request created: ${refundRequest.id} for purchase ${purchaseId}`);
+    console.log(
+      `Refund request created: ${refundRequest.id} for purchase ${purchaseId}`,
+    );
 
     // Send email notifications
     const formattedAmount = formatCurrency(purchase.amount);
@@ -122,10 +129,15 @@ export async function POST(request: NextRequest) {
           to: customerEmailRecipient,
         });
         // eslint-disable-next-line no-console -- logging email success
-        console.log(`Refund request confirmation email sent to ${customerEmailRecipient}`);
+        console.log(
+          `Refund request confirmation email sent to ${customerEmailRecipient}`,
+        );
       } catch (emailError) {
         // eslint-disable-next-line no-console -- logging email failures
-        console.error('Failed to send refund request confirmation email:', emailError);
+        console.error(
+          'Failed to send refund request confirmation email:',
+          emailError,
+        );
       }
     }
 
@@ -150,7 +162,10 @@ export async function POST(request: NextRequest) {
         console.log(`Admin refund request notification sent to ${adminEmail}`);
       } catch (emailError) {
         // eslint-disable-next-line no-console -- logging email failures
-        console.error('Failed to send admin refund request notification:', emailError);
+        console.error(
+          'Failed to send admin refund request notification:',
+          emailError,
+        );
       }
     }
 
@@ -194,4 +209,3 @@ function getReasonLabel(reason: string): string {
   };
   return labels[reason] || reason;
 }
-
