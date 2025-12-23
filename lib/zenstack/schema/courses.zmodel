@@ -42,21 +42,26 @@ model CoursePrice {
 }
 
 model Lesson {
-  id          String           @id @default(cuid())
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-  title       String
-  description String?
-  videoUrl    String?          // placeholder for video hosting
-  content     String?          // rich text/markdown content
-  order       Int              @default(0)
-  courseId    String
-  course      Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  progress    LessonProgress[]
+  id           String           @id @default(cuid())
+  content      String?          // rich text/markdown content
+  courseId     String
+  course       Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdAt    DateTime         @default(now())
+  description  String?
+  duration     Int?             // video duration in seconds
+  isFree       Boolean          @default(false) // allow unauthenticated access
+  order        Int              @default(0)
+  progress     LessonProgress[]
+  thumbnailUrl String?          // Vercel Blob URL for thumbnail
+  title        String
+  updatedAt    DateTime         @updatedAt
+  videoUrl     String?          // Vercel Blob URL for video
 
   @@map('lesson')
 
-  // Purchased users or admins can read lessons
+  // Free lessons are publicly readable
+  @@allow('read', isFree == true)
+  // Purchased users or admins can read all lessons
   @@allow('read', auth() != null && (auth().role == 'admin' || course.purchases?[userId == auth().userId]))
   // Admins can do everything
   @@allow('all', auth() != null && auth().role == 'admin')

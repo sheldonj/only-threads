@@ -423,39 +423,10 @@ const _schema = {
                     id: true,
                     default: ExpressionUtils.call("cuid")
                 },
-                createdAt: {
-                    name: "createdAt",
-                    type: "DateTime",
-                    default: ExpressionUtils.call("now")
-                },
-                updatedAt: {
-                    name: "updatedAt",
-                    type: "DateTime",
-                    updatedAt: true
-                },
-                title: {
-                    name: "title",
-                    type: "String"
-                },
-                description: {
-                    name: "description",
-                    type: "String",
-                    optional: true
-                },
-                videoUrl: {
-                    name: "videoUrl",
-                    type: "String",
-                    optional: true
-                },
                 content: {
                     name: "content",
                     type: "String",
                     optional: true
-                },
-                order: {
-                    name: "order",
-                    type: "Int",
-                    default: 0
                 },
                 courseId: {
                     name: "courseId",
@@ -469,11 +440,55 @@ const _schema = {
                     type: "Course",
                     relation: { opposite: "lessons", fields: ["courseId"], references: ["id"], onDelete: "Cascade" }
                 },
+                createdAt: {
+                    name: "createdAt",
+                    type: "DateTime",
+                    default: ExpressionUtils.call("now")
+                },
+                description: {
+                    name: "description",
+                    type: "String",
+                    optional: true
+                },
+                duration: {
+                    name: "duration",
+                    type: "Int",
+                    optional: true
+                },
+                isFree: {
+                    name: "isFree",
+                    type: "Boolean",
+                    default: false
+                },
+                order: {
+                    name: "order",
+                    type: "Int",
+                    default: 0
+                },
                 progress: {
                     name: "progress",
                     type: "LessonProgress",
                     array: true,
                     relation: { opposite: "lesson" }
+                },
+                thumbnailUrl: {
+                    name: "thumbnailUrl",
+                    type: "String",
+                    optional: true
+                },
+                title: {
+                    name: "title",
+                    type: "String"
+                },
+                updatedAt: {
+                    name: "updatedAt",
+                    type: "DateTime",
+                    updatedAt: true
+                },
+                videoUrl: {
+                    name: "videoUrl",
+                    type: "String",
+                    optional: true
                 }
             },
             idFields: ["id"],

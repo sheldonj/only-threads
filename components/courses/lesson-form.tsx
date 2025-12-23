@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
@@ -16,6 +17,8 @@ import { type LessonFormData, lessonSchema } from '@/lib/validations/course';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
+
+import { MediaUpload } from './media-upload';
 
 type LessonFormProps = {
   readonly initialData?: Partial<LessonFormData>;
@@ -34,7 +37,10 @@ export function LessonForm({
     defaultValues: {
       content: initialData?.content ?? '',
       description: initialData?.description ?? '',
+      duration: initialData?.duration ?? null,
+      isFree: initialData?.isFree ?? false,
       order: initialData?.order ?? 0,
+      thumbnailUrl: initialData?.thumbnailUrl ?? '',
       title: initialData?.title ?? '',
       videoUrl: initialData?.videoUrl ?? '',
     },
@@ -88,24 +94,70 @@ export function LessonForm({
 
         <FormField
           control={form.control}
-          name="videoUrl"
+          name="isFree"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Video URL</FormLabel>
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
               <FormControl>
-                <Input
-                  placeholder="https://..."
-                  type="url"
-                  {...field}
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
                 />
               </FormControl>
-              <FormDescription>
-                Enter the URL of your video (YouTube, Vimeo, or direct link)
-              </FormDescription>
-              <FormMessage />
+              <div className="space-y-1 leading-none">
+                <FormLabel>Free Preview</FormLabel>
+                <FormDescription>
+                  Allow anyone to view this lesson without purchasing the course
+                </FormDescription>
+              </div>
             </FormItem>
           )}
         />
+
+        <div className="grid gap-6 md:grid-cols-2">
+          <FormField
+            control={form.control}
+            name="videoUrl"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Video</FormLabel>
+                <FormControl>
+                  <MediaUpload
+                    currentUrl={field.value ?? undefined}
+                    maxSizeMB={500}
+                    onChange={(url) => field.onChange(url ?? '')}
+                    type="video"
+                  />
+                </FormControl>
+                <FormDescription>
+                  Upload a video file (MP4, WebM, MOV)
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="thumbnailUrl"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Thumbnail</FormLabel>
+                <FormControl>
+                  <MediaUpload
+                    currentUrl={field.value ?? undefined}
+                    maxSizeMB={10}
+                    onChange={(url) => field.onChange(url ?? '')}
+                    type="image"
+                  />
+                </FormControl>
+                <FormDescription>
+                  Upload a thumbnail image (JPG, PNG, WebP)
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <FormField
           control={form.control}

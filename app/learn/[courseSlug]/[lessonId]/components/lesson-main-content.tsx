@@ -46,6 +46,9 @@ export function LessonMainContent({
 
       {lesson.videoUrl && (
         <LessonVideo
+          isFree={lesson.isFree}
+          lessonId={lesson.id}
+          thumbnailUrl={lesson.thumbnailUrl}
           title={lesson.title}
           videoUrl={lesson.videoUrl}
         />

@@ -45,7 +45,14 @@ export const lessonSchema = z.object({
     .max(500, 'Description must be less than 500 characters')
     .optional()
     .or(z.literal('')),
+  duration: z.number().min(0).optional().nullable(),
+  isFree: z.boolean().default(false),
   order: z.number().min(0, 'Order must be positive'),
+  thumbnailUrl: z
+    .string()
+    .url('Must be a valid URL')
+    .optional()
+    .or(z.literal('')),
   title: z
     .string()
     .min(1, 'Title is required')
