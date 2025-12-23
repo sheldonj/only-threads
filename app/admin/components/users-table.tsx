@@ -37,7 +37,7 @@ export function UsersTable({
           <TableHead>User</TableHead>
           <TableHead>Role</TableHead>
           <TableHead>Status</TableHead>
-          <TableHead>Actions</TableHead>
+          <TableHead className="text-right">Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -62,15 +62,17 @@ export function UsersTable({
                 <Badge variant="outline">Active</Badge>
               )}
             </TableCell>
-            <TableCell>
-              <UserActionButtons
-                isLoading={isLoading}
-                onBanClick={onBanClick}
-                onDeleteClick={onDeleteClick}
-                onImpersonateClick={onImpersonateClick}
-                onRevokeSessionsClick={onRevokeSessionsClick}
-                user={user}
-              />
+            <TableCell className="text-right">
+              <div className="flex justify-end">
+                <UserActionButtons
+                  isLoading={isLoading}
+                  onBanClick={onBanClick}
+                  onDeleteClick={onDeleteClick}
+                  onImpersonateClick={onImpersonateClick}
+                  onRevokeSessionsClick={onRevokeSessionsClick}
+                  user={user}
+                />
+              </div>
             </TableCell>
           </TableRow>
         ))}

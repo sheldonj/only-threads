@@ -47,7 +47,7 @@ export function CourseTable({
           <TableHead>Lessons</TableHead>
           <TableHead>Purchases</TableHead>
           <TableHead>Status</TableHead>
-          <TableHead>Actions</TableHead>
+          <TableHead className="text-right">Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -74,8 +74,8 @@ export function CourseTable({
                 <Badge variant="secondary">Draft</Badge>
               )}
             </TableCell>
-            <TableCell>
-              <div className="flex space-x-2">
+            <TableCell className="text-right">
+              <div className="flex justify-end space-x-2">
                 <Button
                   onClick={() => router.push(`/admin/courses/${courseRow.id}`)}
                   size="sm"

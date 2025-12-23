@@ -74,7 +74,7 @@ export function RecentPurchases() {
                 <TableHead>Course</TableHead>
                 <TableHead>Amount</TableHead>
                 <TableHead>Date</TableHead>
-                <TableHead className="w-[50px]" />
+                <TableHead className="w-[50px] text-right" />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -94,13 +94,15 @@ export function RecentPurchases() {
                   <TableCell>
                     {format(new Date(purchase.createdAt), 'MMM d, yyyy')}
                   </TableCell>
-                  <TableCell>
-                    <Link
-                      className="text-muted-foreground hover:text-foreground transition-colors"
-                      href={`/admin/purchases/${purchase.id}`}
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Link>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end">
+                      <Link
+                        className="text-muted-foreground hover:text-foreground transition-colors"
+                        href={`/admin/purchases/${purchase.id}`}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Link>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
