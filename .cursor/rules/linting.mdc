@@ -120,6 +120,53 @@ reasons.map((reason) => reason.value)
 
 **Exceptions:** Loop indices (`i`, `j`) are sometimes acceptable in traditional for loops, but prefer descriptive names in callbacks.
 
+## Module Sorting (perfectionist/sort-modules)
+
+Types and functions must be sorted alphabetically within the file. The order is:
+
+1. **Types** - Sorted alphabetically by name
+2. **Export functions** - Sorted alphabetically  
+3. **Private functions** - Sorted alphabetically
+
+```typescript
+// ❌ Bad: Types and functions out of order
+type ZebraProps = { ... };
+type AlphaProps = { ... };
+
+export function MyComponent() { ... }
+
+function zebra() { ... }
+function alpha() { ... }
+
+// ✅ Good: Alphabetically sorted
+type AlphaProps = { ... };
+type ZebraProps = { ... };
+
+export function MyComponent() { ... }
+
+function alpha() { ... }
+function zebra() { ... }
+```
+
+**Callback Type Narrowing:** TypeScript doesn't narrow types inside callbacks. Extract to a component:
+
+```typescript
+// ❌ Bad: TypeScript can't narrow inside onClick callback
+{item.nested?.id && (
+  <Button onClick={() => handleClick(item.nested.id)}> // Error!
+    Click
+  </Button>
+)}
+
+// ✅ Good: Extract to a component where prop is already narrowed
+<NestedButton nested={item.nested} onClick={handleClick} />
+
+function NestedButton({ nested, onClick }: Props) {
+  if (!nested) return null;
+  return <Button onClick={() => onClick(nested.id)}>Click</Button>;
+}
+```
+
 ## Console Statements
 
 Use `console.log` sparingly and with an eslint-disable comment:
@@ -136,5 +183,7 @@ Before submitting code:
 - [ ] Component complexity < 30 (extract hooks/components if needed)
 - [ ] No `!` non-null assertions (use optional chaining + truthiness checks)
 - [ ] All identifiers ≥ 2 characters (use descriptive names in callbacks)
+- [ ] Types and functions sorted alphabetically within modules
 - [ ] Properties sorted alphabetically in objects and JSX
+- [ ] Extract components when TypeScript can't narrow types in callbacks
 - [ ] No console.log without eslint-disable comment

@@ -28,6 +28,12 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
+type CancelRefundMenuItemProps = {
+  readonly cancellingId: null | string;
+  readonly onCancel: (refundRequestId: string) => void;
+  readonly refundRequest: null | RefundRequest | undefined;
+};
+
 type PurchasesTableProps = {
   readonly onRefresh: () => void;
   readonly purchases: PurchaseWithRelations[];
@@ -136,33 +142,11 @@ export function PurchasesTable({ onRefresh, purchases }: PurchasesTableProps) {
                           </DropdownMenuItem>
                         </>
                       )}
-                      {purchase.refundRequest?.status === 'pending' &&
-                        purchase.refundRequest.id && (
-                          <>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              className="text-destructive focus:text-destructive"
-                              disabled={
-                                cancellingId === purchase.refundRequest.id
-                              }
-                              onClick={() =>
-                                handleCancelRequest(purchase.refundRequest.id)
-                              }
-                            >
-                              {cancellingId === purchase.refundRequest.id ? (
-                                <>
-                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                  Cancelling...
-                                </>
-                              ) : (
-                                <>
-                                  <X className="mr-2 h-4 w-4" />
-                                  Cancel Refund Request
-                                </>
-                              )}
-                            </DropdownMenuItem>
-                          </>
-                        )}
+                      <CancelRefundMenuItem
+                        cancellingId={cancellingId}
+                        onCancel={handleCancelRequest}
+                        refundRequest={purchase.refundRequest}
+                      />
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
@@ -180,6 +164,41 @@ export function PurchasesTable({ onRefresh, purchases }: PurchasesTableProps) {
         }}
         purchase={selectedPurchase}
       />
+    </>
+  );
+}
+
+function CancelRefundMenuItem({
+  cancellingId,
+  onCancel,
+  refundRequest,
+}: CancelRefundMenuItemProps) {
+  if (!refundRequest || refundRequest.status !== 'pending') {
+    return null;
+  }
+
+  const isCancelling = cancellingId === refundRequest.id;
+
+  return (
+    <>
+      <DropdownMenuSeparator />
+      <DropdownMenuItem
+        className="text-destructive focus:text-destructive"
+        disabled={isCancelling}
+        onClick={() => onCancel(refundRequest.id)}
+      >
+        {isCancelling ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Cancelling...
+          </>
+        ) : (
+          <>
+            <X className="mr-2 h-4 w-4" />
+            Cancel Refund Request
+          </>
+        )}
+      </DropdownMenuItem>
     </>
   );
 }
